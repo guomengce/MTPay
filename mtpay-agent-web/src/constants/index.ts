@@ -1,0 +1,2 @@
+export const AUTH_TOKEN_KEY = 'MTPAY_AGENT_TOKEN';
+export const USER_INFO_KEY = 'MTPAY_AGENT_USER_INFO';
