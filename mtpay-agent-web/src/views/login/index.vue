@@ -1,35 +1,15 @@
 <template>
   <main class="login-page">
-    <section class="login-panel">
-      <p class="login-panel__eyebrow">MTPay Agent</p>
-      <h1>代理端后台</h1>
-      <p>企业级前端骨架登录占位页。</p>
-      <el-button type="primary" size="large" @click="handleLogin">进入系统</el-button>
+    <BrandPanel />
+    <section class="login-page__form">
+      <FormCard />
     </section>
   </main>
 </template>
 
 <script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router';
-
-import { useAuthStore } from '@/stores/modules/auth';
-
-const route = useRoute();
-const router = useRouter();
-const authStore = useAuthStore();
-
-async function handleLogin() {
-  authStore.login({
-    token: 'dev-token',
-    userInfo: {
-      id: '1',
-      name: 'MTPay Agent',
-      role: 'agent',
-    },
-  });
-
-  await router.replace(String(route.query.redirect || '/dashboard'));
-}
+import BrandPanel from './components/BrandPanel.vue';
+import FormCard from './components/FormCard.vue';
 </script>
 
 <style scoped lang="scss">
@@ -37,37 +17,35 @@ async function handleLogin() {
   display: grid;
   width: 100%;
   height: 100vh;
-  place-items: center;
-  padding: 24px;
+  grid-template-columns: minmax(520px, 47%) 1fr;
   overflow: hidden;
-  background:
-    linear-gradient(135deg, rgb(22 93 255 / 8%), transparent 34%),
-    linear-gradient(315deg, rgb(16 185 129 / 10%), transparent 28%), #f7f9fc;
-}
+  background: #f4f7fb;
 
-.login-panel {
-  width: min(420px, 100%);
-  padding: 32px;
-  background: #ffffff;
-  border: 1px solid var(--app-border);
-  border-radius: 8px;
-  box-shadow: 0 20px 50px rgb(16 24 40 / 10%);
-
-  &__eyebrow {
-    margin: 0 0 10px;
-    color: var(--app-primary);
-    font-size: 13px;
-    font-weight: 700;
+  &__form {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: center;
+    padding: 48px;
   }
 
-  h1 {
-    margin: 0 0 12px;
-    font-size: 28px;
+  @include narrow {
+    grid-template-columns: minmax(460px, 48%) 1fr;
+
+    &__form {
+      padding: 32px;
+    }
   }
 
-  p {
-    margin: 0 0 24px;
-    color: var(--app-text-muted);
+  @include mobile {
+    height: auto;
+    min-height: 100vh;
+    grid-template-columns: 1fr;
+    overflow-y: auto;
+
+    &__form {
+      padding: 28px 16px 36px;
+    }
   }
 }
 </style>
