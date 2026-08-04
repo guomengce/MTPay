@@ -19,15 +19,6 @@
         登入管理後台
       </el-button>
     </el-form>
-
-    <div class="form-card__demo">
-      <strong>原型示範帳戶</strong>
-      <span>admin@mtpay.test · 密碼：Demo123!</span>
-    </div>
-
-    <el-button class="form-card__link" size="large" plain @click="openAgentPortal"
-      >開啟代理平台</el-button
-    >
   </el-card>
 </template>
 
