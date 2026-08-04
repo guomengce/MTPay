@@ -72,11 +72,11 @@ import { Message, OfficeBuilding, Phone, Postcard } from '@element-plus/icons-vu
   box-shadow: 0 18px 48px rgb(16 30 54 / 8%);
 
   :deep(.el-card__header) {
-    padding: 28px 36px;
+    padding: 22px 24px;
   }
 
   :deep(.el-card__body) {
-    padding: 30px 36px 38px;
+    padding: 22px 24px 28px;
   }
 
   &__header,
@@ -92,25 +92,25 @@ import { Message, OfficeBuilding, Phone, Postcard } from '@element-plus/icons-vu
 
   &__title {
     min-width: 0;
-    gap: 22px;
+    gap: 14px;
 
     > span {
       display: inline-flex;
-      width: 64px;
-      height: 64px;
-      flex: 0 0 64px;
+      width: 48px;
+      height: 48px;
+      flex: 0 0 48px;
       align-items: center;
       justify-content: center;
       color: #0b4fb4;
       background: #eef5ff;
       border-radius: 50%;
-      font-size: 34px;
+      font-size: 24px;
     }
 
     h2 {
       margin: 0;
-      color: #071833;
-      font-size: 30px;
+      color: #09162f;
+      font-size: 22px;
       font-weight: 850;
       letter-spacing: 0;
     }
@@ -126,23 +126,23 @@ import { Message, OfficeBuilding, Phone, Postcard } from '@element-plus/icons-vu
   }
 
   :deep(.el-tag) {
-    height: 50px;
-    padding: 0 22px;
+    height: 32px;
+    padding: 0 14px;
     border-color: transparent;
-    font-size: 18px;
+    font-size: 13px;
     font-weight: 850;
   }
 
   &__body {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 28px;
+    gap: 18px;
   }
 
   &__field {
     display: grid;
     min-width: 0;
-    gap: 14px;
+    gap: 8px;
 
     &.is-wide {
       grid-column: 1 / -1;
@@ -150,15 +150,15 @@ import { Message, OfficeBuilding, Phone, Postcard } from '@element-plus/icons-vu
 
     label {
       color: #2f4260;
-      font-size: 19px;
+      font-size: 13px;
       font-weight: 850;
     }
 
     div {
       display: grid;
       min-width: 0;
-      min-height: 76px;
-      grid-template-columns: 72px minmax(0, 1fr);
+      min-height: 52px;
+      grid-template-columns: 48px minmax(0, 1fr);
       overflow: hidden;
       border: 1px solid #cbd8e8;
       border-radius: 10px;
@@ -171,17 +171,17 @@ import { Message, OfficeBuilding, Phone, Postcard } from '@element-plus/icons-vu
       color: #183150;
       background: #f8fafc;
       border-right: 1px solid #cbd8e8;
-      font-size: 32px;
+      font-size: 22px;
     }
 
     strong {
       display: flex;
       min-width: 0;
       align-items: center;
-      padding: 0 22px;
+      padding: 0 14px;
       overflow: hidden;
-      color: #071833;
-      font-size: 21px;
+      color: #09162f;
+      font-size: 14px;
       font-weight: 650;
       text-overflow: ellipsis;
       white-space: nowrap;

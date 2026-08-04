@@ -29,58 +29,57 @@ import LoginSecurityCard from './components/LoginSecurityCard.vue';
 .account-page {
   display: grid;
   min-width: 0;
-  gap: 34px;
-  padding: 42px 48px 36px;
+  gap: 20px;
+  padding: 36px 36px 18px;
 
   &__hero {
     display: flex;
     min-width: 0;
     align-items: center;
-    gap: 28px;
+    gap: 16px;
   }
 
   &__line {
-    width: 8px;
-    height: 112px;
-    flex: 0 0 8px;
+    width: 4px;
+    height: 60px;
+    flex: 0 0 4px;
     background: linear-gradient(180deg, #1767ff, #52c7ff);
     border-radius: 999px;
   }
 
   &__icon {
     display: inline-flex;
-    width: 90px;
-    height: 90px;
-    flex: 0 0 90px;
+    width: 56px;
+    height: 56px;
+    flex: 0 0 56px;
     align-items: center;
     justify-content: center;
     color: #0b4fb4;
     background: #f2f6ff;
     border: 1px solid #dce7fb;
     border-radius: 50%;
-    font-size: 46px;
+    font-size: 28px;
   }
 
   h1 {
-    margin: 0 0 12px;
-    color: #071833;
-    font-size: 50px;
+    margin: 0 0 6px;
+    color: #09162f;
+    font-size: 30px;
     font-weight: 850;
-    line-height: 1.08;
     letter-spacing: 0;
   }
 
   p {
     margin: 0;
-    color: #344d70;
-    font-size: 22px;
-    font-weight: 650;
+    color: #77869b;
+    font-size: 15px;
+    font-weight: 600;
   }
 
   &__grid {
     display: grid;
     grid-template-columns: minmax(440px, 1.05fr) minmax(420px, 0.95fr);
-    gap: 34px;
+    gap: 22px;
   }
 
   @include narrow {

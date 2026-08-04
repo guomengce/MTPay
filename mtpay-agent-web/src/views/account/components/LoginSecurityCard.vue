@@ -63,11 +63,11 @@ import { CircleCheck, Key, Lock, User } from '@element-plus/icons-vue';
   box-shadow: 0 18px 48px rgb(16 30 54 / 8%);
 
   :deep(.el-card__header) {
-    padding: 28px 36px;
+    padding: 22px 24px;
   }
 
   :deep(.el-card__body) {
-    padding: 30px 36px 38px;
+    padding: 22px 24px 28px;
   }
 
   &__header,
@@ -83,25 +83,25 @@ import { CircleCheck, Key, Lock, User } from '@element-plus/icons-vue';
   }
 
   &__title {
-    gap: 22px;
+    gap: 14px;
 
     > span {
       display: inline-flex;
-      width: 64px;
-      height: 64px;
-      flex: 0 0 64px;
+      width: 48px;
+      height: 48px;
+      flex: 0 0 48px;
       align-items: center;
       justify-content: center;
       color: #0a9b76;
       background: #e9f8f1;
       border-radius: 50%;
-      font-size: 36px;
+      font-size: 26px;
     }
 
     h2 {
       margin: 0;
-      color: #071833;
-      font-size: 30px;
+      color: #09162f;
+      font-size: 22px;
       font-weight: 850;
       letter-spacing: 0;
     }
@@ -117,36 +117,36 @@ import { CircleCheck, Key, Lock, User } from '@element-plus/icons-vue';
   }
 
   :deep(.el-tag) {
-    height: 50px;
-    padding: 0 22px;
+    height: 32px;
+    padding: 0 14px;
     border-color: transparent;
-    font-size: 18px;
+    font-size: 13px;
     font-weight: 850;
   }
 
   &__body {
     display: grid;
-    gap: 26px;
+    gap: 14px;
   }
 
   &__row {
-    min-height: 88px;
-    gap: 20px;
-    padding: 0 24px;
+    min-height: 60px;
+    gap: 14px;
+    padding: 0 16px;
     border: 1px solid #cbd8e8;
     border-radius: 10px;
 
     > span {
       display: inline-flex;
-      width: 54px;
-      height: 54px;
-      flex: 0 0 54px;
+      width: 40px;
+      height: 40px;
+      flex: 0 0 40px;
       align-items: center;
       justify-content: center;
       color: #f1a21d;
       background: #fff4df;
       border-radius: 50%;
-      font-size: 30px;
+      font-size: 22px;
 
       &.is-blue {
         color: #0b4fb4;
@@ -157,15 +157,15 @@ import { CircleCheck, Key, Lock, User } from '@element-plus/icons-vue';
     strong {
       min-width: 0;
       flex: 1;
-      color: #071833;
-      font-size: 22px;
+      color: #09162f;
+      font-size: 15px;
       font-weight: 850;
     }
 
     b {
       flex: 0 0 auto;
-      color: #071833;
-      font-size: 22px;
+      color: #09162f;
+      font-size: 15px;
       font-weight: 850;
     }
 
@@ -180,14 +180,14 @@ import { CircleCheck, Key, Lock, User } from '@element-plus/icons-vue';
   }
 
   :deep(.el-alert) {
-    min-height: 88px;
+    min-height: 60px;
     border-color: #bcd8ff;
     border-radius: 10px;
   }
 
   :deep(.el-alert__title) {
     color: #155fc4;
-    font-size: 18px;
+    font-size: 13px;
     font-weight: 750;
   }
 
