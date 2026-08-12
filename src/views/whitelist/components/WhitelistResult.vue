@@ -1,28 +1,5 @@
 <template>
   <section class="whitelist-result">
-    <div class="whitelist-result__toolbar">
-      <div class="whitelist-result__title">
-        <h2>白名单列表</h2>
-        <span>共 {{ whitelistItems.length }} 条</span>
-      </div>
-
-      <div class="whitelist-result__actions">
-        <el-radio-group v-model="viewMode" class="whitelist-result__mode">
-          <el-radio-button value="card">
-            <el-icon><Grid /></el-icon>
-          </el-radio-button>
-          <el-radio-button value="table">
-            <el-icon><List /></el-icon>
-          </el-radio-button>
-        </el-radio-group>
-
-        <el-select v-model="sortValue" class="whitelist-result__sort" size="large">
-          <el-option label="默认排序" value="default" />
-          <el-option label="最新提交" value="latest" />
-          <el-option label="优先待审" value="pending" />
-        </el-select>
-      </div>
-    </div>
 
     <div v-if="viewMode === 'card'" class="whitelist-result__grid">
       <WhitelistCard v-for="item in whitelistItems" :key="item.id" :item="item" />
@@ -49,8 +26,8 @@
 </template>
 
 <script setup lang="ts">
+import { CircleCheckFilled, Grid, List } from '@element-plus/icons-vue';
 import { ref } from 'vue';
-import { Grid, List } from '@element-plus/icons-vue';
 
 import WhitelistCard, { type WhitelistItem } from './WhitelistCard.vue';
 import WhitelistTable from './WhitelistTable.vue';
@@ -133,22 +110,35 @@ const whitelistItems: WhitelistItem[] = [
 
   &__title {
     display: flex;
-    align-items: baseline;
-    gap: 18px;
+    align-items: center;
+    gap: 12px;
 
     h2 {
       margin: 0;
-      color: #071833;
+      color: #0c2a5a;
       font-size: 24px;
-      font-weight: 850;
+      font-weight: 800;
       letter-spacing: 0;
     }
+  }
 
-    span {
-      color: #071833;
-      font-size: 16px;
-      font-weight: 750;
-    }
+  &__title-icon {
+    display: inline-flex;
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #e6fbf3 0%, #cdf2e1 100%);
+    color: #10aaa4;
+    font-size: 18px;
+  }
+
+  &__title-meta {
+    color: #6b7a90;
+    font-size: 13px;
+    font-weight: 600;
   }
 
   &__actions {
@@ -160,15 +150,16 @@ const whitelistItems: WhitelistItem[] = [
   &__mode {
     :deep(.el-radio-button__inner) {
       display: inline-flex;
-      width: 46px;
-      height: 46px;
       align-items: center;
       justify-content: center;
-      padding: 0;
+      gap: 4px;
+      height: 38px;
+      padding: 0 14px;
       color: #173151;
       border: 0;
       border-radius: 8px;
       box-shadow: none;
+      font-weight: 700;
     }
 
     :deep(.el-radio-button__original-radio:checked + .el-radio-button__inner) {

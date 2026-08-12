@@ -52,11 +52,11 @@ onBeforeUnmount(() => {
   width: 100%;
   height: 100vh;
   overflow: hidden;
-  background: var(--app-bg);
+  background: var(--portal-bg);
 
   &__aside {
-    width: var(--app-aside-width);
-    flex: 0 0 var(--app-aside-width);
+    width: var(--portal-aside-width);
+    flex: 0 0 var(--portal-aside-width);
     transition:
       width 0.2s ease,
       flex-basis 0.2s ease,
@@ -69,6 +69,7 @@ onBeforeUnmount(() => {
     min-width: 0;
     height: 100%;
     flex-direction: column;
+    background: var(--portal-bg);
   }
 
   &__mask {
@@ -80,15 +81,15 @@ onBeforeUnmount(() => {
 
   &.is-collapsed:not(.is-mobile) {
     .app-layout__aside {
-      width: var(--app-aside-collapsed-width);
-      flex-basis: var(--app-aside-collapsed-width);
+      width: var(--portal-aside-width);
+      flex-basis: var(--portal-aside-width);
     }
   }
 
   @include narrow {
     .app-layout__aside {
-      width: var(--app-aside-narrow-width);
-      flex-basis: var(--app-aside-narrow-width);
+      width: var(--portal-aside-width);
+      flex-basis: var(--portal-aside-width);
     }
   }
 
@@ -97,8 +98,8 @@ onBeforeUnmount(() => {
       position: fixed;
       inset: 0 auto 0 0;
       z-index: 20;
-      width: var(--app-aside-width);
-      flex-basis: var(--app-aside-width);
+      width: var(--portal-aside-width);
+      flex-basis: var(--portal-aside-width);
       transform: translateX(0);
     }
 

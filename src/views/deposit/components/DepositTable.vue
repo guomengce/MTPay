@@ -35,8 +35,8 @@
         </template>
       </el-table-column>
       <el-table-column label="操作" width="100" align="right">
-        <template #default>
-          <el-button plain>详情</el-button>
+        <template #default="{ row }">
+          <el-button plain @click="goDetail(row.id)">详情</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -44,6 +44,10 @@
 </template>
 
 <script setup lang="ts">
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
 const records = [
   {
     id: 'DEP-26073002',
@@ -55,6 +59,10 @@ const records = [
     status: '待审核',
   },
 ];
+
+function goDetail(id: string) {
+  router.push({ name: 'DepositDetail', params: { id } }).catch(() => undefined);
+}
 </script>
 
 <style scoped lang="scss">

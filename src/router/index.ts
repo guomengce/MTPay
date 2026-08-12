@@ -21,7 +21,7 @@ export const routes: RouteRecordRaw[] = [
     component: Layout,
     redirect: '/dashboard',
     meta: {
-      title: 'MTPay',
+      title: 'MTPay-web',
       icon: '',
       requiresAuth: true,
       hidden: true,

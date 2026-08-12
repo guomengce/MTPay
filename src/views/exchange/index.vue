@@ -1,10 +1,13 @@
 <template>
   <section class="exchange-page">
-    <PageHeader title="兑换USD" description="只支持 USDT → USD 及 USDC → USD" />
-
+    <AdminHero
+      title="兑换USD"
+      description="只支持 USDT → USD 及 USDC → USD"
+      icon="ri-exchange-dollar-line"
+    />
     <div class="exchange-page__main">
       <ExchangeForm />
-      <ExchangeRatePanel />
+      <ExchangeRatePanel compact />
     </div>
 
     <ExchangeTable />
@@ -12,10 +15,10 @@
 </template>
 
 <script setup lang="ts">
-import PageHeader from '@/components/common/PageHeader.vue';
 import ExchangeForm from './components/ExchangeForm.vue';
-import ExchangeRatePanel from './components/ExchangeRatePanel.vue';
+import ExchangeRatePanel from '@/components/admin/ExchangeRatePanel.vue';
 import ExchangeTable from './components/ExchangeTable.vue';
+import AdminHero from '@/components/admin/AdminHero.vue';
 </script>
 
 <style scoped lang="scss">
@@ -23,7 +26,6 @@ import ExchangeTable from './components/ExchangeTable.vue';
   display: grid;
   min-width: 0;
   gap: 22px;
-  padding: 34px 36px 32px;
 
   &__main {
     display: grid;

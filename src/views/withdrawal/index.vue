@@ -1,5 +1,11 @@
 <template>
   <section class="withdrawal-page">
+    <AdminHero
+      title="USD出金"
+      description="查看每笔交易的资料、资金变化及完整处理时间线"
+      icon="ri-hand-coin-line"
+    >
+    </AdminHero>
     <WithdrawalReminder />
     <el-card class="withdrawal-page__apply" shadow="never">
       <template #header>
@@ -21,6 +27,7 @@
 </template>
 
 <script setup lang="ts">
+import AdminHero from '@/components/admin/AdminHero.vue';
 import WithdrawalForm from './components/WithdrawalForm.vue';
 import WithdrawalReminder from './components/WithdrawalReminder.vue';
 import WithdrawalSummary from './components/WithdrawalSummary.vue';
@@ -32,7 +39,7 @@ import WithdrawalTable from './components/WithdrawalTable.vue';
   display: grid;
   min-width: 0;
   gap: 20px;
-  padding: 34px 36px 32px;
+ 
 
   &__apply {
     overflow: hidden;

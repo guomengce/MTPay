@@ -1,7 +1,22 @@
 <template>
   <main class="login-page">
     <BrandPanel />
+
+    <header class="login-page__header">
+      <div class="login-page__brand">
+        <span class="login-page__logo">M</span>
+        <strong>MTPay</strong>
+      </div>
+      <a class="login-page__help" href="javascript:void(0)" @click.prevent>帮助中心</a>
+    </header>
+
     <section class="login-page__form">
+      <div class="login-page__form-decor login-page__form-decor--ring" aria-hidden="true" />
+      <div class="login-page__form-decor login-page__form-decor--dots" aria-hidden="true" />
+      <div class="login-page__form-decor login-page__form-decor--glow" aria-hidden="true" />
+      <div class="login-page__form-decor login-page__form-decor--bubbles" aria-hidden="true">
+        <i /><i /><i />
+      </div>
       <FormCard />
     </section>
   </main>
@@ -14,37 +29,206 @@ import FormCard from './components/FormCard.vue';
 
 <style scoped lang="scss">
 .login-page {
-  display: grid;
+  position: relative;
+  display: flex;
   width: 100%;
-  height: 100vh;
-  grid-template-columns: minmax(520px, 47%) 1fr;
-  overflow: hidden;
-  background: #f4f7fb;
+  min-height: 100vh;
+  flex-direction: column;
+  background: #ffffff;
 
-  &__form {
+  &__header {
+    position: relative;
+    z-index: 2;
     display: flex;
-    min-width: 0;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 48px;
+  }
+
+  &__brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #071833;
+    font-size: 22px;
+    font-weight: 800;
+  }
+
+  &__logo {
+    display: inline-flex;
+    width: 40px;
+    height: 40px;
     align-items: center;
     justify-content: center;
-    padding: 48px;
+    border-radius: 10px;
+    color: #ffffff;
+    background: linear-gradient(135deg, #27b9aa 0%, #1d8db5 100%);
+    font-size: 20px;
+    font-weight: 800;
+    box-shadow: 0 6px 16px rgb(39 185 170 / 30%);
+  }
+
+  &__help {
+    color: #4f647d;
+    font-size: 14px;
+    text-decoration: none;
+    transition: color 0.2s;
+
+    &:hover {
+      color: #27b9aa;
+    }
+  }
+
+  &__form {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 32px 80px 48px;
+
+    :deep(.form-card) {
+      position: relative;
+      z-index: 2;
+    }
+  }
+
+  &__form-decor {
+    position: absolute;
+    pointer-events: none;
+
+    &--ring {
+      right: 24px;
+      bottom: 0;
+      width: 520px;
+      height: 520px;
+      border: 1px solid rgb(73 164 220 / 30%);
+      border-radius: 50%;
+
+      &::before,
+      &::after {
+        position: absolute;
+        border: 1px dashed rgb(39 185 170 / 25%);
+        border-radius: 50%;
+        content: '';
+      }
+
+      &::before {
+        inset: 64px;
+      }
+
+      &::after {
+        top: 72px;
+        left: 8px;
+        width: 8px;
+        height: 8px;
+        border: 3px solid rgb(255 255 255 / 80%);
+        background: #58bfd2;
+        box-shadow: 0 0 12px rgb(40 169 204 / 38%);
+      }
+    }
+
+    &--dots {
+      top: 9%;
+      right: 2%;
+      width: 320px;
+      height: 220px;
+      opacity: 0.75;
+      background-image: radial-gradient(circle, rgb(45 148 202 / 34%) 1.2px, transparent 1.8px);
+      background-size: 18px 18px;
+      mask-image: linear-gradient(135deg, transparent 5%, #000 42%, transparent 95%);
+    }
+
+    &--glow {
+      top: 18%;
+      right: 25%;
+      width: 230px;
+      height: 230px;
+      border-radius: 42% 58% 63% 37%;
+      background: rgb(75 202 207 / 18%);
+      filter: blur(38px);
+      transform: rotate(20deg);
+    }
+
+    &--bubbles {
+      z-index: 1;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: min(620px, 48vw);
+
+      i {
+        position: absolute;
+        display: block;
+        border: 1px solid rgb(255 255 255 / 85%);
+        border-radius: 50%;
+        background: linear-gradient(145deg, rgb(255 255 255 / 70%), rgb(58 180 203 / 24%));
+        box-shadow: 0 5px 14px rgb(35 130 184 / 14%);
+      }
+
+      i:nth-child(1) {
+        top: 16%;
+        right: 78px;
+        width: 16px;
+        height: 16px;
+      }
+
+      i:nth-child(2) {
+        right: 26px;
+        bottom: 25%;
+        width: 25px;
+        height: 25px;
+      }
+
+      i:nth-child(3) {
+        right: 510px;
+        bottom: 13%;
+        width: 11px;
+        height: 11px;
+        background: #49b9c7;
+        box-shadow: 0 0 12px rgb(45 177 196 / 42%);
+      }
+    }
   }
 
   @include narrow {
-    grid-template-columns: minmax(460px, 48%) 1fr;
+    &__header {
+      padding: 20px 32px;
+    }
 
     &__form {
-      padding: 32px;
+      padding: 24px 48px 36px;
     }
   }
 
   @include mobile {
-    height: auto;
-    min-height: 100vh;
-    grid-template-columns: 1fr;
-    overflow-y: auto;
+    &__header {
+      padding: 16px 20px;
+    }
+
+    &__brand {
+      font-size: 18px;
+    }
+
+    &__logo {
+      width: 34px;
+      height: 34px;
+      font-size: 17px;
+    }
+
+    &__help {
+      font-size: 13px;
+    }
 
     &__form {
-      padding: 28px 16px 36px;
+      justify-content: center;
+      padding: 20px 16px 32px;
+    }
+
+    &__form-decor {
+      display: none;
     }
   }
 }

@@ -26,6 +26,18 @@ export const featureRoutes: RouteRecordRaw[] = [
     },
   },
   {
+    path: '/deposit/detail/:id',
+    name: 'DepositDetail',
+    component: () => import('@/views/deposit/detail/index.vue'),
+    meta: {
+      title: '入金详情',
+      icon: '',
+      requiresAuth: true,
+      hidden: true,
+      keepAlive: false,
+    },
+  },
+  {
     path: '/exchange',
     name: 'Exchange',
     component: () => import('@/views/exchange/index.vue'),

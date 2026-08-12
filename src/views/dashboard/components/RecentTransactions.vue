@@ -1,91 +1,99 @@
 <template>
-  <el-card class="transactions-card" shadow="never">
-    <template #header>
-      <div class="transactions-card__header">
-        <strong>近期交易</strong>
-        <el-button text type="primary"
-          >查看全部 <el-icon><ArrowRight /></el-icon
-        ></el-button>
-      </div>
-    </template>
+  <section class="transactions-card">
+    <header class="transactions-card__header">
+      <h2>近期交易</h2>
+      <RouterLink class="transactions-card__all" to="/records">
+        查看全部 <i class="ri-arrow-right-s-line" />
+      </RouterLink>
+    </header>
 
-    <el-table :data="transactions" class="transactions-card__table">
-      <el-table-column prop="time" label="時間" min-width="104" />
-      <el-table-column label="類型" min-width="76">
-        <template #default="{ row }">
-          <el-tag :type="row.typeTag" round>{{ row.type }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column prop="id" label="編號" min-width="136" />
-      <el-table-column prop="content" label="內容" min-width="150" />
-      <el-table-column prop="amount" label="金額" min-width="150" />
-      <el-table-column label="狀態" min-width="104">
-        <template #default="{ row }">
-          <el-tag :type="row.statusTag" round>{{ row.status }}</el-tag>
-        </template>
-      </el-table-column>
-    </el-table>
-
-    <div class="transactions-card__footer">
-      <span>顯示 1 - 5 / 25 筆</span>
-      <el-pagination layout="prev, pager, next" :total="25" :page-size="5" small />
+    <div class="transactions-card__list">
+      <article v-for="item in transactions" :key="item.id" class="transactions-card__item">
+        <time class="transactions-card__time">
+          <strong>{{ item.date }}</strong>
+          <span>{{ item.time }}</span>
+        </time>
+        <span :class="['transactions-card__type', `is-${item.typeTone}`]">{{ item.type }}</span>
+        <div class="transactions-card__detail">
+          <strong>{{ item.id }}</strong>
+          <span>{{ item.content }}</span>
+        </div>
+        <div :class="['transactions-card__amount', `is-${item.amountTone}`]">
+          <small v-if="item.amountLabel">{{ item.amountLabel }}</small>
+          <strong>{{ item.amount }}</strong>
+        </div>
+        <span :class="['transactions-card__status', `is-${item.statusTone}`]">
+          {{ item.status }}
+        </span>
+      </article>
     </div>
-  </el-card>
+  </section>
 </template>
 
 <script setup lang="ts">
-import { ArrowRight } from '@element-plus/icons-vue';
+import { RouterLink } from 'vue-router';
 
 const transactions = [
   {
-    time: '08/03 15:08',
+    date: '08/03',
+    time: '15:08',
     type: '入金',
-    typeTag: 'success',
+    typeTone: 'deposit',
     id: 'DEP-26073002',
     content: 'USDC · ERC20',
-    amount: '待入帳 12,000.00 USDC',
-    status: '處理中',
-    statusTag: 'warning',
+    amountLabel: '待入账',
+    amount: '12,000.00 USDC',
+    amountTone: 'neutral',
+    status: '处理中',
+    statusTone: 'warning',
   },
   {
-    time: '08/03 14:08',
+    date: '08/03',
+    time: '14:08',
     type: '出金',
-    typeTag: '',
+    typeTone: 'withdrawal',
     id: 'WD-26073001',
     content: 'USD · B→B',
     amount: '-5,050.00 USD',
-    status: '處理中',
-    statusTag: '',
+    amountTone: 'minus',
+    status: '处理中',
+    statusTone: 'info',
   },
   {
-    time: '08/02 17:08',
+    date: '08/02',
+    time: '17:08',
     type: '入金',
-    typeTag: 'success',
+    typeTone: 'deposit',
     id: 'DEP-26073001',
     content: 'USDT · TRC20',
     amount: '+50,000.00 USDT',
+    amountTone: 'plus',
     status: '已完成',
-    statusTag: 'success',
+    statusTone: 'success',
   },
   {
-    time: '08/01 17:08',
-    type: '兌換',
-    typeTag: 'danger',
+    date: '08/01',
+    time: '17:08',
+    type: '兑换',
+    typeTone: 'exchange',
     id: 'EX-26073001',
     content: 'USDT → USD · 0.9900',
     amount: '10,000.00 USDT',
+    amountTone: 'neutral',
     status: '已完成',
-    statusTag: 'success',
+    statusTone: 'success',
   },
   {
-    time: '07/31 17:08',
+    date: '07/31',
+    time: '17:08',
     type: '出金',
-    typeTag: '',
+    typeTone: 'withdrawal',
     id: 'WD-26072908',
     content: 'USD · C→C',
     amount: '-12,550.00 USD',
+    amountTone: 'minus',
     status: '已完成',
-    statusTag: 'success',
+    statusTone: 'success',
   },
 ];
 </script>
@@ -93,66 +101,191 @@ const transactions = [
 <style scoped lang="scss">
 .transactions-card {
   min-width: 0;
-  border-color: #dfe7ef;
+  padding: 22px;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #dfe7ef;
   border-radius: 14px;
   box-shadow: 0 12px 32px rgb(16 30 54 / 6%);
-
-  :deep(.el-card__header) {
-    padding: 18px 22px;
-  }
-
-  :deep(.el-card__body) {
-    padding: 0;
-  }
 
   &__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
-
-    strong {
-      color: #0d1a32;
-      font-size: 18px;
-      font-weight: 850;
-    }
+    margin-bottom: 18px;
   }
-
-  &__table {
-    width: 100%;
-
-    :deep(th.el-table__cell) {
-      color: #78879a;
-      background: #f8fafc;
-      font-size: 12px;
-      font-weight: 800;
-    }
-
-    :deep(td.el-table__cell) {
-      color: #18243a;
-      font-weight: 650;
-    }
+  h2 {
+    margin: 0;
+    color: #0d1a32;
+    font-size: 19px;
+    font-weight: 800;
   }
-
-  &__footer {
+  &__all {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 12px 18px;
-    color: #6b7a90;
-    border-top: 1px solid #edf1f5;
+    color: #2878ff;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  &__all i {
+    font-size: 20px;
+  }
+  &__list {
+    display: grid;
+    gap: 10px;
+    min-width: 0;
+  }
+  &__item {
+    display: grid;
+    min-width: 0;
+    grid-template-columns:
+      minmax(56px, auto)
+      minmax(56px, auto)
+      minmax(0, 1fr)
+      minmax(0, 1.1fr)
+      minmax(96px, auto);
+    align-items: center;
+    gap: 14px;
+    min-height: 78px;
+    padding: 12px 16px;
+    border: 1px solid #e2eaf3;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgb(18 55 92 / 4%);
+  }
+  &__time,
+  &__detail,
+  &__amount {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+  }
+  &__time {
+    gap: 3px;
+  }
+  &__time strong {
+    color: #0c1d3b;
+    font-size: 16px;
+  }
+  &__time span,
+  &__detail span {
+    color: #66758d;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  &__detail {
+    gap: 5px;
+  }
+  &__detail strong {
+    overflow: hidden;
+    color: #0c1d3b;
+    font-size: 15px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  &__type,
+  &__status {
+    justify-self: start;
+    padding: 5px 11px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 750;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+  &__type.is-deposit {
+    color: #2b9d3c;
+    background: #eff9ec;
+    border: 1px solid #d3edcb;
+  }
+  &__type.is-withdrawal {
+    color: #2381cf;
+    background: #eef7ff;
+    border: 1px solid #cfe7fa;
+  }
+  &__type.is-exchange {
+    color: #e65454;
+    background: #fff1f1;
+    border: 1px solid #f8d2d2;
+  }
+  &__amount {
+    gap: 3px;
+  }
+  &__amount small {
+    color: #53637b;
+    font-size: 12px;
+    font-weight: 650;
+  }
+  &__amount strong {
+    font-size: 17px;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  &__amount.is-neutral strong {
+    color: #0c1d3b;
+  }
+  &__amount.is-plus strong {
+    color: #0aa38e;
+  }
+  &__amount.is-minus strong {
+    color: #f05a30;
+  }
+  &__status {
+    justify-self: end;
+  }
+  &__status.is-warning {
+    color: #e88717;
+    background: #fff7e9;
+    border: 1px solid #f8ddb5;
+  }
+  &__status.is-info {
+    color: #2381cf;
+    background: #eef7ff;
+    border: 1px solid #cfe7fa;
+  }
+  &__status.is-success {
+    color: #2b9d3c;
+    background: #eff9ec;
+    border: 1px solid #d3edcb;
   }
 
-  @include mobile {
-    overflow-x: auto;
-
-    &__table {
-      min-width: 760px;
+  @include narrow {
+    &__item {
+      grid-template-columns:
+        minmax(54px, auto)
+        minmax(54px, auto)
+        minmax(0, 1fr)
+        minmax(0, 1.1fr)
+        minmax(96px, auto);
+      gap: 10px;
+      padding: 12px;
     }
-
-    &__footer {
-      min-width: 760px;
+  }
+  @include mobile {
+    padding: 16px;
+    &__item {
+      grid-template-columns: 54px 1fr auto;
+      gap: 10px 12px;
+      padding: 14px;
+    }
+    &__time {
+      grid-row: 1 / 3;
+    }
+    &__type {
+      grid-column: 2;
+      grid-row: 1;
+    }
+    &__status {
+      grid-column: 3;
+      grid-row: 1;
+    }
+    &__detail {
+      grid-column: 2 / 4;
+      grid-row: 2;
+    }
+    &__amount {
+      grid-column: 2 / 4;
+      grid-row: 3;
     }
   }
 }

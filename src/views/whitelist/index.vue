@@ -1,26 +1,24 @@
 <template>
   <section class="whitelist-page">
-    <PageHeader title="白名单管理" description="付款人及收款人需要分别提交">
+    <AdminHero
+      title="白名单管理"
+      description="查看每笔交易的资料、资金变化及完整处理时间线"
+      icon="ri-user-follow-line"
+    >
       <template #extra>
-        <el-button class="whitelist-page__add" type="primary" :icon="Plus" size="large">
-          新增白名单
-        </el-button>
+        <!-- <el-button class="records-page__export" :icon="Download" size="large" plain
+          >导出CSV</el-button
+        > -->
       </template>
-    </PageHeader>
+    </AdminHero>
 
-    <WhitelistNotice />
-    <WhitelistSearchPanel />
     <WhitelistResult />
   </section>
 </template>
 
 <script setup lang="ts">
-import { Plus } from '@element-plus/icons-vue';
-
-import PageHeader from '@/components/common/PageHeader.vue';
-import WhitelistNotice from './components/WhitelistNotice.vue';
+import AdminHero from '@/components/admin/AdminHero.vue';
 import WhitelistResult from './components/WhitelistResult.vue';
-import WhitelistSearchPanel from './components/WhitelistSearchPanel.vue';
 </script>
 
 <style scoped lang="scss">
@@ -28,7 +26,7 @@ import WhitelistSearchPanel from './components/WhitelistSearchPanel.vue';
   display: grid;
   min-width: 0;
   gap: 22px;
-  padding: 34px 36px 32px;
+ 
 
   &__add {
     height: 50px;

@@ -1,249 +1,430 @@
 <template>
-  <aside class="app-aside">
+  <aside
+    class="app-aside"
+    :class="{ 'is-collapsed': isCollapsed, 'is-mobile': isMobile }"
+  >
     <div class="app-aside__brand">
-      <span class="app-aside__mark">M</span>
+      <span class="app-aside__mark">
+        <svg viewBox="0 0 32 32" aria-hidden="true">
+          <defs>
+            <linearGradient id="aside-mark-gradient" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#10aaa4" />
+              <stop offset="100%" stop-color="#2878ff" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M6 4h10.6c3.6 0 6.4 2.7 6.4 6.2 0 2.5-1.4 4.5-3.5 5.4 2.6.7 4.4 2.9 4.4 5.8 0 3.9-3.1 6.6-7.2 6.6H6V4Zm4.6 9.6h5.6c1.6 0 2.7-1 2.7-2.6 0-1.5-1.1-2.5-2.7-2.5h-5.6v5.1Zm0 9.6h6.2c1.8 0 2.9-1.1 2.9-2.7 0-1.6-1.1-2.7-2.9-2.7h-6.2v5.4Z"
+            fill="url(#aside-mark-gradient)"
+          />
+        </svg>
+      </span>
       <div v-if="!isCollapsed" class="app-aside__brand-text">
         <strong>MTPay</strong>
-        <span>AGENT PORTAL</span>
+        <span>CLIENT PORTAL</span>
       </div>
     </div>
 
-    <div v-if="!isCollapsed" class="app-aside__agent">
-      <span>目前代理</span>
-      <strong>代理A · Apex Trading</strong>
-      <el-icon><ArrowDown /></el-icon>
-    </div>
+    <div v-if="!isCollapsed" class="app-aside__divider" aria-hidden="true" />
 
-    <p v-if="!isCollapsed" class="app-aside__label">代理功能</p>
-    <el-menu class="app-aside__menu" :default-active="route.path" :collapse="isCollapsed" router>
-      <el-menu-item v-for="menu in routeStore.menus" :key="menu.path" :index="menu.path">
-        <el-icon><component :is="resolveIcon(menu.icon)" /></el-icon>
-        <template #title>{{ menu.title }}</template>
-      </el-menu-item>
-    </el-menu>
+    <nav class="app-aside__nav" aria-label="主导航">
+      <ul class="app-aside__menu">
+        <li
+          v-for="menu in routeStore.menus"
+          :key="menu.path"
+          class="app-aside__menu-item"
+          :class="{ 'is-active': isActive(menu.path) }"
+          :aria-current="isActive(menu.path) ? 'page' : undefined"
+        >
+          <RouterLink :to="menu.path" class="app-aside__menu-link">
+            <span class="app-aside__menu-icon">
+              <i :class="resolveIcon(menu.icon)" aria-hidden="true" />
+            </span>
+            <span v-if="!isCollapsed" class="app-aside__menu-label">{{ menu.title }}</span>
+          </RouterLink>
+        </li>
+      </ul>
+    </nav>
 
-    <div class="app-aside__profile">
-      <div class="app-aside__profile-main">
-        <span class="app-aside__avatar">A</span>
-        <div v-if="!isCollapsed">
-          <strong>代理A · Apex Trading</strong>
-          <span>finance@apex.test</span>
-        </div>
-        <el-icon v-if="!isCollapsed"><ArrowUp /></el-icon>
+    <div v-if="!isCollapsed" class="app-aside__decoration" aria-hidden="true">
+      <div class="app-aside__decoration-orbit" />
+      <div class="app-aside__decoration-orbit app-aside__decoration-orbit--alt" />
+      <i class="app-aside__decoration-dot app-aside__decoration-dot--left" />
+      <i class="app-aside__decoration-dot app-aside__decoration-dot--right" />
+      <div class="app-aside__decoration-platform" />
+      <div class="app-aside__decoration-shield">
+        <span class="app-aside__decoration-shield-layer" />
+        <el-icon><Check /></el-icon>
       </div>
-      <el-button class="app-aside__logout" text @click="handleLogout">
-        <el-icon><SwitchButton /></el-icon>
-        <span v-if="!isCollapsed">登出</span>
-      </el-button>
     </div>
   </aside>
 </template>
 
 <script setup lang="ts">
-import {
-  ArrowDown,
-  ArrowUp,
-  Grid,
-  List,
-  Money,
-  Switch,
-  SwitchButton,
-  Tickets,
-  Upload,
-  User,
-  Wallet,
-} from '@element-plus/icons-vue';
+import { Check } from '@element-plus/icons-vue';
 import { computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { RouterLink, useRoute } from 'vue-router';
 
 import { useAppStore } from '@/stores/modules/app';
-import { useAuthStore } from '@/stores/modules/auth';
 import { useRouteStore } from '@/stores/modules/route';
 
 const route = useRoute();
-const router = useRouter();
 const appStore = useAppStore();
-const authStore = useAuthStore();
 const routeStore = useRouteStore();
-const isCollapsed = computed(() => appStore.sidebarCollapsed && appStore.device !== 'mobile');
+
+const isMobile = computed(() => appStore.device === 'mobile');
+const isCollapsed = computed(() => appStore.sidebarCollapsed && !isMobile.value);
 
 const icons = {
-  Grid,
-  List,
-  Money,
-  Switch,
-  Tickets,
-  Upload,
-  User,
-  Wallet,
+  Grid: 'ri-dashboard-3-line',
+  Wallet: 'ri-wallet-3-line',
+  Switch: 'ri-exchange-dollar-line',
+  List: 'ri-user-follow-line',
+  Upload: 'ri-hand-coin-line',
+  Tickets: 'ri-file-list-3-line',
+  User: 'ri-shield-user-line',
 };
 
 function resolveIcon(name: string) {
-  return icons[name as keyof typeof icons] || Grid;
+  return icons[name as keyof typeof icons] || icons.Grid;
 }
 
-async function handleLogout() {
-  authStore.logout();
-  await router.replace({ name: 'Login' });
+function isActive(path: string) {
+  return route.path === path || route.path.startsWith(`${path}/`);
 }
 </script>
 
 <style scoped lang="scss">
 .app-aside {
+  position: relative;
   display: flex;
-  height: 100%;
+  height: 100vh;
   min-width: 0;
   flex-direction: column;
-  padding: 24px 16px 16px;
-  color: #ffffff;
-  background:
-    radial-gradient(circle at 18% 0, rgb(13 173 181 / 20%), transparent 24%),
-    linear-gradient(180deg, #051c3b 0%, #01122d 100%);
-  box-shadow: 1px 0 0 rgb(255 255 255 / 8%) inset;
+  background: linear-gradient(180deg, #ffffff 0%, #f5fbff 55%, #eefaff 100%);
+  border-right: 1px solid var(--portal-border);
+  box-shadow: 1px 0 12px rgb(28 77 120 / 4%);
+  overflow: hidden;
+  --portal-aside-width: 240px;
+  --portal-aside-collapsed-width: 72px;
+}
 
-  &__brand {
-    display: flex;
-    min-height: 52px;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 24px;
+.app-aside__brand {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 30px 28px 6px;
+  flex: 0 0 auto;
+}
+
+.app-aside__mark {
+  display: inline-flex;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: rgb(255 255 255);
+  box-shadow: 0 4px 14px rgb(40 120 255 / 18%);
+
+  svg {
+    width: 26px;
+    height: 26px;
+  }
+}
+
+.app-aside__brand-text {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+
+  strong {
+    background: linear-gradient(135deg, #082551 0%, #2878ff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: 0.2px;
   }
 
-  &__mark,
-  &__avatar {
-    display: inline-flex;
-    width: 42px;
-    height: 42px;
-    flex: 0 0 42px;
-    align-items: center;
-    justify-content: center;
-    border-radius: 10px;
-    color: #00152d;
-    background: linear-gradient(135deg, #24d6c1, #10aab8);
-    font-weight: 850;
+  span {
+    color: #2878ff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2.4px;
+  }
+}
+
+.app-aside__nav {
+  position: relative;
+  z-index: 2;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 24px 18px 18px;
+  overflow: hidden;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(40 120 255 / 20%) transparent;
+}
+
+.app-aside__divider {
+  position: relative;
+  height: 16px;
+  margin: 18px 20px 0;
+
+  &::before,
+  &::after {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    content: '';
+    transform: translateY(-50%);
+    background: linear-gradient(90deg, transparent 0%, #10aaa4 22%, #2dd4bf 50%, #2878ff 78%, transparent 100%);
   }
 
-  &__brand-text {
-    display: grid;
-    gap: 3px;
-
-    strong {
-      font-size: 25px;
-      line-height: 1;
-    }
-
-    span {
-      color: #22ead7;
-      font-size: 11px;
-      font-weight: 850;
-      letter-spacing: 1.4px;
-    }
+  &::before {
+    opacity: 0.95;
   }
 
-  &__agent {
+  &::after {
+    top: calc(50% + 5px);
+    height: 1px;
+    background: linear-gradient(90deg, transparent 5%, #10aaa4 50%, #2878ff 95%, transparent 100%);
+    opacity: 0.5;
+  }
+}
+
+.app-aside__nav::-webkit-scrollbar {
+  width: 6px;
+}
+
+.app-aside__nav::-webkit-scrollbar-thumb {
+  border-radius: 6px;
+  background: rgb(40 120 255 / 18%);
+}
+
+.app-aside__nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.app-aside__menu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.app-aside__menu-item {
+  position: relative;
+}
+
+.app-aside__menu-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: 50px;
+  padding: 0 14px;
+  border-radius: 11px;
+  color: #08234a;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+
+  &:hover {
+    background: rgb(16 170 164 / 7%);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #10aaa4;
+    outline-offset: 2px;
+  }
+}
+
+.app-aside__menu-icon {
+  display: inline-flex;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  background: transparent;
+  color: #7387a2;
+  font-size: 20px;
+  font-weight: 400;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+
+  i {
+    font-weight: 400;
+    line-height: 1;
+  }
+}
+
+.app-aside__menu-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-aside__menu-item.is-active {
+  .app-aside__menu-link {
+    color: #082551;
+    background: linear-gradient(90deg, rgb(15 181 174 / 13%), rgb(40 120 255 / 5%));
+    font-weight: 700;
+  }
+
+  .app-aside__menu-icon {
+    background: rgb(16 170 164 / 12%);
+    color: #10aaa4;
+    box-shadow: inset 0 0 0 1px rgb(16 170 164 / 9%);
+  }
+
+  &::before {
+    position: absolute;
+    top: 8px;
+    bottom: 8px;
+    left: -2px;
+    width: 4px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, #10aaa4, #2878ff);
+    content: '';
+  }
+}
+
+.app-aside__decoration {
+  position: absolute;
+  z-index: 1;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 250px;
+  pointer-events: none;
+  opacity: 0.78;
+  mask-image: linear-gradient(180deg, transparent, #000 28%);
+}
+
+.app-aside__decoration-orbit {
+  position: absolute;
+  top: 47%;
+  left: 50%;
+  width: 190px;
+  height: 138px;
+  border: 1px solid rgb(72 151 235 / 20%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) rotate(67deg);
+}
+
+.app-aside__decoration-orbit--alt {
+  width: 178px;
+  height: 112px;
+  border-color: rgb(16 170 164 / 22%);
+  transform: translate(-50%, -50%) rotate(-24deg);
+}
+
+.app-aside__decoration-platform {
+  position: absolute;
+  bottom: 23px;
+  left: 50%;
+  width: 150px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgb(117 205 245 / 35%);
+  background: linear-gradient(180deg, rgb(255 255 255 / 82%), rgb(120 213 245 / 30%));
+  transform: translateX(-50%);
+  box-shadow:
+    inset 0 -7px 10px rgb(37 177 206 / 16%),
+    0 12px 15px rgb(36 165 194 / 16%);
+}
+
+.app-aside__decoration-dot {
+  position: absolute;
+  z-index: 2;
+  width: 7px;
+  height: 7px;
+  border: 2px solid #35d5d1;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgb(53 213 209 / 35%);
+}
+
+.app-aside__decoration-dot--left {
+  bottom: 84px;
+  left: 43px;
+}
+
+.app-aside__decoration-dot--right {
+  top: 63px;
+  right: 45px;
+}
+
+.app-aside__decoration-shield {
+  position: absolute;
+  top: 43%;
+  left: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 88px;
+  height: 108px;
+  color: #dfffff;
+  font-size: 37px;
+  border: 2px solid rgb(255 255 255 / 85%);
+  border-radius: 44% 44% 50% 50% / 20% 20% 72% 72%;
+  background: linear-gradient(145deg, rgb(255 255 255 / 72%), rgb(48 210 216 / 28%));
+  transform: translate(-50%, -50%);
+  box-shadow:
+    inset 0 0 22px rgb(255 255 255 / 80%),
+    0 10px 22px rgb(39 176 207 / 20%);
+  filter: drop-shadow(-8px 7px 0 rgb(61 196 225 / 18%));
+
+  &::before {
+    position: absolute;
+    inset: 7px;
+    border: 1px solid rgb(79 218 221 / 65%);
+    border-radius: inherit;
+    content: '';
+  }
+
+  .el-icon {
     position: relative;
-    display: grid;
-    gap: 8px;
-    margin-bottom: 28px;
-    padding: 14px 36px 14px 16px;
-    border: 1px solid rgb(125 163 214 / 18%);
-    border-radius: 8px;
+    z-index: 2;
+    filter: drop-shadow(0 3px 5px rgb(39 177 186 / 22%));
+  }
+}
 
-    span {
-      color: #8fa6c6;
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    strong {
-      overflow: hidden;
-      color: #ffffff;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .el-icon {
-      position: absolute;
-      top: 50%;
-      right: 14px;
-      transform: translateY(-50%);
-    }
+.app-aside.is-collapsed {
+  .app-aside__brand {
+    justify-content: center;
+    padding: 28px 0 6px;
   }
 
-  &__label {
-    margin: 0 0 12px 8px;
-    color: #8fa6c6;
-    font-size: 12px;
-    font-weight: 800;
+  .app-aside__menu-link {
+    justify-content: center;
+    padding: 0;
   }
 
-  &__menu {
-    flex: 1;
-    min-width: 0;
-    overflow-x: hidden;
-    overflow-y: auto;
-    background: transparent;
+  .app-aside__decoration {
+    display: none;
   }
+}
 
-  :deep(.el-menu-item) {
-    height: 50px;
-    margin: 4px 0;
-    color: #d8e4f6;
-    border-radius: 8px;
-    font-weight: 800;
-  }
-
-  :deep(.el-menu-item.is-active) {
-    color: #ffffff;
-    background: linear-gradient(90deg, rgb(27 214 202 / 24%), rgb(68 124 187 / 20%));
-    box-shadow:
-      3px 0 0 #20d5c8 inset,
-      -3px 0 0 #20d5c8 inset;
-  }
-
-  :deep(.el-menu-item:hover) {
-    background: rgb(255 255 255 / 8%);
-  }
-
-  &__profile {
-    overflow: hidden;
-    border: 1px solid rgb(125 163 214 / 18%);
-    border-radius: 8px;
-  }
-
-  &__profile-main {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 12px;
-    border-bottom: 1px solid rgb(125 163 214 / 14%);
-
-    div {
-      display: grid;
-      min-width: 0;
-      flex: 1;
-      gap: 4px;
-    }
-
-    strong,
-    span {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    span {
-      color: #8fa6c6;
-      font-size: 12px;
-    }
-  }
-
-  &__logout {
-    width: 100%;
-    justify-content: flex-start;
-    padding: 18px 14px;
-    color: #d8e4f6;
-    font-weight: 800;
+.app-aside.is-mobile {
+  .app-aside__decoration {
+    display: none;
   }
 }
 </style>

@@ -23,17 +23,26 @@
       </el-form-item>
 
       <section class="exchange-form__summary">
-        <div>
-          <span>可用余额</span>
-          <strong>128,500.00 USDT</strong>
+        <div class="exchange-form__row">
+          <span class="exchange-form__row-icon exchange-form__row-icon--wallet">
+            <el-icon><Wallet /></el-icon>
+          </span>
+          <span class="exchange-form__row-label">可用余额</span>
+          <strong class="exchange-form__row-value">128,500.00 USDT</strong>
         </div>
-        <div>
-          <span>专属比例</span>
-          <strong>0.9900</strong>
+        <div class="exchange-form__row">
+          <span class="exchange-form__row-icon exchange-form__row-icon--chart">
+            <el-icon><DataLine /></el-icon>
+          </span>
+          <span class="exchange-form__row-label">专属比例</span>
+          <strong class="exchange-form__row-value">0.9900</strong>
         </div>
-        <div class="exchange-form__result">
-          <span>预计获得</span>
-          <strong>990.00 USD</strong>
+        <div class="exchange-form__row exchange-form__row--result">
+          <span class="exchange-form__row-icon exchange-form__row-icon--gift">
+            <el-icon><Coin /></el-icon>
+          </span>
+          <span class="exchange-form__row-label">预计获得</span>
+          <strong class="exchange-form__row-value">990.00 USD</strong>
         </div>
       </section>
 
@@ -43,6 +52,7 @@
 </template>
 
 <script setup lang="ts">
+import { Coin, DataLine, Wallet } from '@element-plus/icons-vue';
 import { reactive } from 'vue';
 
 const form = reactive({
@@ -117,45 +127,103 @@ const form = reactive({
   }
 
   &__summary {
+    position: relative;
     overflow: hidden;
-    margin: 2px 0 20px;
-    border: 1px solid #dce5ef;
-    border-radius: 8px;
+    margin: 6px 0 20px;
+    padding: 6px 0;
+    background:
+      radial-gradient(circle at 92% 100%, rgb(16 170 164 / 10%) 0%, transparent 38%),
+      linear-gradient(135deg, #f4fbff 0%, #ecf8ff 100%);
+    border: 1px solid #d8ecf6;
+    border-radius: 12px;
+  }
 
-    div {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      min-height: 48px;
-      padding: 0 18px;
-      color: #273850;
-      border-bottom: 1px solid #e8eef5;
+  &__row {
+    display: grid;
+    align-items: center;
+    grid-template-columns: 44px 1fr auto;
+    gap: 14px;
+    min-height: 56px;
+    padding: 8px 18px;
+    border-bottom: 1px dashed #c8d9e7;
 
-      &:last-child {
-        border-bottom: 0;
-      }
-    }
-
-    span {
-      color: #56677f;
-      font-weight: 700;
-    }
-
-    strong {
-      color: #071833;
-      font-size: 16px;
-      font-weight: 850;
+    &:last-child {
+      border-bottom: 0;
     }
   }
 
-  &__result {
-    min-height: 62px;
+  &__row--result {
+    margin: 6px 12px 6px;
+    padding: 10px 14px;
+    background:
+      linear-gradient(135deg, rgb(232 250 247 / 90%) 0%, rgb(220 240 250 / 90%) 100%);
+    border: 1px solid #c8e8e0;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgb(16 170 164 / 10%);
 
-    strong {
-      color: #008f83;
-      font-size: 26px;
+    .exchange-form__row-label {
+      color: #0c2a5a;
+      font-weight: 700;
     }
+
+    .exchange-form__row-value {
+      color: #0aa39a;
+      font-size: 30px;
+      font-weight: 800;
+    }
+  }
+
+  &__row-icon {
+    display: inline-flex;
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #e8f6ff 0%, #d5ecff 100%);
+    color: #2878ff;
+    font-size: 20px;
+  }
+
+  &__row-icon--wallet {
+    background: linear-gradient(135deg, #e6fbf3 0%, #cdf2e1 100%);
+    color: #10aaa4;
+  }
+
+  &__row-icon--chart {
+    background: linear-gradient(135deg, #e8f6ff 0%, #d5ecff 100%);
+    color: #2878ff;
+  }
+
+  &__row-icon--gift {
+    width: 52px;
+    height: 52px;
+    flex: 0 0 52px;
+    background: linear-gradient(135deg, #10aaa4 0%, #2dd4bf 100%);
+    color: #ffffff;
+    font-size: 24px;
+    box-shadow: 0 4px 12px rgb(16 170 164 / 28%);
+
+    &::before,
+    &::after {
+      position: absolute;
+      content: '';
+    }
+  }
+
+  &__row-label {
+    color: #0c2a5a;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  &__row-value {
+    color: #0c2a5a;
+    font-size: 18px;
+    font-weight: 800;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
   }
 
   &__submit {
@@ -182,11 +250,37 @@ const form = reactive({
       padding: 0 18px 20px;
     }
 
-    &__summary div {
-      align-items: flex-start;
-      flex-direction: column;
-      gap: 6px;
-      padding: 12px 14px;
+    &__summary {
+      padding: 4px 0;
+    }
+
+    &__row {
+      grid-template-columns: 40px 1fr auto;
+      gap: 10px;
+      padding: 8px 14px;
+    }
+
+    &__row--result {
+      margin: 6px 10px;
+      padding: 8px 12px;
+    }
+
+    &__row-icon {
+      width: 40px;
+      height: 40px;
+      flex: 0 0 40px;
+      font-size: 18px;
+    }
+
+    &__row-icon--gift {
+      width: 48px;
+      height: 48px;
+      flex: 0 0 48px;
+      font-size: 22px;
+    }
+
+    &__row--result .exchange-form__row-value {
+      font-size: 24px;
     }
   }
 }

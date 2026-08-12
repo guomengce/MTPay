@@ -1,30 +1,29 @@
 <template>
   <section class="dashboard-page">
-    <div class="dashboard-page__hero">
-      <div>
-        <h1>歡迎，代理A · Apex Trading</h1>
-        <p>查看資產餘額和最近交易，快速進行資金操作。</p>
-      </div>
-      <el-button :icon="Refresh" size="large" plain>重設示範資料</el-button>
-    </div>
+    <AdminHero
+      title="MTPay 营运总览"
+      description="管理代理、资金与审核流程"
+      icon="ri-dashboard-3-line"
+    >
+    </AdminHero>
 
     <div class="dashboard-page__balances">
       <BalanceCard v-for="item in balances" :key="item.code" v-bind="item" />
-      <el-card class="dashboard-page__todo" shadow="never">
+      <div class="dashboard-page__todo">
         <div class="dashboard-page__todo-head">
-          <el-icon><BellFilled /></el-icon>
-          <strong>待處理事項</strong>
+          <el-icon class="dashboard-page__todo-icon"><BellFilled /></el-icon>
+          <strong>待处理事项</strong>
         </div>
         <div class="dashboard-page__todo-count">
           <span>2</span>
-          <el-tag type="warning" round>待處理</el-tag>
+          <em>待处理</em>
         </div>
-        <p>入金、兌換、白名單及出金</p>
+        <p>入金、兑换、白名单及出金</p>
         <el-divider />
-        <el-button text
-          >查看待處理項目 <el-icon><ArrowRight /></el-icon
-        ></el-button>
-      </el-card>
+        <el-button class="dashboard-page__todo-btn" text>
+          查看待处理项目 <el-icon><ArrowRight /></el-icon>
+        </el-button>
+      </div>
     </div>
 
     <div class="dashboard-page__actions">
@@ -32,11 +31,9 @@
     </div>
 
     <div class="dashboard-page__content">
-      <ExchangeRateCard />
+      <ExchangeRatePanel compact />
       <RecentTransactions />
     </div>
-
-    <footer class="dashboard-page__footer">© 2024 MTPay Agent Portal. All rights reserved.</footer>
   </section>
 </template>
 
@@ -45,47 +42,46 @@ import {
   ArrowDown,
   ArrowRight,
   BellFilled,
-  Refresh,
   Switch,
   Upload,
   UserFilled,
 } from '@element-plus/icons-vue';
-
 import BalanceCard from './components/BalanceCard.vue';
-import ExchangeRateCard from './components/ExchangeRateCard.vue';
+import ExchangeRatePanel from '@/components/admin/ExchangeRatePanel.vue';
 import QuickActionCard from './components/QuickActionCard.vue';
 import RecentTransactions from './components/RecentTransactions.vue';
-
-type BalanceTone = 'teal' | 'blue' | 'green';
 
 interface BalanceItem {
   code: string;
   title: string;
   amount: string;
   frozen: string;
-  tone: BalanceTone;
+  approx?: string;
+  tone: 'teal' | 'blue' | 'green';
 }
 
 const balances: BalanceItem[] = [
   {
     code: 'USDT',
-    title: 'USDT 可用餘額',
+    title: 'USDT 可用余额',
     amount: '128,500.00',
-    frozen: '凍結 0.00 USDT',
+    approx: '128,500.00 USD',
+    frozen: '冻结 0.00 USDT',
     tone: 'teal',
   },
   {
     code: 'USDC',
-    title: 'USDC 可用餘額',
+    title: 'USDC 可用余额',
     amount: '46,200.00',
-    frozen: '凍結 0.00 USDC',
+    approx: '46,200.00 USD',
+    frozen: '冻结 0.00 USDC',
     tone: 'blue',
   },
   {
     code: 'USD',
-    title: 'USD 可用餘額',
+    title: 'USD 可用余额',
     amount: '184,350.00',
-    frozen: '凍結 5,050.00 USD',
+    frozen: '冻结 5,050.00 USD',
     tone: 'green',
   },
 ];
@@ -93,83 +89,116 @@ const balances: BalanceItem[] = [
 const quickActions = [
   {
     icon: ArrowDown,
-    title: '入金 USDT / USDC',
-    description: '取得鏈上地址',
+    title: '入金 USDT',
+    description: '获取链上地址',
   },
   {
     icon: Switch,
-    title: '兌換 USD',
-    description: '查看實時匯率並兌換',
+    title: '兑换 USD',
+    description: '查看实时汇率',
   },
   {
     icon: UserFilled,
-    title: '新增白名單',
+    title: '新增白名单',
     description: '付款人或收款人',
   },
   {
     icon: Upload,
-    title: '申請 USD 出金',
-    description: '固定費 50.00 USD',
+    title: '申请 USD 提现',
+    description: '固定费 50.00 USD',
   },
 ];
 </script>
 
 <style scoped lang="scss">
 .dashboard-page {
+  position: relative;
   min-width: 0;
-  padding: 36px 36px 18px;
+  padding-top: 4px;
 
-  &__hero {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 24px;
-    margin-bottom: 28px;
+  &__banner {
+    position: relative;
+    height: 110px;
+    margin: 0 0 18px;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 92% 50%, rgb(40 120 255 / 14%), transparent 35%),
+      radial-gradient(circle at 60% 100%, rgb(16 170 164 / 12%), transparent 40%),
+      linear-gradient(135deg, #eaf6ff 0%, #f5fbff 60%, #ffffff 100%);
+    border: 1px solid #e6f0f8;
+    border-radius: 16px;
+  }
 
-    > div {
-      position: relative;
-      padding-left: 28px;
+  &__banner-orbit {
+    position: absolute;
+    top: 50%;
+    right: 8%;
+    border: 1px dashed rgb(40 120 255 / 25%);
+    border-radius: 50%;
+    transform: translate(0, -50%);
 
-      &::before {
-        position: absolute;
-        top: 4px;
-        left: 0;
-        width: 4px;
-        height: 40px;
-        content: '';
-        background: #14aa9a;
-        border-radius: 999px;
-      }
-
-      &::after {
-        position: absolute;
-        bottom: 7px;
-        left: 0;
-        width: 7px;
-        height: 7px;
-        content: '';
-        background: #42c5b7;
-        border-radius: 50%;
-      }
+    &--outer {
+      width: 220px;
+      height: 220px;
     }
 
-    h1 {
-      margin: 0 0 12px;
-      color: #09162f;
-      font-size: 30px;
-      font-weight: 850;
-      letter-spacing: 0;
+    &--inner {
+      width: 140px;
+      height: 140px;
+      border-color: rgb(16 170 164 / 25%);
+    }
+  }
+
+  &__banner-coin {
+    position: absolute;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: #ffffff;
+    font-weight: 800;
+    box-shadow: 0 8px 18px rgb(16 80 130 / 18%);
+
+    &--yuan {
+      top: 16px;
+      right: 16%;
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, #4fc6d5, #2a8fb8);
+      font-size: 22px;
     }
 
-    p {
-      margin: 0;
-      color: #77869b;
-      font-size: 15px;
-      font-weight: 600;
+    &--dollar {
+      top: 6px;
+      right: 4%;
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, #5fb8e3, #3a7fc0);
+      font-size: 18px;
+    }
+
+    &--euro {
+      top: 60%;
+      right: 22%;
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #6fc8d9, #3a92b8);
+      font-size: 16px;
+    }
+
+    &--bitcoin {
+      bottom: 12px;
+      right: 10%;
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #4ec0d0, #2c8eb0);
+      font-size: 18px;
     }
   }
 
   &__balances {
+    position: relative;
+    z-index: 1;
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 20px;
@@ -178,51 +207,64 @@ const quickActions = [
 
   &__todo {
     min-width: 0;
-    border-color: #dfe7ef;
-    border-radius: 14px;
-    box-shadow: 0 12px 32px rgb(16 30 54 / 6%);
-
-    :deep(.el-card__body) {
-      padding: 24px 24px 18px;
-    }
+    padding: 22px 24px 18px;
+    background: #ffffff;
+    border: 1px solid #dfe7ef;
+    border-radius: 16px;
+    box-shadow: 0 14px 30px rgb(16 30 54 / 6%);
   }
 
   &__todo-head {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     color: #28384f;
+    font-weight: 800;
+  }
 
-    .el-icon {
-      color: #ff852f;
-    }
+  &__todo-icon {
+    color: #ff852f;
+    font-size: 18px;
   }
 
   &__todo-count {
     display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 22px 0 8px;
+    align-items: baseline;
+    gap: 10px;
+    margin: 18px 0 6px;
 
     span {
       color: #f06d2f;
       font-size: 34px;
-      font-weight: 850;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    em {
+      color: #f06d2f;
+      font-style: normal;
+      font-size: 14px;
+      font-weight: 700;
     }
   }
 
   &__todo p {
     margin: 0;
     color: #66758b;
+    font-size: 13px;
     font-weight: 600;
   }
 
-  &__todo :deep(.el-button) {
+  &__todo :deep(.el-divider) {
+    margin: 14px 0 10px;
+  }
+
+  &__todo-btn {
     width: 100%;
     justify-content: space-between;
     padding: 0;
     color: #15233a;
-    font-weight: 800;
+    font-weight: 700;
   }
 
   &__actions {
@@ -234,19 +276,11 @@ const quickActions = [
 
   &__content {
     display: grid;
-    grid-template-columns: minmax(420px, 0.95fr) minmax(520px, 1.2fr);
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.2fr);
     gap: 22px;
   }
 
-  &__footer {
-    padding: 28px 0 0;
-    color: #8b98aa;
-    text-align: center;
-  }
-
   @include narrow {
-    padding: 28px 24px 16px;
-
     &__balances,
     &__actions {
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -255,27 +289,71 @@ const quickActions = [
     &__content {
       grid-template-columns: 1fr;
     }
+
+    &__banner {
+      height: 96px;
+    }
+
+    &__banner-orbit--outer {
+      width: 180px;
+      height: 180px;
+    }
+
+    &__banner-orbit--inner {
+      width: 110px;
+      height: 110px;
+    }
   }
 
   @include mobile {
-    padding: 20px 14px 16px;
-
-    &__hero {
-      flex-direction: column;
-
-      h1 {
-        font-size: 24px;
-      }
-
-      :deep(.el-button) {
-        width: 100%;
-      }
-    }
-
     &__balances,
     &__actions,
     &__content {
       grid-template-columns: 1fr;
+    }
+
+    &__banner {
+      height: 84px;
+    }
+
+    &__banner-orbit {
+      right: -6%;
+
+      &--outer {
+        width: 140px;
+        height: 140px;
+      }
+
+      &--inner {
+        width: 90px;
+        height: 90px;
+      }
+    }
+
+    &__banner-coin {
+      &--yuan {
+        width: 36px;
+        height: 36px;
+        font-size: 18px;
+      }
+
+      &--dollar {
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+      }
+
+      &--euro {
+        width: 26px;
+        height: 26px;
+        font-size: 12px;
+      }
+
+      &--bitcoin {
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+      }
     }
   }
 }

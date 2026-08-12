@@ -1,30 +1,65 @@
 <template>
-  <el-card class="form-card" shadow="never">
-    <h2>登入管理後台</h2>
-    <p class="form-card__note">目前不區分管理員角色，所有重要操作仍會保留記錄。</p>
+  <div class="form-card">
+    <header class="form-card__header">
+      <h2 class="form-card__title">欢迎登录 MTPay</h2>
+      <p class="form-card__subtitle">安全管理您的资产与每一笔交易</p>
+    </header>
 
-    <el-form label-position="top" :model="form" @submit.prevent>
-      <el-form-item label="管理員Email">
-        <el-input v-model="form.email" size="large" autocomplete="username" />
+    <el-form class="form-card__form" label-position="top" :model="form" @submit.prevent>
+      <el-form-item label="账户 Email">
+        <el-input
+          v-model="form.email"
+          size="large"
+          autocomplete="username"
+          placeholder="请输入您的账户 Email"
+        >
+          <template #prefix>
+            <el-icon class="form-card__icon"><Message /></el-icon>
+          </template>
+        </el-input>
       </el-form-item>
-      <el-form-item label="密碼">
+
+      <el-form-item label="密码">
         <el-input
           v-model="form.password"
           size="large"
-          type="password"
+          :type="showPassword ? 'text' : 'password'"
           autocomplete="current-password"
-        />
+          placeholder="请输入您的密码"
+        >
+          <template #prefix>
+            <el-icon class="form-card__icon"><Lock /></el-icon>
+          </template>
+          <template #suffix>
+            <el-icon class="form-card__icon form-card__icon--toggle" @click="showPassword = !showPassword">
+              <component :is="showPassword ? View : Hide" />
+            </el-icon>
+          </template>
+        </el-input>
       </el-form-item>
+
       <el-button class="form-card__submit" type="primary" size="large" @click="handleLogin">
-        登入管理後台
+        登录
       </el-button>
     </el-form>
-  </el-card>
+
+    <div class="form-card__links">
+      <a class="form-card__link" href="javascript:void(0)" @click.prevent>忘记密码</a>
+      <span class="form-card__divider" />
+      <a class="form-card__link" href="javascript:void(0)" @click.prevent>联系客服</a>
+    </div>
+
+    <div class="form-card__footer">
+      <el-icon class="form-card__footer-icon"><CircleCheckFilled /></el-icon>
+      <span>企业级安全保护 · 交易全程可追溯</span>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { reactive } from 'vue';
+import { reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { CircleCheckFilled, Hide, Lock, Message, View } from '@element-plus/icons-vue';
 
 import { useAuthStore } from '@/stores/modules/auth';
 
@@ -36,6 +71,8 @@ const form = reactive({
   email: 'admin@mtpay.test',
   password: 'Demo123!',
 });
+
+const showPassword = ref(false);
 
 async function handleLogin() {
   authStore.login({
@@ -49,35 +86,52 @@ async function handleLogin() {
 
   await router.replace(String(route.query.redirect || '/dashboard'));
 }
-
-async function openAgentPortal() {
-  await handleLogin();
-}
 </script>
 
 <style scoped lang="scss">
 .form-card {
-  width: min(530px, 100%);
-  border-color: #d9e2ee;
+  width: min(460px, 100%);
+  padding: 44px 40px 36px;
+  background: #ffffff;
   border-radius: 20px;
   box-shadow: 0 24px 70px rgb(22 34 51 / 9%);
 
-  :deep(.el-card__body) {
-    padding: 40px 36px 34px;
+  &__header {
+    margin-bottom: 28px;
+    text-align: center;
   }
 
-  h2 {
+  &__title {
     margin: 0 0 8px;
     color: #071833;
-    font-size: 30px;
-    font-weight: 850;
+    font-size: 28px;
+    font-weight: 800;
     letter-spacing: 0;
   }
 
-  &__note {
-    margin: 0 0 28px;
+  &__subtitle {
+    margin: 0;
     color: #4f647d;
-    line-height: 1.7;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  &__form {
+    width: 100%;
+  }
+
+  &__icon {
+    color: #8aa0bb;
+    font-size: 18px;
+
+    &--toggle {
+      cursor: pointer;
+      transition: color 0.2s;
+
+      &:hover {
+        color: #27b9aa;
+      }
+    }
   }
 
   :deep(.el-form-item) {
@@ -86,63 +140,114 @@ async function openAgentPortal() {
 
   :deep(.el-form-item__label) {
     color: #1d2b42;
-    font-weight: 700;
+    font-weight: 600;
+    font-size: 13px;
   }
 
   :deep(.el-input__wrapper) {
     height: 46px;
+    padding: 0 14px;
     border-radius: 8px;
-    box-shadow: 0 0 0 1px #cbd7e6 inset;
+    background: #f5f8fb;
+    box-shadow: 0 0 0 1px #e2e8f0 inset;
+    transition: box-shadow 0.2s;
+
+    &:hover {
+      box-shadow: 0 0 0 1px #cbd7e6 inset;
+    }
+
+    &.is-focus {
+      background: #ffffff;
+      box-shadow: 0 0 0 1px #27b9aa inset;
+    }
+  }
+
+  :deep(.el-input__inner) {
+    height: 46px;
+    color: #071833;
+    font-size: 14px;
+
+    &::placeholder {
+      color: #9aa9bd;
+    }
   }
 
   &__submit {
     width: 100%;
-    height: 44px;
-    margin-top: 2px;
+    height: 46px;
+    margin-top: 6px;
     border: 0;
     border-radius: 8px;
-    color: #04201d;
-    background: #27b9aa;
-    font-weight: 800;
+    color: #ffffff;
+    background: linear-gradient(135deg, #27b9aa 0%, #1d8db5 100%);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    box-shadow: 0 8px 20px rgb(39 185 170 / 30%);
 
     &:hover,
     &:focus {
-      background: #22aa9d;
+      background: linear-gradient(135deg, #22aa9d 0%, #187fa3 100%);
+    }
+
+    &:active {
+      transform: translateY(1px);
     }
   }
 
-  &__demo {
-    display: grid;
-    gap: 10px;
-    margin: 18px 0 12px;
-    padding: 16px 14px;
-    color: #566a82;
-    background: #f6f8fb;
-    border: 1px solid #dce5ef;
-    border-radius: 8px;
-
-    strong {
-      color: #0e1d35;
-    }
+  &__links {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 18px;
   }
 
   &__link {
-    width: 100%;
-    height: 42px;
-    border-radius: 8px;
-    color: #071833;
-    font-weight: 800;
+    color: #27b9aa;
+    font-size: 13px;
+    text-decoration: none;
+    transition: color 0.2s;
+
+    &:hover {
+      color: #1d8db5;
+    }
+  }
+
+  &__divider {
+    width: 1px;
+    height: 12px;
+    background: #d9e2ee;
+  }
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 26px;
+    padding-top: 22px;
+    color: #6c7d92;
+    font-size: 12px;
+    border-top: 1px solid #eef2f7;
+  }
+
+  &__footer-icon {
+    color: #27b9aa;
+    font-size: 16px;
   }
 
   @include mobile {
+    padding: 32px 22px 26px;
     border-radius: 16px;
+    box-shadow: 0 16px 40px rgb(22 34 51 / 8%);
 
-    :deep(.el-card__body) {
-      padding: 28px 20px 24px;
+    &__title {
+      font-size: 22px;
     }
 
-    h2 {
-      font-size: 25px;
+    &__subtitle {
+      font-size: 13px;
     }
   }
 }
