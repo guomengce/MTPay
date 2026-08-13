@@ -70,7 +70,7 @@
     </div>
 
     <div class="apply-form__submit-row">
-      <el-button class="apply-form__submit" type="primary" size="large">
+      <el-button type="primary" size="large" class="apply-form__submit">
         提交USD出金
       </el-button>
     </div>
@@ -228,22 +228,7 @@ const form = reactive({
   }
 
   &__submit {
-    width:100%;
-    height: 48px;
-    padding: 0 32px;
-    border: 0;
-    border-radius: 8px;
-    background: linear-gradient(135deg, #27b9aa 0%, #1d8db5 100%);
-    color: #ffffff;
-    font-size: 18px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    box-shadow: 0 8px 20px rgb(39 185 170 / 30%);
-
-    &:hover,
-    &:focus {
-      background: linear-gradient(135deg, #22aa9d 0%, #187fa3 100%);
-    }
+    width: 100%;
   }
 
   &__submit-hint {
@@ -264,13 +249,15 @@ const form = reactive({
     padding-right: 0;
     border-right: 0;
 
-    &__people,
-    &__uploads {
+    &__people {
       grid-template-columns: 1fr;
     }
   }
 
   @include mobile {
+    padding-right: 0;
+    border-right: 0;
+
     &__people,
     &__uploads {
       grid-template-columns: 1fr;

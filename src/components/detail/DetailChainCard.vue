@@ -13,22 +13,24 @@
         <div class="detail-chain__value">
           <span class="detail-chain__hash">{{ item.value }}</span>
           <div class="detail-chain__actions">
-            <button
-              type="button"
-              class="detail-chain__action"
+            <el-button
+              type="primary"
+              plain
+              size="small"
+              :icon="Position"
               @click="handleExplore(item)"
             >
-              <el-icon><Position /></el-icon>
-              <span>区块浏览器</span>
-            </button>
-            <button
-              type="button"
-              class="detail-chain__icon-btn"
+              区块浏览器
+            </el-button>
+            <el-button
+              type="primary"
+              plain
+              size="small"
+              :icon="DocumentCopy"
               :aria-label="`复制 ${item.label}`"
+              circle
               @click="handleCopy(item)"
-            >
-              <el-icon><DocumentCopy /></el-icon>
-            </button>
+            />
           </div>
         </div>
       </li>
@@ -138,51 +140,6 @@ function handleExplore(item: { label: string; value: string; href?: string }) {
     align-items: center;
     gap: 8px;
     flex: 0 0 auto;
-  }
-
-  &__action {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 10px;
-    border: 1px solid #cfdcec;
-    border-radius: 999px;
-    background: #f5fbff;
-    color: #2878ff;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-
-    .el-icon {
-      font-size: 13px;
-    }
-
-    &:hover {
-      background: #2878ff;
-      border-color: #2878ff;
-      color: #ffffff;
-    }
-  }
-
-  &__icon-btn {
-    display: inline-flex;
-    width: 28px;
-    height: 28px;
-    flex: 0 0 28px;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid #cfdcec;
-    border-radius: 6px;
-    background: #ffffff;
-    color: #7387a2;
-    cursor: pointer;
-    transition: all 0.2s;
-
-    &:hover {
-      border-color: #10aaa4;
-      color: #10aaa4;
-    }
   }
 
   @include mobile {

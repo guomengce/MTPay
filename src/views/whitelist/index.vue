@@ -6,9 +6,9 @@
       icon="ri-user-follow-line"
     >
       <template #extra>
-        <!-- <el-button class="records-page__export" :icon="Download" size="large" plain
-          >导出CSV</el-button
-        > -->
+        <el-button :icon="Plus" type="primary" size="large" 
+          >新增</el-button
+        >
       </template>
     </AdminHero>
 
@@ -17,6 +17,7 @@
 </template>
 
 <script setup lang="ts">
+import { Plus } from '@element-plus/icons-vue';
 import AdminHero from '@/components/admin/AdminHero.vue';
 import ResultPanel from './components/ResultPanel.vue';
 </script>
@@ -26,21 +27,6 @@ import ResultPanel from './components/ResultPanel.vue';
   display: grid;
   min-width: 0;
   gap: 22px;
- 
-
-  &__add {
-    height: 50px;
-    padding: 0 24px;
-    border: 0;
-    border-radius: 8px;
-    background: #09aa98;
-    font-weight: 850;
-
-    &:hover,
-    &:focus {
-      background: #079986;
-    }
-  }
 
   @include narrow {
     padding: 28px 24px;
@@ -49,10 +35,6 @@ import ResultPanel from './components/ResultPanel.vue';
   @include mobile {
     gap: 16px;
     padding: 20px 14px;
-
-    &__add {
-      width: 100%;
-    }
   }
 }
 </style>

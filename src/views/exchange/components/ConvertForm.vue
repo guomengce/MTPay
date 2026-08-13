@@ -46,7 +46,7 @@
         </div>
       </section>
 
-      <el-button class="convert-form__submit" type="primary" size="large">提交兑换申请</el-button>
+      <el-button type="primary" size="large" class="convert-form__submit">提交兑换申请</el-button>
     </el-form>
   </el-card>
 </template>
@@ -228,17 +228,6 @@ const form = reactive({
 
   &__submit {
     width: 100%;
-    height: 58px;
-    border: 0;
-    border-radius: 8px;
-    background: #09aa98;
-    font-size: 18px;
-    font-weight: 850;
-
-    &:hover,
-    &:focus {
-      background: #079986;
-    }
   }
 
   @include mobile {

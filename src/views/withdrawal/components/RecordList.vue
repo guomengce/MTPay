@@ -22,24 +22,25 @@
         </template>
       </el-table-column>
       <el-table-column prop="time" label="时间" min-width="150" />
-      <el-table-column label="" width="60" align="right">
+      <el-table-column label="" width="120" align="right">
         <template #default>
-          <el-button plain>详情</el-button>
+          <el-button type="primary" plain size="small" :icon="View">
+            详情
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
 
     <div class="record-list__more">
-      <button type="button" class="record-list__more-btn">
+      <el-button type="primary" plain :icon="ArrowRight">
         查看全部出金记录
-        <el-icon><ArrowRight /></el-icon>
-      </button>
+      </el-button>
     </div>
   </el-card>
 </template>
 
 <script setup lang="ts">
-import { ArrowRight } from '@element-plus/icons-vue';
+import { ArrowRight, View } from '@element-plus/icons-vue';
 
 import StatusBadge, {
   type StatusBadgeType,
@@ -133,33 +134,6 @@ function isPending(status: string) {
     display: flex;
     justify-content: center;
     padding: 16px 24px 22px;
-  }
-
-  &__more-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 6px 14px;
-    background: transparent;
-    border: 0;
-    color: #2878ff;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: color 0.2s;
-
-    .el-icon {
-      font-size: 14px;
-    }
-
-    &:hover {
-      color: #1d8db5;
-    }
-  }
-
-  :deep(.el-button) {
-    border-radius: 8px;
-    font-weight: 800;
   }
 
   @include mobile {

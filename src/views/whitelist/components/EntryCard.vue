@@ -21,10 +21,9 @@
     </ul>
 
     <footer class="entry-card__footer">
-      <button type="button" class="entry-card__detail">
+      <el-button type="primary" plain size="small" :icon="ArrowRight">
         查看详情
-        <el-icon><ArrowRight /></el-icon>
-      </button>
+      </el-button>
       <StatusBadge
         :label="item.status"
         :type="item.statusBadge"
@@ -220,31 +219,6 @@ function isPending(status: string) {
     justify-content: space-between;
     gap: 12px;
     margin-top: auto;
-  }
-
-  &__detail {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
-    background: #ffffff;
-    border: 1px solid #c8d9e7;
-    border-radius: 8px;
-    color: #2878ff;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-
-    .el-icon {
-      font-size: 14px;
-    }
-
-    &:hover {
-      background: #2878ff;
-      border-color: #2878ff;
-      color: #ffffff;
-    }
   }
 
   @include mobile {

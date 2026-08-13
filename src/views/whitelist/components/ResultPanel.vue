@@ -1,13 +1,9 @@
 <template>
   <section class="result-panel">
 
-    <div v-if="viewMode === 'card'" class="result-panel__grid">
+    <div class="result-panel__grid">
       <EntryCard v-for="item in whitelistItems" :key="item.id" :item="item" />
     </div>
-
-    <el-card v-else class="result-panel__table-card" shadow="never">
-      <RecordList :items="whitelistItems" />
-    </el-card>
 
     <div class="result-panel__pagination">
       <span>共 {{ whitelistItems.length }} 条</span>
@@ -26,11 +22,10 @@
 </template>
 
 <script setup lang="ts">
-import { CircleCheckFilled, Grid, List } from '@element-plus/icons-vue';
+
 import { ref } from 'vue';
 
 import EntryCard, { type EntryItem } from './EntryCard.vue';
-import RecordList from './RecordList.vue';
 
 const viewMode = ref<'card' | 'table'>('card');
 const sortValue = ref('default');

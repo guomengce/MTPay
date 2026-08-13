@@ -175,6 +175,18 @@ import { Document, Money, UserFilled, Wallet } from '@element-plus/icons-vue';
   }
 
   @include mobile {
+    padding: 0;
+
+    &__list li {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    &__list strong {
+      font-size: 17px;
+    }
+
     &__total strong {
       font-size: 24px;
     }

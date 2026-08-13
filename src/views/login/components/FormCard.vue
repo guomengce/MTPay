@@ -38,7 +38,7 @@
         </el-input>
       </el-form-item>
 
-      <el-button class="form-card__submit" type="primary" size="large" @click="handleLogin">
+      <el-button type="primary" size="large" class="form-card__submit" @click="handleLogin">
         登录
       </el-button>
     </el-form>
@@ -174,25 +174,7 @@ async function handleLogin() {
 
   &__submit {
     width: 100%;
-    height: 46px;
     margin-top: 6px;
-    border: 0;
-    border-radius: 8px;
-    color: #ffffff;
-    background: linear-gradient(135deg, #27b9aa 0%, #1d8db5 100%);
-    font-size: 16px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    box-shadow: 0 8px 20px rgb(39 185 170 / 30%);
-
-    &:hover,
-    &:focus {
-      background: linear-gradient(135deg, #22aa9d 0%, #187fa3 100%);
-    }
-
-    &:active {
-      transform: translateY(1px);
-    }
   }
 
   &__links {

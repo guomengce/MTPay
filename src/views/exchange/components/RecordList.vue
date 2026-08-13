@@ -34,9 +34,11 @@
           <StatusBadge :label="row.status" type="success" />
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="110" align="right">
+      <el-table-column label="操作" width="120" align="right">
         <template #default>
-          <el-button plain>详情</el-button>
+          <el-button type="primary" plain size="small" :icon="View">
+            详情
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -44,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import { InfoFilled } from '@element-plus/icons-vue';
+import { InfoFilled, View } from '@element-plus/icons-vue';
 
 import StatusBadge from '@/components/admin/StatusBadge.vue';
 
@@ -148,11 +150,6 @@ const records = [
     color: #071833;
     font-size: 17px;
     font-weight: 850;
-  }
-
-  :deep(.el-button) {
-    border-radius: 8px;
-    font-weight: 800;
   }
 
   @include mobile {

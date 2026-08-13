@@ -98,16 +98,11 @@ import { Document, InfoFilled, Wallet } from '@element-plus/icons-vue';
     color: #2878ff;
   }
 
-  @include narrow {
-    &__stats {
-      grid-template-columns: 1fr;
-    }
-  }
-
   @include mobile {
     padding: 16px;
 
     &__stats {
+      grid-template-columns: 1fr;
       gap: 14px;
     }
 

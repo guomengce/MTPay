@@ -1,7 +1,268 @@
+/* ============================================
+ * Element Plus 框架级重置
+ * ============================================ */
+
 .el-menu {
   border-right: 0;
 }
 
+/* ============================================
+ * Button System
+ * 继承 Element Plus 的 .el-button 基础结构
+ * 通过 type / is-plain / is-text / is-link / size 五个变体维度
+ * 覆盖 solid / plain / text / link / default 五种视觉
+ * ============================================ */
+
+/* -------- 基础规则（所有按钮通用）-------- */
 .el-button {
-  font-weight: 500;
+  min-width: 84px;
+  border-radius: var(--mt-btn-radius);
+  font-weight: 850;
+  letter-spacing: 0.02em;
+  box-shadow: 0 6px 14px rgb(15 23 42 / 6%);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+.el-button:hover,
+.el-button:focus {
+  box-shadow: 0 10px 20px rgb(15 23 42 / 10%);
+}
+
+.el-button:active {
+  box-shadow: 0 4px 10px rgb(15 23 42 / 8%);
+}
+
+.el-button.is-disabled,
+.el-button.is-disabled:hover,
+.el-button.is-disabled:focus {
+  transform: none;
+  box-shadow: none;
+}
+
+/* 尺寸变体 */
+.el-button.el-button--small {
+  min-width: 72px;
+  border-radius: 18px;
+  font-size: 13px;
+  --el-button-size: var(--mt-btn-height-small);
+}
+
+.el-button.el-button--large {
+  min-width: 116px;
+  border-radius: 24px;
+  font-size: 16px;
+  --el-button-size: var(--mt-btn-height-large);
+}
+
+/* -------- Default 按钮（无 type）-------- */
+.el-button:not(
+    .el-button--primary,
+    .el-button--success,
+    .el-button--danger,
+    .el-button--warning,
+    .el-button--info,
+    .is-text,
+    .is-link
+  ) {
+  color: var(--mt-btn-text);
+  border-color: var(--mt-btn-border);
+  background: linear-gradient(180deg, #ffffff 0%, var(--mt-btn-ghost) 100%);
+}
+
+.el-button:not(
+    .el-button--primary,
+    .el-button--success,
+    .el-button--danger,
+    .el-button--warning,
+    .el-button--info,
+    .is-text,
+    .is-link
+  ):hover,
+.el-button:not(
+    .el-button--primary,
+    .el-button--success,
+    .el-button--danger,
+    .el-button--warning,
+    .el-button--info,
+    .is-text,
+    .is-link
+  ):focus {
+  color: var(--mt-btn-primary);
+  border-color: var(--mt-btn-primary-border);
+  background: #ffffff;
+}
+
+/* -------- Solid 彩色按钮（非 plain 变体） -------- */
+/* 通用：去边框、白字 */
+.el-button--primary:not(.is-plain, .is-text, .is-link),
+.el-button--success:not(.is-plain, .is-text, .is-link),
+.el-button--danger:not(.is-plain, .is-text, .is-link),
+.el-button--warning:not(.is-plain, .is-text, .is-link),
+.el-button--info:not(.is-plain, .is-text, .is-link) {
+  --el-button-border-color: transparent;
+  --el-button-hover-border-color: transparent;
+  --el-button-active-border-color: transparent;
+  --el-button-disabled-border-color: transparent;
+  border: 0;
+  border-color: transparent;
+  color: #ffffff;
+  background-clip: border-box;
+  outline: 0;
+}
+
+/* primary solid */
+.el-button--primary:not(.is-plain, .is-text, .is-link) {
+  background:
+    radial-gradient(circle at 50% 10%, rgb(255 255 255 / 14%), transparent 45%),
+    linear-gradient(135deg, var(--mt-btn-primary-start) 0%, var(--mt-btn-primary-end) 100%);
+}
+.el-button--primary:not(.is-plain, .is-text, .is-link):hover,
+.el-button--primary:not(.is-plain, .is-text, .is-link):focus {
+  background:
+    radial-gradient(circle at 50% 10%, rgb(255 255 255 / 18%), transparent 45%),
+    linear-gradient(135deg, var(--mt-btn-primary-start) 0%, var(--mt-btn-primary-end) 100%);
+}
+
+/* success solid */
+.el-button--success:not(.is-plain, .is-text, .is-link) {
+  background:
+    radial-gradient(circle at 50% 10%, rgb(255 255 255 / 14%), transparent 45%),
+    linear-gradient(180deg, var(--mt-btn-success-start) 0%, var(--mt-btn-success-end) 100%);
+}
+.el-button--success:not(.is-plain, .is-text, .is-link):hover,
+.el-button--success:not(.is-plain, .is-text, .is-link):focus {
+  background:
+    radial-gradient(circle at 50% 10%, rgb(255 255 255 / 18%), transparent 45%),
+    linear-gradient(180deg, var(--mt-btn-success-start) 0%, var(--mt-btn-success-end) 100%);
+}
+
+/* danger solid */
+.el-button--danger:not(.is-plain, .is-text, .is-link) {
+  background:
+    radial-gradient(circle at 50% 10%, rgb(255 255 255 / 14%), transparent 45%),
+    linear-gradient(180deg, var(--mt-btn-danger-start) 0%, var(--mt-btn-danger-end) 100%);
+  box-shadow: 0 10px 22px rgb(220 38 38 / 24%);
+}
+.el-button--danger:not(.is-plain, .is-text, .is-link):hover,
+.el-button--danger:not(.is-plain, .is-text, .is-link):focus {
+  background:
+    radial-gradient(circle at 50% 10%, rgb(255 255 255 / 18%), transparent 45%),
+    linear-gradient(180deg, var(--mt-btn-danger-start) 0%, var(--mt-btn-danger-end) 100%);
+  box-shadow: 0 12px 26px rgb(220 38 38 / 32%);
+}
+
+/* warning solid */
+.el-button--warning:not(.is-plain, .is-text, .is-link) {
+  background:
+    radial-gradient(circle at 50% 10%, rgb(255 255 255 / 14%), transparent 45%),
+    linear-gradient(180deg, var(--mt-btn-warning-start) 0%, var(--mt-btn-warning-end) 100%);
+  box-shadow: 0 10px 22px rgb(245 158 11 / 24%);
+}
+.el-button--warning:not(.is-plain, .is-text, .is-link):hover,
+.el-button--warning:not(.is-plain, .is-text, .is-link):focus {
+  background:
+    radial-gradient(circle at 50% 10%, rgb(255 255 255 / 18%), transparent 45%),
+    linear-gradient(180deg, var(--mt-btn-warning-start) 0%, var(--mt-btn-warning-end) 100%);
+  box-shadow: 0 12px 26px rgb(245 158 11 / 32%);
+}
+
+/* info solid */
+.el-button--info:not(.is-plain, .is-text, .is-link) {
+  background:
+    radial-gradient(circle at 50% 10%, rgb(255 255 255 / 14%), transparent 45%),
+    linear-gradient(180deg, var(--mt-btn-info-start) 0%, var(--mt-btn-info-end) 100%);
+  box-shadow: 0 10px 22px rgb(29 141 181 / 24%);
+}
+.el-button--info:not(.is-plain, .is-text, .is-link):hover,
+.el-button--info:not(.is-plain, .is-text, .is-link):focus {
+  background:
+    radial-gradient(circle at 50% 10%, rgb(255 255 255 / 18%), transparent 45%),
+    linear-gradient(180deg, var(--mt-btn-info-start) 0%, var(--mt-btn-info-end) 100%);
+  box-shadow: 0 12px 26px rgb(29 141 181 / 32%);
+}
+
+/* -------- Plain 按钮（浅色底 + 彩色字 + 彩色边） -------- */
+.el-button.is-plain {
+  box-shadow: 0 6px 14px rgb(15 23 42 / 5%);
+}
+
+.el-button--primary.is-plain {
+  color: var(--mt-btn-primary);
+  border-color: var(--mt-btn-primary-border);
+  background: var(--mt-btn-primary-soft);
+}
+.el-button--primary.is-plain:hover,
+.el-button--primary.is-plain:focus {
+  color: var(--mt-btn-primary);
+  border-color: var(--mt-btn-primary);
+  background: #ffffff;
+}
+
+.el-button--success.is-plain {
+  color: var(--mt-btn-success);
+  border-color: var(--mt-btn-success-border);
+  background: var(--mt-btn-success-soft);
+}
+.el-button--success.is-plain:hover,
+.el-button--success.is-plain:focus {
+  color: var(--mt-btn-success);
+  border-color: var(--mt-btn-success);
+  background: #ffffff;
+}
+
+.el-button--danger.is-plain {
+  color: var(--mt-btn-danger);
+  border-color: var(--mt-btn-danger-border);
+  background: var(--mt-btn-danger-soft);
+}
+.el-button--danger.is-plain:hover,
+.el-button--danger.is-plain:focus {
+  color: var(--mt-btn-danger);
+  border-color: var(--mt-btn-danger);
+  background: #ffffff;
+}
+
+.el-button--warning.is-plain {
+  color: var(--mt-btn-warning);
+  border-color: var(--mt-btn-warning-border);
+  background: var(--mt-btn-warning-soft);
+}
+.el-button--warning.is-plain:hover,
+.el-button--warning.is-plain:focus {
+  color: var(--mt-btn-warning);
+  border-color: var(--mt-btn-warning);
+  background: #ffffff;
+}
+
+.el-button--info.is-plain {
+  color: var(--mt-btn-info);
+  border-color: var(--mt-btn-info-border);
+  background: var(--mt-btn-info-soft);
+}
+.el-button--info.is-plain:hover,
+.el-button--info.is-plain:focus {
+  color: var(--mt-btn-info);
+  border-color: var(--mt-btn-info);
+  background: #ffffff;
+}
+
+/* -------- 文字 / 链接按钮（最小重量） -------- */
+.el-button.is-text,
+.el-button.is-link {
+  min-width: 0;
+  border-radius: 10px;
+  box-shadow: none;
+}
+
+.el-button.is-text:hover,
+.el-button.is-text:focus,
+.el-button.is-link:hover,
+.el-button.is-link:focus {
+  transform: none;
+  box-shadow: none;
 }

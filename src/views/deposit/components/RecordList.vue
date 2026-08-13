@@ -35,9 +35,11 @@
           />
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="100" align="right">
+      <el-table-column label="操作" width="120" align="right">
         <template #default="{ row }">
-          <el-button plain @click="goDetail(row.id)">详情</el-button>
+          <el-button type="primary" plain size="small" :icon="View" @click="goDetail(row.id)">
+            详情
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -45,6 +47,7 @@
 </template>
 
 <script setup lang="ts">
+import { View } from '@element-plus/icons-vue';
 import { useRouter } from 'vue-router';
 
 import StatusBadge from '@/components/admin/StatusBadge.vue';
@@ -134,11 +137,6 @@ function goDetail(id: string) {
       font-size: 12px;
       font-weight: 650;
     }
-  }
-
-  :deep(.el-button) {
-    border-radius: 8px;
-    font-weight: 800;
   }
 
   @include mobile {

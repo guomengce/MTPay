@@ -2,12 +2,9 @@
   <section class="withdrawal-page">
     <AdminHero
       title="USD出金"
-      description="付款人、收款人需为已添加的白名单，并按要求上传合同与 Invoice"
+      description="付/收款人需为已添加的白名单，并按要求上传合同与 Invoice"
       icon="ri-bank-card-2-line"
     >
-      <template #extra>
-        <StatusBadge label="出金说明" type="primary" />
-      </template>
     </AdminHero>
 
     <BalanceCard />
@@ -59,6 +56,8 @@ import SummaryCard from './components/SummaryCard.vue';
     gap: 14px;
 
     &__apply {
+      grid-template-columns: 1fr;
+      gap: 24px;
       padding: 20px 18px;
     }
   }

@@ -177,8 +177,7 @@ function isActive(path: string) {
   height: 16px;
   margin: 10px 20px 0;
 
-  &::before,
-  &::after {
+  &::before {
     position: absolute;
     top: 50%;
     left: 0;
@@ -191,13 +190,6 @@ function isActive(path: string) {
 
   &::before {
     opacity: 0.95;
-  }
-
-  &::after {
-    top: calc(50% + 5px);
-    height: 1px;
-    background: linear-gradient(90deg, transparent 5%, #10aaa4 50%, #2878ff 95%, transparent 100%);
-    opacity: 0.5;
   }
 }
 

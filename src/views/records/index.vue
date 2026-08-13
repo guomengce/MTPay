@@ -6,9 +6,9 @@
       icon="ri-file-list-3-line"
     >
       <template #extra>
-        <el-button class="records-page__export" :icon="Download" size="large" plain
-          >导出CSV</el-button
-        >
+        <el-button type="primary" plain :icon="Download" size="large">
+          导出CSV
+        </el-button>
       </template>
     </AdminHero>
     <TransactionTable />
@@ -26,14 +26,6 @@ import TransactionTable from './components/TransactionTable.vue';
   display: grid;
   min-width: 0;
   gap: 24px;
- 
-
-  &__export {
-    height: 44px;
-    border-radius: 8px;
-    color: #071833;
-    font-weight: 850;
-  }
 
   @include narrow {
     padding: 28px 24px;
@@ -41,10 +33,6 @@ import TransactionTable from './components/TransactionTable.vue';
 
   @include mobile {
     padding: 20px 14px;
-
-    &__export {
-      width: 100%;
-    }
   }
 }
 </style>

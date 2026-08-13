@@ -22,4 +22,76 @@
   --portal-text: #08234a;
   --portal-text-secondary: #7387a2;
   --portal-border: #dce8f2;
+
+  /* ============================================
+   * Button System Tokens
+   * 命名规则：--mt-btn-{type}{?suffix}
+   *   type     : primary | success | danger | warning | info
+   *   -:       : 表格语法上的连接符，无业务含义
+   *   suffix   : 主色 / start / end / soft / border
+   *
+   * - {type}        : 用于 hover 文字色、焦点环等
+   * - {type}-start  : 渐变顶部
+   * - {type}-end    : 渐变底部
+   * - {type}-soft   : plain 变体的浅色背景
+   * - {type}-border : plain 变体的浅色边框
+   * ============================================ */
+
+  /* 尺寸 */
+  --mt-btn-radius: 20px;
+  --mt-btn-height: 36px;
+  --mt-btn-height-small: 32px;
+  --mt-btn-height-large: 44px;
+
+  /* Primary：项目主色（青→蓝） */
+  --mt-btn-primary: #048f8f;
+  --mt-btn-primary-start: #27b9aa;
+  --mt-btn-primary-end: #1d8db5;
+  --mt-btn-primary-soft: #e6f7f7;
+  --mt-btn-primary-border: #b4e0dd;
+
+  /* Success：绿色 */
+  --mt-btn-success: #16a34a;
+  --mt-btn-success-start: #34c773;
+  --mt-btn-success-end: #138a3f;
+  --mt-btn-success-soft: #ecfdf5;
+  --mt-btn-success-border: #bbf7d0;
+
+  /* Danger：红色 */
+  --mt-btn-danger: #ef4444;
+  --mt-btn-danger-start: #f87171;
+  --mt-btn-danger-end: #dc2626;
+  --mt-btn-danger-soft: #fff1f1;
+  --mt-btn-danger-border: #ffc5c5;
+
+  /* Warning：橙黄 */
+  --mt-btn-warning: #f59e0b;
+  --mt-btn-warning-start: #fcd34d;
+  --mt-btn-warning-end: #f59e0b;
+  --mt-btn-warning-soft: #fff8e6;
+  --mt-btn-warning-border: #fde68a;
+
+  /* Info：信息蓝（与项目蓝同系） */
+  --mt-btn-info: #1d8db5;
+  --mt-btn-info-start: #4fb0e0;
+  --mt-btn-info-end: #1d8db5;
+  --mt-btn-info-soft: #eaf6fc;
+  --mt-btn-info-border: #b4dcec;
+
+  /* 中性 */
+  --mt-btn-text: #1e293b;
+  --mt-btn-border: #d9e0e8;
+  --mt-btn-ghost: #f8fafc;
+
+  /* ============================================
+   * Element Plus 主题主色 hook
+   * 让 el-message / el-tag / el-pagination 等组件跟着项目主色
+   * ============================================ */
+  --el-color-primary: #048f8f;
+  --el-color-primary-light-3: #4fb0b0;
+  --el-color-primary-light-5: #82c7c7;
+  --el-color-primary-light-7: #b4dddd;
+  --el-color-primary-light-8: #cde8e8;
+  --el-color-primary-light-9: #e6f3f3;
+  --el-color-primary-dark-2: #037272;
 }

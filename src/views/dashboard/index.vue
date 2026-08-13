@@ -20,7 +20,7 @@
         </div>
         <p>入金、兑换、白名单及出金</p>
         <el-divider />
-        <el-button class="dashboard-page__todo-btn" text>
+        <el-button type="primary" plain class="dashboard-page__todo-btn">
           查看待处理项目 <el-icon><ArrowRight /></el-icon>
         </el-button>
       </div>
@@ -262,9 +262,6 @@ const quickActions = [
   &__todo-btn {
     width: 100%;
     justify-content: space-between;
-    padding: 0;
-    color: #15233a;
-    font-weight: 700;
   }
 
   &__actions {

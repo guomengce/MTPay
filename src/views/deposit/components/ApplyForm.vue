@@ -25,7 +25,7 @@
           <p>{{ form.asset }}（{{ form.network }}）入金地址</p>
           <div class="apply-form__copy-row">
             <el-input v-model="form.address" size="large" readonly />
-            <el-button class="apply-form__copy" :icon="CopyDocument" size="large">复制</el-button>
+            <el-button type="primary" plain :icon="CopyDocument">复制</el-button>
           </div>
           <el-alert
             title="仅向此地址转入TRC20网络的USDT。"
@@ -53,7 +53,7 @@
         show-icon
       />
 
-      <el-button class="apply-form__submit" type="primary" size="large">
+      <el-button type="primary" size="large" class="apply-form__submit">
         我已完成转账，提交审核
       </el-button>
     </el-form>
@@ -157,23 +157,8 @@ const qrCells = Array.from({ length: 121 }, (_, index) => index);
 
   &__copy-row {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 106px;
+    grid-template-columns: minmax(0, 1fr) auto;
     gap: 14px;
-  }
-
-  &__copy {
-    height: 48px;
-    border: 0;
-    border-radius: 8px;
-    color: #ffffff;
-    background: #071833;
-    font-weight: 800;
-
-    &:hover,
-    &:focus {
-      color: #ffffff;
-      background: #0f2344;
-    }
   }
 
   &__notice {
@@ -184,17 +169,6 @@ const qrCells = Array.from({ length: 121 }, (_, index) => index);
 
   &__submit {
     width: 100%;
-    height: 52px;
-    border: 0;
-    border-radius: 8px;
-    background: #09aa98;
-    font-size: 17px;
-    font-weight: 850;
-
-    &:hover,
-    &:focus {
-      background: #079986;
-    }
   }
 
   @include mobile {

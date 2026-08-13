@@ -29,9 +29,11 @@
           />
         </template>
       </el-table-column>
-      <el-table-column label="详情" width="128" align="right">
+      <el-table-column label="详情" width="140" align="right">
         <template #default>
-          <el-button plain>查看详情</el-button>
+          <el-button type="primary" plain size="small" :icon="View">
+            查看详情
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -39,6 +41,8 @@
 </template>
 
 <script setup lang="ts">
+import { View } from '@element-plus/icons-vue';
+
 import StatusBadge, {
   type StatusBadgeType,
 } from '@/components/admin/StatusBadge.vue';
@@ -159,12 +163,6 @@ function isPending(status: string) {
     &.is-negative {
       color: #0d1a32;
     }
-  }
-
-  :deep(.el-button) {
-    border-radius: 8px;
-    color: #071833;
-    font-weight: 850;
   }
 
   @include mobile {
