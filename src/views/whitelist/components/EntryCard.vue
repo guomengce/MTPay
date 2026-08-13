@@ -1,45 +1,49 @@
 <template>
-  <article class="whitelist-card">
-    <header class="whitelist-card__header">
-      <span class="whitelist-card__avatar">{{ item.avatar }}</span>
-      <div class="whitelist-card__heading">
+  <article class="entry-card">
+    <header class="entry-card__header">
+      <span class="entry-card__avatar">{{ item.avatar }}</span>
+      <div class="entry-card__heading">
         <h3>{{ item.name }}</h3>
         <p>{{ item.role }} · {{ item.type }} · {{ item.region }}</p>
       </div>
     </header>
 
-    <div class="whitelist-card__divider" aria-hidden="true" />
+    <div class="entry-card__divider" aria-hidden="true" />
 
-    <ul class="whitelist-card__info">
+    <ul class="entry-card__info">
       <li v-for="(row, index) in infoRows" :key="index">
-        <span class="whitelist-card__info-icon">
+        <span class="entry-card__info-icon">
           <el-icon><component :is="row.icon" /></el-icon>
         </span>
-        <span class="whitelist-card__info-label">{{ row.label }}</span>
-        <span class="whitelist-card__info-value">{{ row.value }}</span>
+        <span class="entry-card__info-label">{{ row.label }}</span>
+        <span class="entry-card__info-value">{{ row.value }}</span>
       </li>
     </ul>
 
-    <footer class="whitelist-card__footer">
-      <button type="button" class="whitelist-card__detail">
+    <footer class="entry-card__footer">
+      <button type="button" class="entry-card__detail">
         查看详情
         <el-icon><ArrowRight /></el-icon>
       </button>
-      <span :class="['whitelist-card__status', `is-${item.statusTone}`]">
-        <el-icon v-if="item.statusTone === 'success'"><CircleCheckFilled /></el-icon>
-        <span v-else class="whitelist-card__status-dot" />
-        {{ item.status }}
-      </span>
+      <StatusBadge
+        :label="item.status"
+        :type="item.statusBadge"
+        :effect="isPending(item.status) ? 'pending' : undefined"
+      />
     </footer>
   </article>
 </template>
 
 <script setup lang="ts">
-import { ArrowRight, OfficeBuilding, CircleCheckFilled, Postcard, UserFilled } from '@element-plus/icons-vue';
+import { ArrowRight, OfficeBuilding, Postcard, UserFilled } from '@element-plus/icons-vue';
 import { computed } from 'vue';
 import type { Component } from 'vue';
 
-export interface WhitelistItem {
+import StatusBadge, {
+  type StatusBadgeType,
+} from '@/components/admin/StatusBadge.vue';
+
+export interface EntryItem {
   id: string;
   avatar: string;
   name: string;
@@ -47,12 +51,12 @@ export interface WhitelistItem {
   type: string;
   region: string;
   status: string;
-  statusType: 'success' | 'warning';
+  statusBadge: StatusBadgeType;
   tags: string[];
 }
 
 const props = defineProps<{
-  item: WhitelistItem;
+  item: EntryItem;
 }>();
 
 interface InfoRow {
@@ -72,10 +76,14 @@ const infoRows = computed<InfoRow[]>(() => [
   { label: '账户/识别码', value: props.item.tags[1] ?? '-', icon: ICONS.account },
   { label: '白名单 ID', value: props.item.tags[2] ?? props.item.id, icon: ICONS.id },
 ]);
+
+function isPending(status: string) {
+  return /待审核|待处理|处理中/.test(status);
+}
 </script>
 
 <style scoped lang="scss">
-.whitelist-card {
+.entry-card {
   display: flex;
   min-width: 0;
   flex-direction: column;
@@ -237,41 +245,6 @@ const infoRows = computed<InfoRow[]>(() => [
       border-color: #2878ff;
       color: #ffffff;
     }
-  }
-
-  &__status {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 14px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 700;
-    white-space: nowrap;
-  }
-
-  &__status.is-success {
-    color: #0aa39a;
-    background: #e6fbf3;
-    border: 1px solid #c8edde;
-
-    .el-icon {
-      font-size: 14px;
-    }
-  }
-
-  &__status.is-warning {
-    color: #e88717;
-    background: #fff7e9;
-    border: 1px solid #f8ddb5;
-  }
-
-  &__status-dot {
-    display: inline-block;
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: currentColor;
   }
 
   @include mobile {

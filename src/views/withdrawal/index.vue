@@ -2,120 +2,64 @@
   <section class="withdrawal-page">
     <AdminHero
       title="USD出金"
-      description="查看每笔交易的资料、资金变化及完整处理时间线"
-      icon="ri-hand-coin-line"
+      description="付款人、收款人需为已添加的白名单，并按要求上传合同与 Invoice"
+      icon="ri-bank-card-2-line"
     >
-    </AdminHero>
-    <WithdrawalReminder />
-    <el-card class="withdrawal-page__apply" shadow="never">
-      <template #header>
-        <div class="withdrawal-page__header">
-          <h2>建立出金申请</h2>
-          <el-tag round>
-            <span></span>
-            USD
-          </el-tag>
-        </div>
+      <template #extra>
+        <StatusBadge label="出金说明" type="primary" />
       </template>
-      <div class="withdrawal-page__body">
-        <WithdrawalForm />
-        <WithdrawalSummary />
-      </div>
-    </el-card>
-    <WithdrawalTable />
+    </AdminHero>
+
+    <BalanceCard />
+
+    <div class="withdrawal-page__apply">
+      <ApplyForm />
+      <SummaryCard />
+    </div>
+
+    <RecordList />
   </section>
 </template>
 
 <script setup lang="ts">
 import AdminHero from '@/components/admin/AdminHero.vue';
-import WithdrawalForm from './components/WithdrawalForm.vue';
-import WithdrawalReminder from './components/WithdrawalReminder.vue';
-import WithdrawalSummary from './components/WithdrawalSummary.vue';
-import WithdrawalTable from './components/WithdrawalTable.vue';
+import StatusBadge from '@/components/admin/StatusBadge.vue';
+import ApplyForm from './components/ApplyForm.vue';
+import BalanceCard from './components/BalanceCard.vue';
+import RecordList from './components/RecordList.vue';
+import SummaryCard from './components/SummaryCard.vue';
 </script>
 
 <style scoped lang="scss">
 .withdrawal-page {
   display: grid;
   min-width: 0;
-  gap: 20px;
- 
+  gap: 18px;
 
   &__apply {
-    overflow: hidden;
-    border-color: #dfe7ef;
-    border-radius: 14px;
-    box-shadow: 0 16px 42px rgb(16 30 54 / 7%);
-
-    :deep(.el-card__header) {
-      padding: 22px 28px;
-    }
-
-    :deep(.el-card__body) {
-      padding: 0;
-    }
-  }
-
-  &__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-
-    h2 {
-      margin: 0;
-      color: #071833;
-      font-size: 24px;
-      font-weight: 850;
-      letter-spacing: 0;
-    }
-
-    :deep(.el-tag) {
-      color: #076f68;
-      background: #eefbf8;
-      border-color: transparent;
-      font-weight: 850;
-    }
-
-    span {
-      display: inline-block;
-      width: 7px;
-      height: 7px;
-      margin-right: 6px;
-      background: #10aa9b;
-      border-radius: 50%;
-    }
-  }
-
-  &__body {
     display: grid;
-    grid-template-columns: minmax(460px, 1.15fr) minmax(360px, 1fr);
-    gap: 34px;
-    padding: 18px 28px 28px;
+    min-width: 0;
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    gap: 0;
+    padding: 26px 28px;
+    background: #ffffff;
+    border: 1px solid #dfe7ef;
+    border-radius: 14px;
+    box-shadow: 0 14px 36px rgb(16 30 54 / 6%);
   }
 
   @include narrow {
-    padding: 28px 24px;
-
-    &__body {
+    &__apply {
       grid-template-columns: 1fr;
+      gap: 24px;
     }
   }
 
   @include mobile {
-    gap: 16px;
-    padding: 20px 14px;
+    gap: 14px;
 
     &__apply {
-      :deep(.el-card__header) {
-        padding: 18px;
-      }
-    }
-
-    &__body {
-      grid-template-columns: 1fr;
-      gap: 18px;
-      padding: 18px;
+      padding: 20px 18px;
     }
   }
 }

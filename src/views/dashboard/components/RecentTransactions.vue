@@ -13,7 +13,7 @@
           <strong>{{ item.date }}</strong>
           <span>{{ item.time }}</span>
         </time>
-        <span :class="['transactions-card__type', `is-${item.typeTone}`]">{{ item.type }}</span>
+        <StatusBadge :label="item.type" :type="typeToBadge(item.typeTone)" />
         <div class="transactions-card__detail">
           <strong>{{ item.id }}</strong>
           <span>{{ item.content }}</span>
@@ -22,9 +22,11 @@
           <small v-if="item.amountLabel">{{ item.amountLabel }}</small>
           <strong>{{ item.amount }}</strong>
         </div>
-        <span :class="['transactions-card__status', `is-${item.statusTone}`]">
-          {{ item.status }}
-        </span>
+        <StatusBadge
+          :label="item.status"
+          :type="item.statusBadge"
+          :effect="isPending(item.status) ? 'pending' : undefined"
+        />
       </article>
     </div>
   </section>
@@ -33,7 +35,25 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router';
 
-const transactions = [
+import StatusBadge, {
+  type StatusBadgeType,
+} from '@/components/admin/StatusBadge.vue';
+
+interface TransactionItem {
+  date: string;
+  time: string;
+  type: string;
+  typeTone: 'deposit' | 'withdrawal' | 'exchange';
+  id: string;
+  content: string;
+  amountLabel?: string;
+  amount: string;
+  amountTone: 'neutral' | 'plus' | 'minus';
+  status: string;
+  statusBadge: StatusBadgeType;
+}
+
+const transactions: TransactionItem[] = [
   {
     date: '08/03',
     time: '15:08',
@@ -45,7 +65,7 @@ const transactions = [
     amount: '12,000.00 USDC',
     amountTone: 'neutral',
     status: '处理中',
-    statusTone: 'warning',
+    statusBadge: 'warning',
   },
   {
     date: '08/03',
@@ -57,7 +77,7 @@ const transactions = [
     amount: '-5,050.00 USD',
     amountTone: 'minus',
     status: '处理中',
-    statusTone: 'info',
+    statusBadge: 'primary',
   },
   {
     date: '08/02',
@@ -69,7 +89,7 @@ const transactions = [
     amount: '+50,000.00 USDT',
     amountTone: 'plus',
     status: '已完成',
-    statusTone: 'success',
+    statusBadge: 'success',
   },
   {
     date: '08/01',
@@ -81,7 +101,7 @@ const transactions = [
     amount: '10,000.00 USDT',
     amountTone: 'neutral',
     status: '已完成',
-    statusTone: 'success',
+    statusBadge: 'success',
   },
   {
     date: '07/31',
@@ -93,9 +113,19 @@ const transactions = [
     amount: '-12,550.00 USD',
     amountTone: 'minus',
     status: '已完成',
-    statusTone: 'success',
+    statusBadge: 'success',
   },
 ];
+
+function isPending(status: string) {
+  return /待审核|待处理|处理中/.test(status);
+}
+
+function typeToBadge(tone: TransactionItem['typeTone']): StatusBadgeType {
+  if (tone === 'deposit') return 'success';
+  if (tone === 'withdrawal') return 'primary';
+  return 'danger';
+}
 </script>
 
 <style scoped lang="scss">
@@ -183,30 +213,8 @@ const transactions = [
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  &__type,
-  &__status {
+  &__type {
     justify-self: start;
-    padding: 5px 11px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 750;
-    white-space: nowrap;
-    max-width: 100%;
-  }
-  &__type.is-deposit {
-    color: #2b9d3c;
-    background: #eff9ec;
-    border: 1px solid #d3edcb;
-  }
-  &__type.is-withdrawal {
-    color: #2381cf;
-    background: #eef7ff;
-    border: 1px solid #cfe7fa;
-  }
-  &__type.is-exchange {
-    color: #e65454;
-    background: #fff1f1;
-    border: 1px solid #f8d2d2;
   }
   &__amount {
     gap: 3px;
@@ -229,24 +237,6 @@ const transactions = [
   }
   &__amount.is-minus strong {
     color: #f05a30;
-  }
-  &__status {
-    justify-self: end;
-  }
-  &__status.is-warning {
-    color: #e88717;
-    background: #fff7e9;
-    border: 1px solid #f8ddb5;
-  }
-  &__status.is-info {
-    color: #2381cf;
-    background: #eef7ff;
-    border: 1px solid #cfe7fa;
-  }
-  &__status.is-success {
-    color: #2b9d3c;
-    background: #eff9ec;
-    border: 1px solid #d3edcb;
   }
 
   @include narrow {
@@ -275,9 +265,10 @@ const transactions = [
       grid-column: 2;
       grid-row: 1;
     }
-    &__status {
+    > :deep(.status-badge) {
       grid-column: 3;
       grid-row: 1;
+      justify-self: end;
     }
     &__detail {
       grid-column: 2 / 4;

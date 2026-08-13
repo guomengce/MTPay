@@ -6,18 +6,18 @@
       icon="ri-exchange-dollar-line"
     />
     <div class="exchange-page__main">
-      <ExchangeForm />
+      <ConvertForm />
       <ExchangeRatePanel compact />
     </div>
 
-    <ExchangeTable />
+    <RecordList />
   </section>
 </template>
 
 <script setup lang="ts">
-import ExchangeForm from './components/ExchangeForm.vue';
+import ConvertForm from './components/ConvertForm.vue';
 import ExchangeRatePanel from '@/components/admin/ExchangeRatePanel.vue';
-import ExchangeTable from './components/ExchangeTable.vue';
+import RecordList from './components/RecordList.vue';
 import AdminHero from '@/components/admin/AdminHero.vue';
 </script>
 

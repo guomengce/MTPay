@@ -1,7 +1,7 @@
 <template>
-  <el-card class="deposit-form" shadow="never">
+  <el-card class="apply-form" shadow="never">
     <el-form label-position="top" :model="form">
-      <div class="deposit-form__selectors">
+      <div class="apply-form__selectors">
         <el-form-item label="入金币种">
           <el-select v-model="form.asset" size="large">
             <el-option label="USDT" value="USDT" />
@@ -16,16 +16,16 @@
         </el-form-item>
       </div>
 
-      <section class="deposit-form__address">
-        <div class="deposit-form__qr" aria-label="USDT TRC20 入金二维码">
+      <section class="apply-form__address">
+        <div class="apply-form__qr" aria-label="USDT TRC20 入金二维码">
           <span v-for="cell in qrCells" :key="cell" :class="{ 'is-dark': cell % 3 !== 1 }"></span>
         </div>
 
-        <div class="deposit-form__address-main">
+        <div class="apply-form__address-main">
           <p>{{ form.asset }}（{{ form.network }}）入金地址</p>
-          <div class="deposit-form__copy-row">
+          <div class="apply-form__copy-row">
             <el-input v-model="form.address" size="large" readonly />
-            <el-button class="deposit-form__copy" :icon="CopyDocument" size="large">复制</el-button>
+            <el-button class="apply-form__copy" :icon="CopyDocument" size="large">复制</el-button>
           </div>
           <el-alert
             title="仅向此地址转入TRC20网络的USDT。"
@@ -36,7 +36,7 @@
         </div>
       </section>
 
-      <div class="deposit-form__fields">
+      <div class="apply-form__fields">
         <el-form-item label="已转账数量">
           <el-input v-model="form.amount" size="large" placeholder="例如 1000" />
         </el-form-item>
@@ -46,14 +46,14 @@
       </div>
 
       <el-alert
-        class="deposit-form__notice"
+        class="apply-form__notice"
         title="提交后不会立即增加余额。MTPay后台确认实际收款并审核通过后，才会完成入账。"
         type="info"
         :closable="false"
         show-icon
       />
 
-      <el-button class="deposit-form__submit" type="primary" size="large">
+      <el-button class="apply-form__submit" type="primary" size="large">
         我已完成转账，提交审核
       </el-button>
     </el-form>
@@ -76,7 +76,7 @@ const qrCells = Array.from({ length: 121 }, (_, index) => index);
 </script>
 
 <style scoped lang="scss">
-.deposit-form {
+.apply-form {
   min-width: 0;
   border-color: #dfe7ef;
   border-radius: 14px;

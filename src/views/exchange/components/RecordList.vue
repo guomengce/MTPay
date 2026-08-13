@@ -1,8 +1,8 @@
 <template>
-  <el-card class="exchange-table" shadow="never">
+  <el-card class="record-list" shadow="never">
     <template #header>
-      <div class="exchange-table__header">
-        <div class="exchange-table__title">
+      <div class="record-list__header">
+        <div class="record-list__title">
           <span></span>
           <strong>兑换记录</strong>
         </div>
@@ -13,10 +13,10 @@
       </div>
     </template>
 
-    <el-table :data="records" class="exchange-table__table">
+    <el-table :data="records" class="record-list__table">
       <el-table-column label="编号" min-width="180">
         <template #default="{ row }">
-          <div class="exchange-table__id">
+          <div class="record-list__id">
             <strong>{{ row.id }}</strong>
             <span>{{ row.time }}</span>
           </div>
@@ -26,15 +26,12 @@
       <el-table-column prop="rate" label="比例" min-width="120" />
       <el-table-column label="获得USD" min-width="180">
         <template #default="{ row }">
-          <strong class="exchange-table__amount">{{ row.usd }}</strong>
+          <strong class="record-list__amount">{{ row.usd }}</strong>
         </template>
       </el-table-column>
       <el-table-column label="状态" min-width="130">
         <template #default="{ row }">
-          <el-tag type="success" round>
-            <span class="exchange-table__status-dot"></span>
-            {{ row.status }}
-          </el-tag>
+          <StatusBadge :label="row.status" type="success" />
         </template>
       </el-table-column>
       <el-table-column label="操作" width="110" align="right">
@@ -49,6 +46,8 @@
 <script setup lang="ts">
 import { InfoFilled } from '@element-plus/icons-vue';
 
+import StatusBadge from '@/components/admin/StatusBadge.vue';
+
 const records = [
   {
     id: 'EX-26073001',
@@ -62,7 +61,7 @@ const records = [
 </script>
 
 <style scoped lang="scss">
-.exchange-table {
+.record-list {
   min-width: 0;
   border-color: #dfe7ef;
   border-radius: 14px;
@@ -149,15 +148,6 @@ const records = [
     color: #071833;
     font-size: 17px;
     font-weight: 850;
-  }
-
-  &__status-dot {
-    display: inline-block;
-    width: 7px;
-    height: 7px;
-    margin-right: 6px;
-    background: #0aa39a;
-    border-radius: 50%;
   }
 
   :deep(.el-button) {

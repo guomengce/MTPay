@@ -1,8 +1,8 @@
 <template>
-  <el-table :data="items" class="whitelist-table">
+  <el-table :data="items" class="record-list">
     <el-table-column label="名称" min-width="220">
       <template #default="{ row }">
-        <div class="whitelist-table__name">
+        <div class="record-list__name">
           <span>{{ row.avatar }}</span>
           <div>
             <strong>{{ row.name }}</strong>
@@ -13,17 +13,23 @@
     </el-table-column>
     <el-table-column label="资料" min-width="320">
       <template #default="{ row }">
-        <div class="whitelist-table__tags">
-          <el-tag v-for="tag in row.tags" :key="tag" round>{{ tag }}</el-tag>
+        <div class="record-list__tags">
+          <StatusBadge
+            v-for="tag in row.tags"
+            :key="tag"
+            :label="tag"
+            type="gray"
+          />
         </div>
       </template>
     </el-table-column>
     <el-table-column label="状态" min-width="120">
       <template #default="{ row }">
-        <el-tag :type="row.statusType" round>
-          <span class="whitelist-table__dot"></span>
-          {{ row.status }}
-        </el-tag>
+        <StatusBadge
+          :label="row.status"
+          :type="row.statusBadge"
+          :effect="isPending(row.status) ? 'pending' : undefined"
+        />
       </template>
     </el-table-column>
     <el-table-column label="操作" width="120" align="right">
@@ -35,15 +41,33 @@
 </template>
 
 <script setup lang="ts">
-import type { WhitelistItem } from './WhitelistCard.vue';
+import StatusBadge, {
+  type StatusBadgeType,
+} from '@/components/admin/StatusBadge.vue';
+
+export interface EntryItem {
+  id: string;
+  avatar: string;
+  name: string;
+  role: string;
+  type: string;
+  region: string;
+  status: string;
+  statusBadge: StatusBadgeType;
+  tags: string[];
+}
 
 defineProps<{
-  items: WhitelistItem[];
+  items: EntryItem[];
 }>();
+
+function isPending(status: string) {
+  return /待审核|待处理|处理中/.test(status);
+}
 </script>
 
 <style scoped lang="scss">
-.whitelist-table {
+.record-list {
   width: 100%;
 
   :deep(th.el-table__cell) {
@@ -105,22 +129,6 @@ defineProps<{
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-
-    :deep(.el-tag) {
-      color: #455770;
-      background: #eef3f8;
-      border-color: transparent;
-      font-weight: 750;
-    }
-  }
-
-  &__dot {
-    display: inline-block;
-    width: 7px;
-    height: 7px;
-    margin-right: 6px;
-    background: currentColor;
-    border-radius: 50%;
   }
 
   :deep(.el-button) {

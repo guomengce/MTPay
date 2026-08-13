@@ -165,7 +165,7 @@ function isActive(path: string) {
   z-index: 2;
   flex: 1 1 auto;
   min-height: 0;
-  padding: 24px 18px 18px;
+  padding: 10px 18px 18px;
   overflow: hidden;
   overflow-y: auto;
   scrollbar-width: thin;
@@ -175,7 +175,7 @@ function isActive(path: string) {
 .app-aside__divider {
   position: relative;
   height: 16px;
-  margin: 18px 20px 0;
+  margin: 10px 20px 0;
 
   &::before,
   &::after {

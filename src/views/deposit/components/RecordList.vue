@@ -1,16 +1,16 @@
 <template>
-  <el-card class="deposit-table" shadow="never">
+  <el-card class="record-list" shadow="never">
     <template #header>
-      <div class="deposit-table__header">
+      <div class="record-list__header">
         <strong>入金记录</strong>
         <span>可查看提交、审核及入账时间线</span>
       </div>
     </template>
 
-    <el-table :data="records" class="deposit-table__table">
+    <el-table :data="records" class="record-list__table">
       <el-table-column label="编号" min-width="170">
         <template #default="{ row }">
-          <div class="deposit-table__id">
+          <div class="record-list__id">
             <strong>{{ row.id }}</strong>
             <span>{{ row.time }}</span>
           </div>
@@ -18,7 +18,7 @@
       </el-table-column>
       <el-table-column label="资产 / 网络" min-width="150">
         <template #default="{ row }">
-          <div class="deposit-table__asset">
+          <div class="record-list__asset">
             <strong>{{ row.asset }}</strong>
             <span>{{ row.network }}</span>
           </div>
@@ -28,10 +28,11 @@
       <el-table-column prop="amount" label="申请金额" min-width="160" />
       <el-table-column label="状态" min-width="120">
         <template #default="{ row }">
-          <el-tag type="warning" round>
-            <span class="deposit-table__status-dot"></span>
-            {{ row.status }}
-          </el-tag>
+          <StatusBadge
+            :label="row.status"
+            type="warning"
+            :effect="row.status === '待审核' ? 'pending' : undefined"
+          />
         </template>
       </el-table-column>
       <el-table-column label="操作" width="100" align="right">
@@ -45,6 +46,8 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
+
+import StatusBadge from '@/components/admin/StatusBadge.vue';
 
 const router = useRouter();
 
@@ -66,7 +69,7 @@ function goDetail(id: string) {
 </script>
 
 <style scoped lang="scss">
-.deposit-table {
+.record-list {
   min-width: 0;
   border-color: #dfe7ef;
   border-radius: 14px;
@@ -131,15 +134,6 @@ function goDetail(id: string) {
       font-size: 12px;
       font-weight: 650;
     }
-  }
-
-  &__status-dot {
-    display: inline-block;
-    width: 7px;
-    height: 7px;
-    margin-right: 6px;
-    background: #d88c00;
-    border-radius: 50%;
   }
 
   :deep(.el-button) {

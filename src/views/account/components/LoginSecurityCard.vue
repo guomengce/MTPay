@@ -8,10 +8,7 @@
           </span>
           <h2>登入安全</h2>
         </div>
-        <el-tag type="success" round>
-          <span class="security-card__dot"></span>
-          正常
-        </el-tag>
+        <StatusBadge label="正常" type="success" />
       </div>
     </template>
 
@@ -52,6 +49,8 @@
 
 <script setup lang="ts">
 import { CircleCheck, Key, Lock, User } from '@element-plus/icons-vue';
+
+import StatusBadge from '@/components/admin/StatusBadge.vue';
 </script>
 
 <style scoped lang="scss">
@@ -108,20 +107,7 @@ import { CircleCheck, Key, Lock, User } from '@element-plus/icons-vue';
   }
 
   &__dot {
-    display: inline-block;
-    width: 9px;
-    height: 9px;
-    margin-right: 10px;
-    background: currentColor;
-    border-radius: 50%;
-  }
-
-  :deep(.el-tag) {
-    height: 34px;
-    padding: 0 14px;
-    border-color: transparent;
-    font-size: 13px;
-    font-weight: 850;
+    display: none;
   }
 
   &__body {

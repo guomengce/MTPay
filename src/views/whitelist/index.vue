@@ -12,13 +12,13 @@
       </template>
     </AdminHero>
 
-    <WhitelistResult />
+    <ResultPanel />
   </section>
 </template>
 
 <script setup lang="ts">
 import AdminHero from '@/components/admin/AdminHero.vue';
-import WhitelistResult from './components/WhitelistResult.vue';
+import ResultPanel from './components/ResultPanel.vue';
 </script>
 
 <style scoped lang="scss">

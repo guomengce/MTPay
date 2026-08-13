@@ -47,7 +47,7 @@ const codeIcon = computed(() => {
   min-width: 0;
   flex-direction: column;
   overflow: hidden;
-  padding: 22px 24px 20px;
+  padding: 16px 24px 14px;
   color: #ffffff;
   border-radius: 16px;
   box-shadow: 0 14px 30px rgb(16 30 54 / 8%);

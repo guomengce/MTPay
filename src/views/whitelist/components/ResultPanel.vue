@@ -1,15 +1,15 @@
 <template>
-  <section class="whitelist-result">
+  <section class="result-panel">
 
-    <div v-if="viewMode === 'card'" class="whitelist-result__grid">
-      <WhitelistCard v-for="item in whitelistItems" :key="item.id" :item="item" />
+    <div v-if="viewMode === 'card'" class="result-panel__grid">
+      <EntryCard v-for="item in whitelistItems" :key="item.id" :item="item" />
     </div>
 
-    <el-card v-else class="whitelist-result__table-card" shadow="never">
-      <WhitelistTable :items="whitelistItems" />
+    <el-card v-else class="result-panel__table-card" shadow="never">
+      <RecordList :items="whitelistItems" />
     </el-card>
 
-    <div class="whitelist-result__pagination">
+    <div class="result-panel__pagination">
       <span>共 {{ whitelistItems.length }} 条</span>
       <el-pagination
         layout="prev, pager, next"
@@ -29,14 +29,14 @@
 import { CircleCheckFilled, Grid, List } from '@element-plus/icons-vue';
 import { ref } from 'vue';
 
-import WhitelistCard, { type WhitelistItem } from './WhitelistCard.vue';
-import WhitelistTable from './WhitelistTable.vue';
+import EntryCard, { type EntryItem } from './EntryCard.vue';
+import RecordList from './RecordList.vue';
 
 const viewMode = ref<'card' | 'table'>('card');
 const sortValue = ref('default');
 const pageSize = ref(10);
 
-const whitelistItems: WhitelistItem[] = [
+const whitelistItems: EntryItem[] = [
   {
     id: 'WL-1005',
     avatar: 'B',
@@ -45,7 +45,7 @@ const whitelistItems: WhitelistItem[] = [
     type: '企业',
     region: 'Germany',
     status: '待审核',
-    statusType: 'warning',
+    statusBadge: 'warning',
     tags: ['Deutsche Bank', 'DE8937040044053206194', 'WL-1005'],
   },
   {
@@ -56,7 +56,7 @@ const whitelistItems: WhitelistItem[] = [
     type: '个人',
     region: 'United Kingdom',
     status: '已批准',
-    statusType: 'success',
+    statusBadge: 'success',
     tags: ['Barclays', 'GB29NWBK601613319501', 'WL-1004'],
   },
   {
@@ -67,7 +67,7 @@ const whitelistItems: WhitelistItem[] = [
     type: '企业',
     region: 'United States',
     status: '已批准',
-    statusType: 'success',
+    statusBadge: 'success',
     tags: ['JPMorgan Chase', '4839001388', 'WL-1003'],
   },
   {
@@ -78,7 +78,7 @@ const whitelistItems: WhitelistItem[] = [
     type: '个人',
     region: 'Hong Kong',
     status: '已批准',
-    statusType: 'success',
+    statusBadge: 'success',
     tags: ['Passport', 'K12345678', 'WL-1002'],
   },
   {
@@ -89,14 +89,14 @@ const whitelistItems: WhitelistItem[] = [
     type: '企业',
     region: 'Singapore',
     status: '已批准',
-    statusType: 'success',
+    statusBadge: 'success',
     tags: ['Non Financial Institute', '201812345N', 'WL-1001'],
   },
 ];
 </script>
 
 <style scoped lang="scss">
-.whitelist-result {
+.result-panel {
   display: grid;
   min-width: 0;
   gap: 18px;

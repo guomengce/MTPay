@@ -5,14 +5,14 @@
       description="转账后提交入金资料，后台审核通过后才会增加余额"
       icon="ri-wallet-3-line"
     />
-    <DepositForm />
-    <DepositTable />
+    <ApplyForm />
+    <RecordList />
   </section>
 </template>
 
 <script setup lang="ts">
-import DepositForm from './components/DepositForm.vue';
-import DepositTable from './components/DepositTable.vue';
+import ApplyForm from './components/ApplyForm.vue';
+import RecordList from './components/RecordList.vue';
 import AdminHero from '@/components/admin/AdminHero.vue';
 </script>
 

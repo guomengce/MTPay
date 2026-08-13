@@ -1,7 +1,7 @@
 <template>
-  <el-card class="exchange-form" shadow="never">
+  <el-card class="convert-form" shadow="never">
     <template #header>
-      <div class="exchange-form__title">
+      <div class="convert-form__title">
         <span></span>
         <strong>建立兑换申请</strong>
       </div>
@@ -11,7 +11,7 @@
       <el-form-item label="支付币种">
         <el-select v-model="form.asset" size="large">
           <template #prefix>
-            <span class="exchange-form__coin">₮</span>
+            <span class="convert-form__coin">₮</span>
           </template>
           <el-option label="USDT" value="USDT" />
           <el-option label="USDC" value="USDC" />
@@ -22,31 +22,31 @@
         <el-input v-model="form.amount" size="large" />
       </el-form-item>
 
-      <section class="exchange-form__summary">
-        <div class="exchange-form__row">
-          <span class="exchange-form__row-icon exchange-form__row-icon--wallet">
+      <section class="convert-form__summary">
+        <div class="convert-form__row">
+          <span class="convert-form__row-icon convert-form__row-icon--wallet">
             <el-icon><Wallet /></el-icon>
           </span>
-          <span class="exchange-form__row-label">可用余额</span>
-          <strong class="exchange-form__row-value">128,500.00 USDT</strong>
+          <span class="convert-form__row-label">可用余额</span>
+          <strong class="convert-form__row-value">128,500.00 USDT</strong>
         </div>
-        <div class="exchange-form__row">
-          <span class="exchange-form__row-icon exchange-form__row-icon--chart">
+        <div class="convert-form__row">
+          <span class="convert-form__row-icon convert-form__row-icon--chart">
             <el-icon><DataLine /></el-icon>
           </span>
-          <span class="exchange-form__row-label">专属比例</span>
-          <strong class="exchange-form__row-value">0.9900</strong>
+          <span class="convert-form__row-label">专属比例</span>
+          <strong class="convert-form__row-value">0.9900</strong>
         </div>
-        <div class="exchange-form__row exchange-form__row--result">
-          <span class="exchange-form__row-icon exchange-form__row-icon--gift">
+        <div class="convert-form__row convert-form__row--result">
+          <span class="convert-form__row-icon convert-form__row-icon--gift">
             <el-icon><Coin /></el-icon>
           </span>
-          <span class="exchange-form__row-label">预计获得</span>
-          <strong class="exchange-form__row-value">990.00 USD</strong>
+          <span class="convert-form__row-label">预计获得</span>
+          <strong class="convert-form__row-value">990.00 USD</strong>
         </div>
       </section>
 
-      <el-button class="exchange-form__submit" type="primary" size="large">提交兑换申请</el-button>
+      <el-button class="convert-form__submit" type="primary" size="large">提交兑换申请</el-button>
     </el-form>
   </el-card>
 </template>
@@ -62,7 +62,7 @@ const form = reactive({
 </script>
 
 <style scoped lang="scss">
-.exchange-form {
+.convert-form {
   min-width: 0;
   border-color: #dfe7ef;
   border-radius: 14px;
@@ -161,12 +161,12 @@ const form = reactive({
     border-radius: 12px;
     box-shadow: 0 4px 14px rgb(16 170 164 / 10%);
 
-    .exchange-form__row-label {
+    .convert-form__row-label {
       color: #0c2a5a;
       font-weight: 700;
     }
 
-    .exchange-form__row-value {
+    .convert-form__row-value {
       color: #0aa39a;
       font-size: 30px;
       font-weight: 800;
@@ -279,7 +279,7 @@ const form = reactive({
       font-size: 22px;
     }
 
-    &__row--result .exchange-form__row-value {
+    &__row--result .convert-form__row-value {
       font-size: 24px;
     }
   }

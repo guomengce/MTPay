@@ -8,10 +8,7 @@
           </span>
           <h2>企业资料</h2>
         </div>
-        <el-tag type="success" round>
-          <span class="company-card__dot"></span>
-          正常使用
-        </el-tag>
+        <StatusBadge label="正常使用" type="success" />
       </div>
     </template>
 
@@ -61,6 +58,8 @@
 
 <script setup lang="ts">
 import { Message, OfficeBuilding, Phone, Postcard } from '@element-plus/icons-vue';
+
+import StatusBadge from '@/components/admin/StatusBadge.vue';
 </script>
 
 <style scoped lang="scss">
@@ -117,20 +116,7 @@ import { Message, OfficeBuilding, Phone, Postcard } from '@element-plus/icons-vu
   }
 
   &__dot {
-    display: inline-block;
-    width: 9px;
-    height: 9px;
-    margin-right: 10px;
-    background: currentColor;
-    border-radius: 50%;
-  }
-
-  :deep(.el-tag) {
-    height: 34px;
-    padding: 0 14px;
-    border-color: transparent;
-    font-size: 13px;
-    font-weight: 850;
+    display: none;
   }
 
   &__body {
