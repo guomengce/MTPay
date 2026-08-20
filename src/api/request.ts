@@ -19,7 +19,7 @@ import { useAuthStore } from '@/stores/modules/auth';
 
 /** 统一后端响应结构 */
 export interface ApiEnvelope<T> {
-  code: number;
+  status: number | string;
   message: string;
   data: T;
 }
@@ -50,6 +50,11 @@ request.interceptors.request.use(
     if (authStore.token) {
       config.headers.Authorization = `Bearer ${authStore.token}`;
     }
+    // FormData 上传：移除默认 JSON 头，交由浏览器生成 multipart（含 boundary）。
+    // 否则 axios 会把 FormData 序列化成 {"file":{"uid":...}} 发送。
+    if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+      config.headers.delete('Content-Type');
+    }
     return config;
   },
   (error: AxiosError) => Promise.reject(error),
@@ -59,12 +64,16 @@ request.interceptors.request.use(
 
 request.interceptors.response.use(
   (response: AxiosResponse<ApiEnvelope<unknown>>) => {
+    const refreshedToken = response.headers.authorization;
+    if (refreshedToken) {
+      useAuthStore().setToken(refreshedToken.replace(/^Bearer\s+/i, ''));
+    }
     const payload = response.data;
     // 非标准结构（如文件下载）直接放行
-    if (payload === null || typeof payload !== 'object' || !('code' in payload)) {
+    if (payload === null || typeof payload !== 'object' || !('status' in payload)) {
       return response;
     }
-    if (payload.code === 0) {
+    if (Number(payload.status) === 200) {
       return payload.data as unknown as AxiosResponse;
     }
     if (!response.config.silent) {

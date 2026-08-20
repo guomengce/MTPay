@@ -1,19 +1,35 @@
 <template>
-  <section class="account-page">
-    <AdminHero title="账户与安全" description="代理账户由MTPay后台直接建立" icon="ri-shield-user-line">
-    </AdminHero>
+  <section v-loading="loading" class="account-page">
+    <AdminHero title="账户与安全" description="查看代理资料，管理登录密码与当前会话" icon="ri-shield-user-line" />
 
     <div class="account-page__grid">
-      <CompanyProfileCard />
-      <LoginSecurityCard />
+      <CompanyProfileCard :profile="profile" />
+      <LoginSecurityCard
+        :profile="profile"
+        @change-password="passwordDialogVisible = true"
+      />
     </div>
+
+    <ChangePasswordDialog
+      v-model="passwordDialogVisible"
+      :submitting="submitting"
+      @submit="changePassword"
+    />
   </section>
 </template>
 
 <script setup lang="ts">
+import { onMounted, ref } from 'vue';
 import AdminHero from '@/components/admin/AdminHero.vue';
+import ChangePasswordDialog from './components/ChangePasswordDialog.vue';
 import CompanyProfileCard from './components/CompanyProfileCard.vue';
 import LoginSecurityCard from './components/LoginSecurityCard.vue';
+import { useAccount } from './composables/useAccount';
+
+const passwordDialogVisible = ref(false);
+const { loading, submitting, profile, fetchProfile, changePassword } = useAccount();
+
+onMounted(fetchProfile);
 </script>
 
 <style scoped lang="scss">
@@ -24,7 +40,7 @@ import LoginSecurityCard from './components/LoginSecurityCard.vue';
 
   &__grid {
     display: grid;
-    grid-template-columns: minmax(440px, 1.05fr) minmax(420px, 0.95fr);
+    grid-template-columns: minmax(460px, 1.12fr) minmax(390px, 0.88fr);
     gap: 24px;
   }
 

@@ -1,28 +1,30 @@
-<template>
+﻿<template>
   <div class="form-card">
     <header class="form-card__header">
       <h2 class="form-card__title">欢迎登录 MTPay</h2>
       <p class="form-card__subtitle">安全管理您的资产与每一笔交易</p>
     </header>
 
-    <el-form class="form-card__form" label-position="top" :model="form" @submit.prevent>
-      <el-form-item label="账户 Email">
-        <el-input
-          v-model="form.email"
-          size="large"
-          autocomplete="username"
-          placeholder="请输入您的账户 Email"
-        >
+    <el-form
+      ref="formRef"
+      class="form-card__form"
+      label-position="top"
+      :model="form"
+      :rules="rules"
+      hide-required-asterisk
+      @submit.prevent="handleSubmit"
+    >
+      <el-form-item label="账户 Email" prop="email">
+        <el-input v-model="form.email" autocomplete="username" placeholder="请输入您的账户 Email">
           <template #prefix>
             <el-icon class="form-card__icon"><Message /></el-icon>
           </template>
         </el-input>
       </el-form-item>
 
-      <el-form-item label="密码">
+      <el-form-item label="密码" prop="password">
         <el-input
           v-model="form.password"
-          size="large"
           :type="showPassword ? 'text' : 'password'"
           autocomplete="current-password"
           placeholder="请输入您的密码"
@@ -31,22 +33,34 @@
             <el-icon class="form-card__icon"><Lock /></el-icon>
           </template>
           <template #suffix>
-            <el-icon class="form-card__icon form-card__icon--toggle" @click="showPassword = !showPassword">
+            <el-icon
+              class="form-card__icon form-card__icon--toggle"
+              @click="showPassword = !showPassword"
+            >
               <component :is="showPassword ? View : Hide" />
             </el-icon>
           </template>
         </el-input>
       </el-form-item>
 
-      <el-button type="primary" size="large" class="form-card__submit" @click="handleLogin">
+      <el-button
+        type="primary"
+        native-type="submit"
+        class="form-card__submit"
+        :loading="submitting"
+      >
         登录
       </el-button>
     </el-form>
 
     <div class="form-card__links">
-      <a class="form-card__link" href="javascript:void(0)" @click.prevent>忘记密码</a>
+      <a class="form-card__link" href="javascript:void(0)" @click.prevent="emit('forgot-password')"
+        >忘记密码</a
+      >
       <span class="form-card__divider" />
-      <a class="form-card__link" href="javascript:void(0)" @click.prevent>联系客服</a>
+      <a class="form-card__link" href="javascript:void(0)" @click.prevent="emit('contact')"
+        >联系客服</a
+      >
     </div>
 
     <div class="form-card__footer">
@@ -57,34 +71,42 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+/**
+ * 登录表单组件
+ * 只负责：表单 UI、收集输入、暴露 loading 状态、对外发出提交事件。
+ * 真实登录请求与登录态写入由 index.vue 直接处理。
+ */
+import { computed, reactive, ref } from 'vue';
+import type { FormInstance, FormRules } from 'element-plus';
 import { CircleCheckFilled, Hide, Lock, Message, View } from '@element-plus/icons-vue';
 
-import { useAuthStore } from '@/stores/modules/auth';
+const props = defineProps<{
+  submitting?: boolean;
+}>();
 
-const route = useRoute();
-const router = useRouter();
-const authStore = useAuthStore();
+const emit = defineEmits<{
+  (e: 'submit', payload: { email: string; password: string }): void;
+  (e: 'forgot-password'): void;
+  (e: 'contact'): void;
+}>();
 
-const form = reactive({
-  email: 'admin@mtpay.test',
-  password: 'Demo123!',
-});
-
+const form = reactive({ email: '', password: '' });
+const formRef = ref<FormInstance>();
 const showPassword = ref(false);
+const submitting = computed(() => props.submitting ?? false);
+const rules: FormRules<typeof form> = {
+  email: [
+    { required: true, message: '请输入账户 Email', trigger: 'blur' },
+    { type: 'email', message: '请输入有效的 Email 地址', trigger: ['blur', 'change'] },
+  ],
+  password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
+};
 
-async function handleLogin() {
-  authStore.login({
-    token: 'dev-token',
-    userInfo: {
-      id: '1',
-      name: '代理A · Apex Trading',
-      role: 'agent',
-    },
-  });
-
-  await router.replace(String(route.query.redirect || '/dashboard'));
+async function handleSubmit() {
+  if (submitting.value) return;
+  const valid = await formRef.value?.validate().catch(() => false);
+  if (!valid) return;
+  emit('submit', { email: form.email.trim(), password: form.password });
 }
 </script>
 
@@ -131,44 +153,6 @@ async function handleLogin() {
       &:hover {
         color: #27b9aa;
       }
-    }
-  }
-
-  :deep(.el-form-item) {
-    margin-bottom: 18px;
-  }
-
-  :deep(.el-form-item__label) {
-    color: #1d2b42;
-    font-weight: 600;
-    font-size: 13px;
-  }
-
-  :deep(.el-input__wrapper) {
-    height: 46px;
-    padding: 0 14px;
-    border-radius: 8px;
-    background: #f5f8fb;
-    box-shadow: 0 0 0 1px #e2e8f0 inset;
-    transition: box-shadow 0.2s;
-
-    &:hover {
-      box-shadow: 0 0 0 1px #cbd7e6 inset;
-    }
-
-    &.is-focus {
-      background: #ffffff;
-      box-shadow: 0 0 0 1px #27b9aa inset;
-    }
-  }
-
-  :deep(.el-input__inner) {
-    height: 46px;
-    color: #071833;
-    font-size: 14px;
-
-    &::placeholder {
-      color: #9aa9bd;
     }
   }
 

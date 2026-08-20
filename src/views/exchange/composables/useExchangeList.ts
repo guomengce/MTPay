@@ -1,50 +1,75 @@
 /**
  * 兑换列表 Composable
+ * - 管理分页与列表状态；
+ * - 金额、汇率保留字符串展示，不做数值换算；
+ * - 与入金列表不同：兑换列表不直接接 status_group，使用 status + source_currency_id 筛选。
  */
 import { reactive, ref } from 'vue';
 
 import * as exchangeApi from '@/api/modules/exchange';
-import type { ExchangeItem } from '@/api/modules/exchange';
-import type { PageResult } from '@/api/types';
+import type { ExchangeListParams, ExchangeOrder, ExchangePageResult } from '@/api/modules/exchange';
 
+/** 模块外的状态映射，便于组件按 status 取 label / type。 */
 export const EXCHANGE_STATUS_MAP = {
-  pending: { label: '处理中', type: 'primary' as const },
-  completed: { label: '已完成', type: 'success' as const },
-  failed: { label: '已失败', type: 'danger' as const },
+  0: { label: '待审核', type: 'warning' as const, effect: 'pending' as const },
+  1: { label: '已完成', type: 'success' as const, effect: undefined },
+  2: { label: '已驳回', type: 'danger' as const, effect: undefined },
 } as const;
+
+export type ExchangeStatus = 0 | 1 | 2;
 
 export function useExchangeList() {
   const loading = ref(false);
-  const list = ref<ExchangeItem[]>([]);
+  const list = ref<ExchangeOrder[]>([]);
   const total = ref(0);
   const page = ref(1);
-  const pageSize = ref(10);
+  const limit = ref(15);
 
   const query = reactive({
-    keyword: '',
-    asset: '' as string,
+    source_currency_id: undefined as number | undefined,
+    status: undefined as ExchangeStatus | undefined,
+    order_no: '',
+    started_at: '',
+    ended_at: '',
   });
+
+  function buildParams(): ExchangeListParams {
+    const params: ExchangeListParams = {
+      page: page.value,
+      limit: limit.value,
+    };
+    if (query.source_currency_id) params.source_currency_id = query.source_currency_id;
+    if (query.status !== undefined && query.status !== null) params.status = query.status;
+    if (query.order_no.trim()) params.order_no = query.order_no.trim();
+    if (query.started_at) params.started_at = query.started_at;
+    if (query.ended_at) params.ended_at = query.ended_at;
+    return params;
+  }
 
   async function fetchList() {
     loading.value = true;
     try {
-      const res = await exchangeApi.fetchExchangeList({
-        page: page.value,
-        pageSize: pageSize.value,
-        ...query,
-      });
-      const data: PageResult<ExchangeItem> = res.data;
-      list.value = data.list;
-      total.value = data.total;
+      const data: ExchangePageResult = await exchangeApi.fetchExchangeList(buildParams());
+      list.value = data.data ?? [];
+      total.value = data.total ?? 0;
+      page.value = data.current_page ?? page.value;
+      limit.value = data.per_page ?? limit.value;
     } finally {
       loading.value = false;
     }
   }
 
   function resetQuery() {
-    query.keyword = '';
-    query.asset = '';
+    query.source_currency_id = undefined;
+    query.status = undefined;
+    query.order_no = '';
+    query.started_at = '';
+    query.ended_at = '';
     page.value = 1;
+  }
+
+  function setPage(nextPage: number) {
+    page.value = nextPage;
   }
 
   async function refresh() {
@@ -56,10 +81,11 @@ export function useExchangeList() {
     list,
     total,
     page,
-    pageSize,
+    limit,
     query,
     fetchList,
     resetQuery,
+    setPage,
     refresh,
   };
 }

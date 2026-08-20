@@ -1,51 +1,78 @@
 /**
  * 出金列表 Composable
+ * - 管理分页与列表状态；
+ * - 金额/手续费/到账金额保留字符串展示，不在前端做数值换算。
  */
 import { reactive, ref } from 'vue';
 
 import * as withdrawalApi from '@/api/modules/withdrawal';
-import type { WithdrawalItem } from '@/api/modules/withdrawal';
-import type { PageResult } from '@/api/types';
+import type {
+  WithdrawalListParams,
+  WithdrawalOrder,
+  WithdrawalPageResult,
+} from '@/api/modules/withdrawal';
 
+/** 模块外的状态映射，便于组件按 status 取 label / type。 */
 export const WITHDRAWAL_STATUS_MAP = {
-  pending: { label: '待审核', type: 'warning' as const, effect: 'pending' as const },
-  reviewing: { label: '审核处理中', type: 'primary' as const },
-  completed: { label: '已完成', type: 'success' as const },
-  rejected: { label: '已驳回', type: 'danger' as const },
+  0: { label: '待审核', type: 'warning' as const, effect: 'pending' as const },
+  1: { label: '待补充文件', type: 'warning' as const, effect: undefined },
+  2: { label: '付款处理中', type: 'primary' as const, effect: undefined },
+  3: { label: '已完成', type: 'success' as const, effect: undefined },
+  4: { label: '已驳回', type: 'danger' as const, effect: undefined },
+  5: { label: '付款失败', type: 'danger' as const, effect: undefined },
 } as const;
+
+export type WithdrawalStatus = 0 | 1 | 2 | 3 | 4 | 5;
 
 export function useWithdrawalList() {
   const loading = ref(false);
-  const list = ref<WithdrawalItem[]>([]);
+  const list = ref<WithdrawalOrder[]>([]);
   const total = ref(0);
   const page = ref(1);
-  const pageSize = ref(10);
+  const limit = ref(15);
 
   const query = reactive({
-    keyword: '',
-    status: '' as WithdrawalItem['status'] | '',
+    status: undefined as WithdrawalStatus | undefined,
+    order_no: '',
+    started_at: '',
+    ended_at: '',
   });
+
+  function buildParams(): WithdrawalListParams {
+    const params: WithdrawalListParams = {
+      page: page.value,
+      limit: limit.value,
+    };
+    if (query.status !== undefined && query.status !== null) params.status = query.status;
+    if (query.order_no.trim()) params.order_no = query.order_no.trim();
+    if (query.started_at) params.started_at = query.started_at;
+    if (query.ended_at) params.ended_at = query.ended_at;
+    return params;
+  }
 
   async function fetchList() {
     loading.value = true;
     try {
-      const res = await withdrawalApi.fetchWithdrawalList({
-        page: page.value,
-        pageSize: pageSize.value,
-        ...query,
-      });
-      const data: PageResult<WithdrawalItem> = res.data;
-      list.value = data.list;
-      total.value = data.total;
+      const data: WithdrawalPageResult = await withdrawalApi.fetchWithdrawalList(buildParams());
+      list.value = data.data ?? [];
+      total.value = data.total ?? 0;
+      page.value = data.current_page ?? page.value;
+      limit.value = data.per_page ?? limit.value;
     } finally {
       loading.value = false;
     }
   }
 
   function resetQuery() {
-    query.keyword = '';
-    query.status = '';
+    query.status = undefined;
+    query.order_no = '';
+    query.started_at = '';
+    query.ended_at = '';
     page.value = 1;
+  }
+
+  function setPage(nextPage: number) {
+    page.value = nextPage;
   }
 
   async function refresh() {
@@ -57,10 +84,11 @@ export function useWithdrawalList() {
     list,
     total,
     page,
-    pageSize,
+    limit,
     query,
     fetchList,
     resetQuery,
+    setPage,
     refresh,
   };
 }

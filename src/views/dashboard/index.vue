@@ -15,7 +15,7 @@
           <strong>待处理事项</strong>
         </div>
         <div class="dashboard-page__todo-count">
-          <span>2</span>
+          <span>{{ pendingCount }}</span>
           <em>待处理</em>
         </div>
         <p>入金、兑换、白名单及出金</p>
@@ -31,83 +31,43 @@
     </div>
 
     <div class="dashboard-page__content">
-      <ExchangeRatePanel compact />
-      <RecentTransactions />
+      <ExchangeRatePanel compact :agent="companyName" :rates="rateItems" />
+      <RecentTransactions :transactions="recentTransactions" />
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import {
-  ArrowDown,
-  ArrowRight,
-  BellFilled,
-  Switch,
-  Upload,
-  UserFilled,
-} from '@element-plus/icons-vue';
+import { computed, onMounted } from 'vue';
+import { ArrowDown, ArrowRight, BellFilled, Switch, Upload, UserFilled } from '@element-plus/icons-vue';
 import BalanceCard from './components/BalanceCard.vue';
 import ExchangeRatePanel from '@/components/admin/ExchangeRatePanel.vue';
 import QuickActionCard from './components/QuickActionCard.vue';
 import RecentTransactions from './components/RecentTransactions.vue';
+import { useDashboard } from './composables/useDashboard';
 
-interface BalanceItem {
-  code: string;
-  title: string;
-  amount: string;
-  frozen: string;
-  approx?: string;
-  tone: 'teal' | 'blue' | 'green';
-}
+const {
+  balances,
+  pendingCount,
+  feeAmount,
+  companyName,
+  recentTransactions,
+  rateItems,
+  loadOverview,
+} = useDashboard();
 
-const balances: BalanceItem[] = [
-  {
-    code: 'USDT',
-    title: 'USDT 可用余额',
-    amount: '128,500.00',
-    approx: '128,500.00 USD',
-    frozen: '冻结 0.00 USDT',
-    tone: 'teal',
-  },
-  {
-    code: 'USDC',
-    title: 'USDC 可用余额',
-    amount: '46,200.00',
-    approx: '46,200.00 USD',
-    frozen: '冻结 0.00 USDC',
-    tone: 'blue',
-  },
-  {
-    code: 'USD',
-    title: 'USD 可用余额',
-    amount: '184,350.00',
-    frozen: '冻结 5,050.00 USD',
-    tone: 'green',
-  },
-];
-
-const quickActions = [
-  {
-    icon: ArrowDown,
-    title: '入金 USDT',
-    description: '获取链上地址',
-  },
-  {
-    icon: Switch,
-    title: '兑换 USD',
-    description: '查看实时汇率',
-  },
-  {
-    icon: UserFilled,
-    title: '新增白名单',
-    description: '付款人或收款人',
-  },
+const quickActions = computed(() => [
+  { icon: ArrowDown, title: '入金 USDT', description: '获取链上地址' },
+  { icon: Switch, title: '兑换 USD', description: '查看实时汇率' },
+  { icon: UserFilled, title: '新增白名单', description: '付款人或收款人' },
   {
     icon: Upload,
     title: '申请 USD 提现',
-    description: '固定费 50.00 USD',
+    description: feeAmount.value ? `固定费 ${feeAmount.value} USD` : '提交出金申请',
   },
-];
+]);
+
+onMounted(loadOverview);
 </script>
 
 <style scoped lang="scss">

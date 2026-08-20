@@ -1,55 +1,49 @@
 /**
- * 仪表盘模块
- * 余额、概览、近期交易、快捷操作
+ * 业务总览模块
+ * - 仅调用 /web/getAgentAssetOverview 一次获取余额、待办、汇率与近期交易；
+ * - 近期交易 recent_orders 与统一交易记录共用 TransactionItem 结构。
  */
 import request from '../request';
-import type { ApiResponse, PageResult } from '../types';
+import type { TransactionItem } from './transaction';
 
-export interface BalanceItem {
-  code: string;
-  title: string;
-  amount: string;
-  approx?: string;
-  frozen: string;
-  tone: 'teal' | 'blue' | 'green';
+export interface AssetBalance {
+  currency: { id: number; code: string; name: string; decimal_places: number };
+  available_balance: string;
+  frozen_balance: string;
+  total_balance: string;
 }
 
-export interface DashboardOverview {
-  totalBalance: string;
-  pendingCount: number;
-  pendingDelta: number;
-  balances: BalanceItem[];
+export interface EffectiveRate {
+  source_currency: { id: number; code: string; name: string };
+  target_currency: { id: number; code: string; name: string };
+  rate: string;
+  rate_source: 'agent' | 'default';
+  rate_source_name: string;
 }
 
-export interface DashboardTransaction {
-  id: string;
-  date: string;
-  time: string;
-  type: string;
-  typeTone: 'deposit' | 'withdrawal' | 'exchange';
-  content: string;
-  amount: string;
-  amountTone: 'neutral' | 'plus' | 'minus';
-  status: string;
-  statusBadge: 'primary' | 'warning' | 'success' | 'danger' | 'gray';
+export interface AssetOverview {
+  user: {
+    id: number;
+    agent_code: string;
+    company_name: string;
+    email: string;
+    status: number;
+    status_name: string;
+  };
+  assets: AssetBalance[];
+  effective_exchange_rates: Partial<Record<'USDT' | 'USDC', EffectiveRate>>;
+  pending_counts: { deposit: number; exchange: number; whitelist: number; withdrawal: number; total: number };
+  capabilities: {
+    deposit_channel_count: number;
+    exchange_source_currencies: string[];
+    exchange_target_currency: string;
+    withdrawal_currency: string;
+    withdrawal_fee_amount: string;
+  };
+  recent_orders: TransactionItem[];
 }
 
-/** 概览数据 */
-export function fetchOverview(): Promise<ApiResponse<DashboardOverview>> {
-  return request.get('/dashboard/overview');
-}
-
-/** 近期交易 */
-export function fetchRecentTransactions(
-  limit = 5,
-): Promise<ApiResponse<DashboardTransaction[]>> {
-  return request.get('/dashboard/recent-transactions', { params: { limit } });
-}
-
-/** 分页查询仪表盘列表（保留扩展） */
-export function fetchDashboardList(params: {
-  page: number;
-  pageSize: number;
-}): Promise<ApiResponse<PageResult<DashboardTransaction>>> {
-  return request.get('/dashboard/list', { params });
+/** 业务总览：余额、待办、有效比例与最近 5 笔交易。 */
+export function fetchAgentAssetOverview() {
+  return request.get<unknown, AssetOverview>('/web/getAgentAssetOverview');
 }

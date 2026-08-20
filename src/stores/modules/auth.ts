@@ -21,6 +21,11 @@ export const useAuthStore = defineStore('auth', () => {
     storage.set(USER_INFO_KEY, payload.userInfo);
   }
 
+  function setUserInfo(value: UserInfo) {
+    userInfo.value = value;
+    storage.set(USER_INFO_KEY, value);
+  }
+
   function clearAuth() {
     token.value = '';
     userInfo.value = null;
@@ -37,6 +42,7 @@ export const useAuthStore = defineStore('auth', () => {
     userInfo,
     isLoggedIn,
     login,
+    setUserInfo,
     logout,
     setToken,
     clearAuth,

@@ -1,223 +1,136 @@
 <template>
-  <el-card class="security-card" shadow="never">
-    <template #header>
-      <div class="security-card__header">
-        <div class="security-card__title">
-          <span>
-            <el-icon><CircleCheck /></el-icon>
-          </span>
-          <h2>登入安全</h2>
-        </div>
-        <StatusBadge label="正常" type="success" />
+  <article class="security-card">
+    <header class="security-card__header">
+      <span class="security-card__header-icon"><el-icon><Lock /></el-icon></span>
+      <div>
+        <h2>登录安全</h2>
+        <p>保护你的账户与资金操作安全</p>
       </div>
-    </template>
+    </header>
 
     <div class="security-card__body">
-      <section class="security-card__row">
-        <span class="is-blue"
-          ><el-icon><Lock /></el-icon
-        ></span>
-        <strong>密码</strong>
-        <b>已设定</b>
+      <section class="security-card__item">
+        <span class="security-card__item-icon is-green"><el-icon><Key /></el-icon></span>
+        <div>
+          <strong>登录密码</strong>
+          <p>建议定期更换，并避免与其他平台使用相同密码</p>
+        </div>
+        <el-button type="primary" plain :icon="EditPen" @click="emit('change-password')">
+          修改密码
+        </el-button>
       </section>
 
-      <section class="security-card__row is-warning">
-        <span
-          ><el-icon><Key /></el-icon
-        ></span>
-        <strong>MFA</strong>
-        <b>建议启用</b>
+      <section class="security-card__item">
+        <span class="security-card__item-icon is-blue"><el-icon><Clock /></el-icon></span>
+        <div>
+          <strong>最近登录</strong>
+          <p>{{ profile?.last_login_at || '暂无登录记录' }}</p>
+        </div>
+        <StatusBadge label="当前会话" type="success" />
       </section>
 
-      <section class="security-card__row">
-        <span class="is-blue"
-          ><el-icon><User /></el-icon
-        ></span>
-        <strong>账户模式</strong>
-        <b>单一代理</b>
+      <section class="security-card__notice">
+        <el-icon><Warning /></el-icon>
+        <div>
+          <strong>安全提示</strong>
+          <p>修改密码后，当前设备及其他设备上的登录状态都会失效。</p>
+        </div>
       </section>
-
-      <el-alert
-        title="不包含下级客户、企业群批、团队或角色权限。"
-        type="info"
-        :closable="false"
-        show-icon
-      />
     </div>
-  </el-card>
+
+  </article>
 </template>
 
 <script setup lang="ts">
-import { CircleCheck, Key, Lock, User } from '@element-plus/icons-vue';
+import { Clock, EditPen, Key, Lock, Warning } from '@element-plus/icons-vue';
 
+import type { AgentProfile } from '@/api/modules/auth';
 import StatusBadge from '@/components/admin/StatusBadge.vue';
+
+defineProps<{ profile: AgentProfile | null }>();
+const emit = defineEmits<{ (e: 'change-password'): void }>();
 </script>
 
 <style scoped lang="scss">
 .security-card {
   min-width: 0;
   overflow: hidden;
-  border-color: #dfe7ef;
-  border-radius: 14px;
-  box-shadow: 0 18px 48px rgb(16 30 54 / 8%);
-
-  :deep(.el-card__header) {
-    padding: 20px 24px;
-  }
-
-  :deep(.el-card__body) {
-    padding: 22px 24px 26px;
-  }
-
-  &__header,
-  &__title,
-  &__row {
-    display: flex;
-    align-items: center;
-  }
+  border: 1px solid rgb(192 211 227 / 70%);
+  border-radius: 20px;
+  background: rgb(255 255 255 / 96%);
+  box-shadow: 0 18px 50px rgb(35 82 126 / 8%);
 
   &__header {
-    justify-content: space-between;
-    gap: 18px;
-  }
-
-  &__title {
+    display: flex;
+    align-items: center;
     gap: 14px;
-
-    > span {
-      display: inline-flex;
-      width: 46px;
-      height: 46px;
-      flex: 0 0 46px;
-      align-items: center;
-      justify-content: center;
-      color: #0a9b76;
-      background: #e9f8f1;
-      border-radius: 50%;
-      font-size: 25px;
-    }
-
-    h2 {
-      margin: 0;
-      color: #071833;
-      font-size: 22px;
-      font-weight: 850;
-      letter-spacing: 0;
-    }
+    padding: 25px 26px;
+    border-bottom: 1px solid #e8f0f5;
+    h2 { margin: 0 0 4px; color: #071833; font-size: 20px; }
+    p { margin: 0; color: #8292a6; font-size: 12px; }
   }
 
-  &__dot {
-    display: none;
+  &__header-icon {
+    display: inline-flex;
+    width: 46px;
+    height: 46px;
+    flex: 0 0 46px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    color: #fff;
+    background: linear-gradient(135deg, #27b9aa, #1d8db5);
+    box-shadow: 0 9px 20px rgb(29 141 181 / 20%);
+    font-size: 21px;
   }
 
-  &__body {
+  &__body { display: grid; gap: 12px; padding: 22px 24px; }
+
+  &__item {
     display: grid;
-    gap: 16px;
+    min-width: 0;
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 13px;
+    padding: 16px;
+    border: 1px solid #e2ecf3;
+    border-radius: 14px;
+    background: #fbfdff;
+
+    > div { min-width: 0; }
+    strong { color: #14263e; font-size: 14px; }
+    p { margin: 5px 0 0; color: #8393a6; font-size: 12px; line-height: 1.5; }
   }
 
-  &__row {
-    min-height: 62px;
-    gap: 14px;
-    padding: 0 16px;
-    border: 1px solid #cbd8e8;
-    border-radius: 10px;
-
-    > span {
-      display: inline-flex;
-      width: 38px;
-      height: 38px;
-      flex: 0 0 38px;
-      align-items: center;
-      justify-content: center;
-      color: #f1a21d;
-      background: #fff4df;
-      border-radius: 50%;
-      font-size: 20px;
-
-      &.is-blue {
-        color: #0b4fb4;
-        background: #edf4ff;
-      }
-    }
-
-    strong {
-      min-width: 0;
-      flex: 1;
-      color: #071833;
-      font-size: 16px;
-      font-weight: 850;
-    }
-
-    b {
-      flex: 0 0 auto;
-      color: #071833;
-      font-size: 16px;
-      font-weight: 850;
-    }
-
-    &.is-warning {
-      background: #fffaf1;
-      border-color: #f3d49a;
-
-      b {
-        color: #f08a00;
-      }
-    }
+  &__item-icon {
+    display: inline-flex;
+    width: 42px;
+    height: 42px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    font-size: 19px;
+    &.is-green { color: #14998f; background: #e8f8f5; }
+    &.is-blue { color: #2878c8; background: #eaf3fd; }
   }
 
-  :deep(.el-alert) {
-    min-height: 62px;
-    border-color: #bcd8ff;
-    border-radius: 10px;
-  }
-
-  :deep(.el-alert__title) {
-    color: #155fc4;
-    font-size: 14px;
-    font-weight: 750;
+  &__notice {
+    display: flex;
+    gap: 12px;
+    padding: 15px 16px;
+    border: 1px solid #f3dfb7;
+    border-radius: 13px;
+    color: #d58a13;
+    background: #fffaf0;
+    > .el-icon { margin-top: 2px; font-size: 19px; }
+    strong { color: #8a5a12; font-size: 13px; }
+    p { margin: 4px 0 0; color: #9b7741; font-size: 12px; line-height: 1.55; }
   }
 
   @include mobile {
-    :deep(.el-card__header),
-    :deep(.el-card__body) {
-      padding: 20px 18px;
-    }
-
-    &__header {
-      align-items: flex-start;
-      flex-direction: column;
-    }
-
-    &__title {
-      gap: 14px;
-
-      > span {
-        width: 52px;
-        height: 52px;
-        flex-basis: 52px;
-      }
-
-      h2 {
-        font-size: 24px;
-      }
-    }
-
-    &__row {
-      min-height: auto;
-      flex-wrap: wrap;
-      gap: 12px;
-      padding: 16px;
-
-      strong,
-      b {
-        font-size: 18px;
-      }
-
-      b {
-        width: 100%;
-        padding-left: 66px;
-      }
-    }
+    &__header, &__body { padding-right: 20px; padding-left: 20px; }
+    &__item { grid-template-columns: 42px minmax(0, 1fr); }
+    &__item .el-button, &__item :deep(.status-badge) { grid-column: 1 / -1; width: 100%; }
   }
 }
 </style>

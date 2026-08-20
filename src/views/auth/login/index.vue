@@ -7,7 +7,7 @@
         <span class="login-page__logo">M</span>
         <strong>MTPay</strong>
       </div>
-      <a class="login-page__help" href="javascript:void(0)" @click.prevent>帮助中心</a>
+      <a class="login-page__help" href="javascript:void(0)" @click.prevent="handleContact">帮助中心</a>
     </header>
 
     <section class="login-page__form">
@@ -17,14 +17,71 @@
       <div class="login-page__form-decor login-page__form-decor--bubbles" aria-hidden="true">
         <i /><i /><i />
       </div>
-      <FormCard />
+      <FormCard
+        :submitting="submitting"
+        @submit="handleSubmit"
+        @forgot-password="handleForgotPassword"
+        @contact="handleContact"
+      />
     </section>
   </main>
 </template>
 
 <script setup lang="ts">
+/**
+ * 登录页面
+ * - 串联登录表单与登录接口；
+ * - 登录成功后完整保存代理资料与 Token，并跳转到目标页面；
+ * - 失败由统一请求层展示后端 message。
+ */
+import { ElMessage } from 'element-plus';
+import { ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+
+import * as authApi from '@/api/modules/auth';
+import { useAuthStore } from '@/stores/modules/auth';
 import BrandPanel from './components/BrandPanel.vue';
 import FormCard from './components/FormCard.vue';
+
+const route = useRoute();
+const router = useRouter();
+const authStore = useAuthStore();
+const submitting = ref(false);
+
+async function handleSubmit(payload: { email: string; password: string }) {
+  if (submitting.value) return;
+  submitting.value = true;
+  try {
+    const result = await authApi.login(payload);
+    authStore.login({
+      token: result.token,
+      userInfo: {
+        id: String(result.id),
+        name: result.company_name,
+        role: result.portal,
+        agentCode: result.agent_code,
+        companyName: result.company_name,
+        email: result.email,
+        phone: result.phone,
+        status: result.status,
+        statusName: result.status_name,
+        activatedAt: result.activated_at,
+        lastLoginAt: result.last_login_at,
+      },
+    });
+    await router.replace(String(route.query.redirect || '/dashboard'));
+  } finally {
+    submitting.value = false;
+  }
+}
+
+function handleForgotPassword() {
+  void router.push({ name: 'ForgotPassword' });
+}
+
+function handleContact() {
+  ElMessage.info('请联系平台客服：support@mtpay.example');
+}
 </script>
 
 <style scoped lang="scss">

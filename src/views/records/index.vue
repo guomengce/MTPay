@@ -2,23 +2,57 @@
   <section class="records-page">
     <AdminHero
       title="交易记录"
-      description="查看每笔交易的资料、资金变化及完整处理时间线"
+      description="统一查看入金、兑换与 USD 出金订单，本页仅只读"
       icon="ri-file-list-3-line"
-    >
-      <template #extra>
-        <el-button type="primary" plain :icon="Download" size="large">
-          导出CSV
-        </el-button>
-      </template>
-    </AdminHero>
-    <TransactionTable />
+    />
+
+    <el-card class="records-page__card" shadow="never">
+      <TransactionFilters
+        :query="query"
+        :loading="loading"
+        @update="Object.assign(query, $event)"
+        @search="search"
+        @reset="reset"
+      />
+      <TransactionTable :data="list" :loading="loading" @view="openDetail" />
+      <el-empty v-if="!loading && list.length === 0" description="暂无交易记录" />
+      <footer class="records-page__pager">
+        <el-pagination
+          layout="prev, pager, next, total"
+          :current-page="page"
+          :page-size="limit"
+          :total="total"
+          :hide-on-single-page="total <= limit"
+          @current-change="setPage"
+        />
+      </footer>
+    </el-card>
   </section>
 </template>
 
 <script setup lang="ts">
-import { Download } from '@element-plus/icons-vue';
+/** 代理端交易记录列表：真实筛选与分页，详情只读跳转。 */
+import { onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+
 import AdminHero from '@/components/admin/AdminHero.vue';
+import type { TransactionItem } from '@/api/modules/transaction';
+import TransactionFilters from './components/TransactionFilters.vue';
 import TransactionTable from './components/TransactionTable.vue';
+import { useTransactionList } from './composables/useTransactionList';
+
+const router = useRouter();
+const { loading, list, total, page, limit, query, loadList, search, reset, setPage } =
+  useTransactionList();
+
+function openDetail(row: TransactionItem) {
+  void router.push({
+    name: 'TransactionDetail',
+    params: { businessType: row.detail_type, businessId: row.detail_id },
+  });
+}
+
+onMounted(loadList);
 </script>
 
 <style scoped lang="scss">
@@ -27,12 +61,40 @@ import TransactionTable from './components/TransactionTable.vue';
   min-width: 0;
   gap: 24px;
 
+  &__card {
+    min-width: 0;
+    padding: 22px 24px;
+    border-color: #dfe7ef;
+    border-radius: 16px;
+    box-shadow: 0 16px 42px rgb(16 30 54 / 7%);
+
+    :deep(.el-card__body) {
+      display: grid;
+      gap: 16px;
+    }
+  }
+
+  &__pager {
+    display: flex;
+    justify-content: flex-end;
+  }
+
   @include narrow {
     padding: 28px 24px;
   }
 
   @include mobile {
+    gap: 16px;
     padding: 20px 14px;
+
+    &__card {
+      padding: 16px;
+    }
+
+    &__pager {
+      justify-content: center;
+      overflow-x: auto;
+    }
   }
 }
 </style>

@@ -1,44 +1,35 @@
 /**
  * 入金详情 Composable
+ * - 加载指定 id 的入金订单详情（公共字段 + 审核信息 + 时间线）；
+ * - 详情中状态为后端快照，禁止在前端伪造状态值。
  */
 import { ref } from 'vue';
 
 import * as depositApi from '@/api/modules/deposit';
-import type { DepositDetail } from '@/api/modules/deposit';
+import type { DepositOrderDetail } from '@/api/modules/deposit';
 
 export function useDepositDetail() {
   const loading = ref(false);
-  const detail = ref<DepositDetail | null>(null);
+  const detail = ref<DepositOrderDetail | null>(null);
 
-  async function fetchDetail(id: string) {
+  /** 重新加载指定 id 的入金详情。 */
+  async function fetchDetail(id: number) {
     loading.value = true;
     try {
-      const res = await depositApi.fetchDepositDetail(id);
-      detail.value = res.data;
+      detail.value = await depositApi.fetchDepositDetail(id);
     } finally {
       loading.value = false;
     }
   }
 
-  async function approve(id: string) {
-    await depositApi.approveDeposit(id);
-    if (detail.value) {
-      detail.value.status = 'approved';
-    }
-  }
-
-  async function reject(id: string, reason: string) {
-    await depositApi.rejectDeposit(id, reason);
-    if (detail.value) {
-      detail.value.status = 'rejected';
-    }
+  function clear() {
+    detail.value = null;
   }
 
   return {
     loading,
     detail,
     fetchDetail,
-    approve,
-    reject,
+    clear,
   };
 }

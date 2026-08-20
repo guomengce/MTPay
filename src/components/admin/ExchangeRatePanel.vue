@@ -11,7 +11,7 @@
     </template>
 
     <div class="exchange-rate-panel__cards">
-      <section v-for="rate in rates" :key="rate.pair" class="exchange-rate-panel__card">
+      <section v-for="rate in displayRates" :key="rate.pair" class="exchange-rate-panel__card">
         <span>{{ rate.pair }}</span>
         <strong>{{ rate.value }}</strong>
         <p>{{ rate.sample }}</p>
@@ -27,21 +27,34 @@
 </template>
 
 <script setup lang="ts">
-withDefaults(
+import { computed } from 'vue';
+
+export interface ExchangeRateItem {
+  pair: string;
+  value: string;
+  sample: string;
+  mark: string;
+}
+
+const DEFAULT_RATES: ExchangeRateItem[] = [
+  { pair: 'USDT → USD', value: '0.9900', sample: '1,000 USDT = 990.00 USD', mark: '₮' },
+  { pair: 'USDC → USD', value: '0.9900', sample: '1,000 USDC = 990.00 USD', mark: '$' },
+];
+
+const props = withDefaults(
   defineProps<{
     compact?: boolean;
     agent?: string;
+    rates?: ExchangeRateItem[];
   }>(),
   {
     compact: false,
     agent: '代理A · Apex Trading',
+    rates: undefined,
   },
 );
 
-const rates = [
-  { pair: 'USDT → USD', value: '0.9900', sample: '1,000 USDT = 990.00 USD', mark: '₮' },
-  { pair: 'USDC → USD', value: '0.9900', sample: '1,000 USDC = 990.00 USD', mark: '$' },
-];
+const displayRates = computed(() => props.rates && props.rates.length ? props.rates : DEFAULT_RATES);
 </script>
 
 <style scoped lang="scss">

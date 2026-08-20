@@ -8,7 +8,7 @@
     </header>
 
     <div class="transactions-card__list">
-      <article v-for="item in transactions" :key="item.id" class="transactions-card__item">
+      <article v-for="item in transactions" :key="item.key" class="transactions-card__item">
         <time class="transactions-card__time">
           <strong>{{ item.date }}</strong>
           <span>{{ item.time }}</span>
@@ -38,90 +38,15 @@ import { RouterLink } from 'vue-router';
 import StatusBadge, {
   type StatusBadgeType,
 } from '@/components/admin/StatusBadge.vue';
+import type { RecentTransactionItem } from '../composables/useDashboard';
 
-interface TransactionItem {
-  date: string;
-  time: string;
-  type: string;
-  typeTone: 'deposit' | 'withdrawal' | 'exchange';
-  id: string;
-  content: string;
-  amountLabel?: string;
-  amount: string;
-  amountTone: 'neutral' | 'plus' | 'minus';
-  status: string;
-  statusBadge: StatusBadgeType;
-}
-
-const transactions: TransactionItem[] = [
-  {
-    date: '08/03',
-    time: '15:08',
-    type: '入金',
-    typeTone: 'deposit',
-    id: 'DEP-26073002',
-    content: 'USDC · ERC20',
-    amountLabel: '待入账',
-    amount: '12,000.00 USDC',
-    amountTone: 'neutral',
-    status: '处理中',
-    statusBadge: 'warning',
-  },
-  {
-    date: '08/03',
-    time: '14:08',
-    type: '出金',
-    typeTone: 'withdrawal',
-    id: 'WD-26073001',
-    content: 'USD · B→B',
-    amount: '-5,050.00 USD',
-    amountTone: 'minus',
-    status: '处理中',
-    statusBadge: 'primary',
-  },
-  {
-    date: '08/02',
-    time: '17:08',
-    type: '入金',
-    typeTone: 'deposit',
-    id: 'DEP-26073001',
-    content: 'USDT · TRC20',
-    amount: '+50,000.00 USDT',
-    amountTone: 'plus',
-    status: '已完成',
-    statusBadge: 'success',
-  },
-  {
-    date: '08/01',
-    time: '17:08',
-    type: '兑换',
-    typeTone: 'exchange',
-    id: 'EX-26073001',
-    content: 'USDT → USD · 0.9900',
-    amount: '10,000.00 USDT',
-    amountTone: 'neutral',
-    status: '已完成',
-    statusBadge: 'success',
-  },
-  {
-    date: '07/31',
-    time: '17:08',
-    type: '出金',
-    typeTone: 'withdrawal',
-    id: 'WD-26072908',
-    content: 'USD · C→C',
-    amount: '-12,550.00 USD',
-    amountTone: 'minus',
-    status: '已完成',
-    statusBadge: 'success',
-  },
-];
+defineProps<{ transactions: RecentTransactionItem[] }>();
 
 function isPending(status: string) {
   return /待审核|待处理|处理中/.test(status);
 }
 
-function typeToBadge(tone: TransactionItem['typeTone']): StatusBadgeType {
+function typeToBadge(tone: RecentTransactionItem['typeTone']): StatusBadgeType {
   if (tone === 'deposit') return 'success';
   if (tone === 'withdrawal') return 'primary';
   return 'danger';

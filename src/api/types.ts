@@ -9,9 +9,11 @@
 
 /** 统一后端响应 */
 export interface ApiResponse<T = unknown> {
-  code: number;
+  status: number | string;
   message: string;
   data: T;
+  is_popup?: boolean;
+  sign?: string;
 }
 
 /** 分页请求参数 */

@@ -86,11 +86,13 @@ import { RouterLink, useRoute, useRouter } from 'vue-router';
 
 import { useAppStore } from '@/stores/modules/app';
 import { useAuthStore } from '@/stores/modules/auth';
+import { useLogout } from '@/composables/useLogout';
 
 const route = useRoute();
 const router = useRouter();
 const appStore = useAppStore();
 const authStore = useAuthStore();
+const { submitLogout } = useLogout();
 
 interface CrumbItem {
   title: string;
@@ -131,7 +133,7 @@ function handleMessages() {
   // 项目目前未接入消息中心逻辑，保留 UI 与事件接口
 }
 
-function handleUserCommand(command: string) {
+async function handleUserCommand(command: string) {
   if (command === 'profile') {
     router.push('/account').catch(() => undefined);
     return;
@@ -141,8 +143,8 @@ function handleUserCommand(command: string) {
     return;
   }
   if (command === 'logout') {
-    authStore.logout();
-    router.replace({ name: 'Login' }).catch(() => undefined);
+    await submitLogout();
+    await router.replace({ name: 'Login' }).catch(() => undefined);
   }
 }
 </script>

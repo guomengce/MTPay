@@ -14,11 +14,15 @@
   flex: 1;
   min-width: 0;
   overflow: auto;
-  padding: 30px;
+  padding: 24px;
   background: var(--portal-bg);
 
+  @include narrow {
+    padding: 20px;
+  }
+
   @include mobile {
-    padding: 12px;
+    padding: 14px;
   }
 }
 </style>

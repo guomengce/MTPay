@@ -7,6 +7,132 @@
 }
 
 /* ============================================
+ * Form System
+ * 默认控件统一使用 52px，页面禁止通过 size 或局部样式重复定义高度。
+ * 页面只负责宽度和布局，不再覆盖输入类组件的高度、圆角、边框和字体。
+ * ============================================ */
+:root {
+  --mt-form-control-height: 52px;
+  --mt-form-control-radius: 10px;
+  --mt-form-control-border: #d7e1ea;
+  --mt-form-control-border-hover: #aebfce;
+  --mt-form-control-border-focus: #27b9aa;
+  --mt-table-header-height: 52px;
+  --mt-table-row-height: 64px;
+}
+
+.el-input,
+.el-select,
+.el-date-editor,
+.el-input-number,
+.el-cascader {
+  --el-component-size: var(--mt-form-control-height);
+  font-size: 14px;
+}
+
+/* 日期控件默认占满其布局容器，页面不再逐个补 width。 */
+.el-date-editor.el-input,
+.el-date-editor.el-input__wrapper,
+.el-date-editor.el-range-editor {
+  width: 100%;
+}
+
+.el-input__wrapper,
+.el-select__wrapper,
+.el-date-editor.el-input__wrapper,
+.el-date-editor .el-input__wrapper,
+.el-input-number .el-input__wrapper,
+.el-cascader .el-input__wrapper {
+  min-height: var(--mt-form-control-height);
+  border-radius: var(--mt-form-control-radius);
+  background: #ffffff;
+  box-shadow: 0 0 0 1px var(--mt-form-control-border) inset;
+  transition: box-shadow 0.18s ease;
+}
+
+.el-input__wrapper:hover,
+.el-select__wrapper:hover,
+.el-date-editor.el-input__wrapper:hover,
+.el-date-editor .el-input__wrapper:hover,
+.el-input-number .el-input__wrapper:hover,
+.el-cascader .el-input__wrapper:hover {
+  box-shadow: 0 0 0 1px var(--mt-form-control-border-hover) inset;
+}
+
+.el-input__wrapper.is-focus,
+.el-select__wrapper.is-focused,
+.el-date-editor.el-input__wrapper.is-focus,
+.el-input-number .el-input__wrapper.is-focus,
+.el-cascader .el-input__wrapper.is-focus {
+  box-shadow: 0 0 0 1px var(--mt-form-control-border-focus) inset;
+}
+
+.el-textarea__inner {
+  min-height: 88px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: var(--mt-form-control-radius);
+  box-shadow: 0 0 0 1px var(--mt-form-control-border) inset;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.el-form-item {
+  margin-bottom: 18px;
+}
+
+.el-form-item__label {
+  color: #24364d;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* 筛选区查询与重置按钮的公共操作组，任何宽度下都作为一个整体。 */
+.filter-actions {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.filter-actions .el-button + .el-button {
+  margin-left: 0;
+}
+
+/* 列表筛选工具栏：弱化辅助筛选，不与 52px 的业务录入表单争夺层级。 */
+.filter-bar {
+  --mt-filter-control-height: 40px;
+}
+
+.filter-bar .el-input,
+.filter-bar .el-select,
+.filter-bar .el-date-editor,
+.filter-bar .el-input-number,
+.filter-bar .el-cascader {
+  --el-component-size: var(--mt-filter-control-height);
+}
+
+.filter-bar .el-input__wrapper,
+.filter-bar .el-select__wrapper,
+.filter-bar .el-date-editor.el-input__wrapper,
+.filter-bar .el-date-editor .el-input__wrapper,
+.filter-bar .el-input-number .el-input__wrapper,
+.filter-bar .el-cascader .el-input__wrapper {
+  min-height: var(--mt-filter-control-height);
+}
+
+.filter-bar .el-button {
+  --el-button-size: var(--mt-filter-control-height);
+  min-width: 76px;
+  height: var(--mt-filter-control-height);
+  min-height: var(--mt-filter-control-height);
+  font-size: 13px;
+}
+
+/* ============================================
  * Button System
  * 继承 Element Plus 的 .el-button 基础结构
  * 通过 type / is-plain / is-text / is-link / size 五个变体维度
@@ -15,6 +141,9 @@
 
 /* -------- 基础规则（所有按钮通用）-------- */
 .el-button {
+  --el-button-size: var(--mt-form-control-height);
+  height: var(--el-button-size);
+  min-height: var(--el-button-size);
   min-width: 84px;
   border-radius: var(--mt-btn-radius);
   font-weight: 850;
@@ -26,6 +155,90 @@
     border-color 0.18s ease,
     background 0.18s ease,
     color 0.18s ease;
+}
+
+/* ============================================
+ * Table System
+ * 所有业务表格统一表头、行高、文字层级和交互色；功能模块只定义列和数据布局。
+ * ============================================ */
+.el-table {
+  --el-table-border-color: #e4ebf2;
+  --el-table-header-bg-color: #f6f9fc;
+  --el-table-header-text-color: #65768c;
+  --el-table-text-color: #42536a;
+  --el-table-row-hover-bg-color: #eef9f7;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 12px;
+  color: var(--el-table-text-color);
+  font-size: 14px;
+}
+
+.el-table th.el-table__cell,
+.el-table td.el-table__cell {
+  padding-top: 0;
+  padding-bottom: 0;
+  border-bottom-color: var(--el-table-border-color);
+}
+
+.el-table th.el-table__cell {
+  height: var(--mt-table-header-height);
+  color: var(--el-table-header-text-color);
+  background: var(--el-table-header-bg-color);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.el-table td.el-table__cell {
+  height: var(--mt-table-row-height);
+  color: var(--el-table-text-color);
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.el-table .cell {
+  padding-right: 14px;
+  padding-left: 14px;
+  line-height: 1.45;
+}
+
+.el-table .el-table__row--striped td.el-table__cell {
+  background: #fbfcfe;
+}
+
+.el-table .el-table__body tr:hover > td.el-table__cell,
+.el-table .el-table__body tr.hover-row > td.el-table__cell {
+  background: var(--el-table-row-hover-bg-color);
+}
+
+.el-table td.el-table__cell strong {
+  color: #203249;
+  font-weight: 600;
+}
+
+.el-table .el-button + .el-button {
+  margin-left: 0;
+}
+
+.el-table__empty-block {
+  min-height: 160px;
+}
+
+.el-table__fixed-right::before,
+.el-table__fixed::before {
+  background-color: var(--el-table-border-color);
+}
+
+.el-table th.el-table-fixed-column--right {
+  background: var(--el-table-header-bg-color);
+}
+
+.el-table td.el-table-fixed-column--right {
+  background: #ffffff;
+}
+
+.el-table .el-table__row--striped td.el-table-fixed-column--right {
+  background: #fbfcfe;
 }
 
 .el-button:hover,
@@ -61,14 +274,14 @@
 
 /* -------- Default 按钮（无 type）-------- */
 .el-button:not(
-    .el-button--primary,
-    .el-button--success,
-    .el-button--danger,
-    .el-button--warning,
-    .el-button--info,
-    .is-text,
-    .is-link
-  ) {
+  .el-button--primary,
+  .el-button--success,
+  .el-button--danger,
+  .el-button--warning,
+  .el-button--info,
+  .is-text,
+  .is-link
+) {
   color: var(--mt-btn-text);
   border-color: var(--mt-btn-border);
   background: linear-gradient(180deg, #ffffff 0%, var(--mt-btn-ghost) 100%);

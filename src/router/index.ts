@@ -7,9 +7,45 @@ export const routes: RouteRecordRaw[] = [
   {
     path: '/login',
     name: 'Login',
-    component: () => import('@/views/login/index.vue'),
+    component: () => import('@/views/auth/login/index.vue'),
     meta: {
       title: '登录',
+      icon: '',
+      requiresAuth: false,
+      hidden: true,
+      keepAlive: false,
+    },
+  },
+  {
+    path: '/activate',
+    name: 'Activate',
+    component: () => import('@/views/auth/activate/index.vue'),
+    meta: {
+      title: '激活账户',
+      icon: '',
+      requiresAuth: false,
+      hidden: true,
+      keepAlive: false,
+    },
+  },
+  {
+    path: '/forgot-password',
+    name: 'ForgotPassword',
+    component: () => import('@/views/auth/forgot-password/index.vue'),
+    meta: {
+      title: '找回密码',
+      icon: '',
+      requiresAuth: false,
+      hidden: true,
+      keepAlive: false,
+    },
+  },
+  {
+    path: '/reset-password',
+    name: 'ResetPassword',
+    component: () => import('@/views/auth/reset-password/index.vue'),
+    meta: {
+      title: '重置密码',
       icon: '',
       requiresAuth: false,
       hidden: true,

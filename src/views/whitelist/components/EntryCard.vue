@@ -1,84 +1,83 @@
 <template>
   <article class="entry-card">
     <header class="entry-card__header">
-      <span class="entry-card__avatar">{{ item.avatar }}</span>
+      <span class="entry-card__avatar">{{ avatarText }}</span>
       <div class="entry-card__heading">
-        <h3>{{ item.name }}</h3>
-        <p>{{ item.role }} · {{ item.type }} · {{ item.region }}</p>
+        <h3>{{ item.subject_name }}</h3>
+        <p>{{ item.role_name }} · {{ item.entity_type_name }} · {{ countryName }}</p>
       </div>
     </header>
 
     <div class="entry-card__divider" aria-hidden="true" />
 
-    <ul class="entry-card__info">
-      <li v-for="(row, index) in infoRows" :key="index">
+    <dl class="entry-card__info">
+      <div v-for="row in infoRows" :key="row.label">
         <span class="entry-card__info-icon">
           <el-icon><component :is="row.icon" /></el-icon>
         </span>
-        <span class="entry-card__info-label">{{ row.label }}</span>
-        <span class="entry-card__info-value">{{ row.value }}</span>
-      </li>
-    </ul>
+        <dt>{{ row.label }}</dt>
+        <dd :class="{ 'is-code': row.code }" :title="row.value">{{ row.value }}</dd>
+      </div>
+    </dl>
 
     <footer class="entry-card__footer">
-      <el-button type="primary" plain size="small" :icon="ArrowRight">
-        查看详情
-      </el-button>
-      <StatusBadge
-        :label="item.status"
-        :type="item.statusBadge"
-        :effect="isPending(item.status) ? 'pending' : undefined"
-      />
+      <StatusBadge :label="item.status_name" :type="statusMeta.type" :effect="statusMeta.effect" />
+      <div class="entry-card__actions">
+        <el-button
+          v-if="item.status === 1"
+          size="small"
+          type="warning"
+          plain
+          :icon="Upload"
+          @click="emit('supplement', item)"
+        >
+          补充文件
+        </el-button>
+        <el-button size="small" type="primary" plain :icon="ArrowRight" @click="emit('view', item)">
+          查看详情
+        </el-button>
+      </div>
     </footer>
   </article>
 </template>
 
 <script setup lang="ts">
-import { ArrowRight, OfficeBuilding, Postcard, UserFilled } from '@element-plus/icons-vue';
-import { computed } from 'vue';
-import type { Component } from 'vue';
+import { computed, type Component } from 'vue';
+import { ArrowRight, Calendar, Document, Files, Upload } from '@element-plus/icons-vue';
 
-import StatusBadge, {
-  type StatusBadgeType,
-} from '@/components/admin/StatusBadge.vue';
+import StatusBadge from '@/components/admin/StatusBadge.vue';
+import { getCountryLabel } from '@/constants/countries';
 
-export interface EntryItem {
-  id: string;
-  avatar: string;
-  name: string;
-  role: string;
-  type: string;
-  region: string;
-  status: string;
-  statusBadge: StatusBadgeType;
-  tags: string[];
-}
+import type { WhitelistItem } from '@/api/modules/whitelist';
+import { WHITELIST_STATUS_MAP, type WhitelistStatus } from '../composables/useWhitelistList';
 
-const props = defineProps<{
-  item: EntryItem;
+const props = defineProps<{ item: WhitelistItem }>();
+const emit = defineEmits<{
+  (event: 'view', item: WhitelistItem): void;
+  (event: 'supplement', item: WhitelistItem): void;
 }>();
+
+const statusMeta = computed(() => WHITELIST_STATUS_MAP[props.item.status as WhitelistStatus]);
+const countryName = computed(() => getCountryLabel(props.item.country));
 
 interface InfoRow {
   label: string;
   value: string;
   icon: Component;
+  code?: boolean;
 }
 
-const ICONS: Record<string, Component> = {
-  bank: OfficeBuilding,
-  account: Postcard,
-  id: UserFilled,
-};
-
+/** 卡片只展示识别与追踪所需信息，完整业务资料统一进入详情页查看。 */
 const infoRows = computed<InfoRow[]>(() => [
-  { label: '银行', value: props.item.tags[0] ?? '-', icon: ICONS.bank },
-  { label: '账户/识别码', value: props.item.tags[1] ?? '-', icon: ICONS.account },
-  { label: '白名单 ID', value: props.item.tags[2] ?? props.item.id, icon: ICONS.id },
+  { label: '白名单编号', value: props.item.whitelist_no, icon: Document, code: true },
+  { label: '附件数量', value: `${props.item.file_count} 个`, icon: Files },
+  { label: '提交时间', value: props.item.submitted_at || '—', icon: Calendar },
 ]);
 
-function isPending(status: string) {
-  return /待审核|待处理|处理中/.test(status);
-}
+const avatarText = computed(() => {
+  const name = props.item.subject_name?.trim() ?? '';
+  return name ? name.charAt(0).toUpperCase() : '·';
+});
 </script>
 
 <style scoped lang="scss">
@@ -87,21 +86,24 @@ function isPending(status: string) {
   min-width: 0;
   flex-direction: column;
   padding: 22px 24px;
-  background: #ffffff;
-  border: 1px solid #e1e8f1;
-  border-radius: 14px;
-  box-shadow: 0 14px 36px rgb(16 30 54 / 6%);
+  border: 1px solid #dfe8ef;
+  border-radius: 15px;
+  background: #fff;
+  box-shadow: 0 12px 32px rgb(16 39 68 / 6%);
   transition:
     transform 0.18s ease,
+    border-color 0.18s ease,
     box-shadow 0.18s ease;
 
   &:hover {
+    border-color: #bcdedc;
+    box-shadow: 0 18px 42px rgb(16 39 68 / 10%);
     transform: translateY(-2px);
-    box-shadow: 0 18px 44px rgb(16 30 54 / 10%);
   }
 
   &__header {
     display: flex;
+    min-width: 0;
     align-items: center;
     gap: 14px;
   }
@@ -110,130 +112,137 @@ function isPending(status: string) {
     display: inline-flex;
     width: 48px;
     height: 48px;
-    flex: 0 0 48px;
     align-items: center;
     justify-content: center;
-    border-radius: 10px;
-    background: linear-gradient(135deg, #e8f3ff 0%, #d8e8ff 100%);
-    color: #2878ff;
+    border-radius: 13px;
+    color: #176fcb;
+    background: linear-gradient(135deg, #e7f4ff, #e8f8f5);
     font-size: 18px;
-    font-weight: 800;
+    font-weight: 750;
   }
 
   &__heading {
-    display: grid;
     min-width: 0;
     flex: 1;
-    gap: 4px;
 
     h3 {
       margin: 0;
       overflow: hidden;
-      color: #0c2a5a;
-      font-size: 16px;
-      font-weight: 800;
+      color: #102a49;
+      font-size: 17px;
+      font-weight: 700;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
 
     p {
-      margin: 0;
+      margin: 5px 0 0;
       overflow: hidden;
-      color: #6b7a90;
-      font-size: 12px;
-      font-weight: 600;
+      color: #718298;
+      font-size: 13px;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
   }
 
   &__divider {
-    position: relative;
-    height: 14px;
-    margin: 16px 0 8px;
-
-    &::before {
-      position: absolute;
-      top: 50%;
-      left: 0;
-      right: 0;
-      height: 1px;
-      content: '';
-      background: linear-gradient(90deg, transparent 0%, #c8d9e7 22%, #c8d9e7 78%, transparent 100%);
-      transform: translateY(-50%);
-    }
+    height: 1px;
+    margin: 18px 0 12px;
+    background: linear-gradient(90deg, transparent, #dce6ee 8%, #dce6ee 92%, transparent);
   }
 
   &__info {
     display: grid;
-    gap: 12px;
-    margin: 0 0 18px;
-    padding: 0;
-    list-style: none;
+    margin: 0;
+    gap: 9px;
+  }
 
-    li {
-      display: grid;
-      align-items: center;
-      grid-template-columns: 28px 88px 1fr;
-      gap: 10px;
-    }
+  &__info > div {
+    display: grid;
+    min-width: 0;
+    align-items: center;
+    grid-template-columns: 30px 86px minmax(0, 1fr);
+    gap: 10px;
   }
 
   &__info-icon {
     display: inline-flex;
-    width: 28px;
-    height: 28px;
-    flex: 0 0 28px;
+    width: 30px;
+    height: 30px;
     align-items: center;
     justify-content: center;
-    border-radius: 8px;
-    background: linear-gradient(135deg, #e8f6ff 0%, #d5ecff 100%);
-    color: #2878ff;
+    border-radius: 9px;
+    color: #2878d7;
+    background: #edf5ff;
     font-size: 14px;
   }
 
-  &__info-label {
-    color: #6b7a90;
-    font-size: 13px;
-    font-weight: 600;
+  dt {
+    color: #6f8095;
+    font-size: 12px;
   }
 
-  &__info-value {
-    display: inline-flex;
-    align-items: center;
+  dd {
     min-width: 0;
-    padding: 6px 10px;
-    background: #eef3f8;
-    border-radius: 8px;
-    color: #0c2a5a;
-    font-size: 12px;
-    font-weight: 700;
+    margin: 0;
+    padding: 7px 10px;
     overflow: hidden;
+    border-radius: 8px;
+    color: #163150;
+    background: #eef3f8;
+    font-size: 12px;
+    font-weight: 600;
     text-overflow: ellipsis;
     white-space: nowrap;
+
+    &.is-code {
+      color: #087f7b;
+      font-family: 'JetBrains Mono', Consolas, monospace;
+    }
   }
 
   &__footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: wrap;
     gap: 12px;
-    margin-top: auto;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid #e8edf2;
+  }
+
+  &__actions {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 8px;
+
+    :deep(.el-button + .el-button) {
+      margin-left: 0;
+    }
   }
 
   @include mobile {
-    padding: 18px 20px;
+    padding: 18px;
 
-    &__info li {
-      grid-template-columns: 24px 80px 1fr;
+    &__avatar {
+      width: 44px;
+      height: 44px;
+    }
+
+    &__info > div {
+      grid-template-columns: 28px 76px minmax(0, 1fr);
       gap: 8px;
     }
 
     &__info-icon {
-      width: 24px;
-      height: 24px;
-      flex: 0 0 24px;
-      font-size: 12px;
+      width: 28px;
+      height: 28px;
+    }
+
+    &__actions {
+      justify-content: flex-end;
     }
   }
 }

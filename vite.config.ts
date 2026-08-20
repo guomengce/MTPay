@@ -19,6 +19,8 @@ export default defineConfig({
   },
   server: {
     host: '0.0.0.0',
-    port: 9527
-  }
+    // 代理端固定使用 9528，避免与管理端 9527 冲突。
+    port: 9528,
+    strictPort: true,
+  },
 });

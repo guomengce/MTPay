@@ -1,220 +1,168 @@
 <template>
-  <el-card class="company-card" shadow="never">
-    <template #header>
-      <div class="company-card__header">
-        <div class="company-card__title">
-          <span>
-            <el-icon><OfficeBuilding /></el-icon>
-          </span>
-          <h2>企业资料</h2>
+  <article class="profile-card">
+    <header class="profile-card__hero">
+      <div class="profile-card__identity">
+        <span class="profile-card__avatar">{{ companyInitial }}</span>
+        <div>
+          <small>企业代理账户</small>
+          <h2>{{ profile?.company_name || '—' }}</h2>
+          <p>{{ profile?.agent_code || '资料加载中' }}</p>
         </div>
-        <StatusBadge label="正常使用" type="success" />
       </div>
-    </template>
+      <StatusBadge
+        :label="profile?.status_name || '未知状态'"
+        :type="profile?.status === 1 ? 'success' : 'warning'"
+      />
+    </header>
 
-    <div class="company-card__body">
-      <section class="company-card__field is-wide">
-        <label>企业名称</label>
-        <div>
-          <span
-            ><el-icon><OfficeBuilding /></el-icon
-          ></span>
-          <strong>代理A · Apex Trading</strong>
-        </div>
-      </section>
+    <div class="profile-card__section-title">
+      <span>账户资料</span>
+      <small>资料由 MTPay 管理端维护</small>
+    </div>
 
-      <section class="company-card__field">
-        <label>Email</label>
+    <div class="profile-card__details">
+      <section v-for="item in details" :key="item.label" class="profile-card__detail">
+        <span><el-icon><component :is="item.icon" /></el-icon></span>
         <div>
-          <span
-            ><el-icon><Message /></el-icon
-          ></span>
-          <strong>finance@apex.test</strong>
-        </div>
-      </section>
-
-      <section class="company-card__field">
-        <label>电话</label>
-        <div>
-          <span
-            ><el-icon><Phone /></el-icon
-          ></span>
-          <strong>+65 6123 8801</strong>
-        </div>
-      </section>
-
-      <section class="company-card__field is-wide">
-        <label>代理编号</label>
-        <div>
-          <span
-            ><el-icon><Postcard /></el-icon
-          ></span>
-          <strong>AG-A</strong>
+          <small>{{ item.label }}</small>
+          <strong>{{ item.value }}</strong>
         </div>
       </section>
     </div>
-  </el-card>
+  </article>
 </template>
 
 <script setup lang="ts">
-import { Message, OfficeBuilding, Phone, Postcard } from '@element-plus/icons-vue';
+import { Clock, Message, Phone, Postcard } from '@element-plus/icons-vue';
+import { computed } from 'vue';
 
+import type { AgentProfile } from '@/api/modules/auth';
 import StatusBadge from '@/components/admin/StatusBadge.vue';
+
+const props = defineProps<{ profile: AgentProfile | null }>();
+
+const companyInitial = computed(() => props.profile?.company_name?.trim().charAt(0).toUpperCase() || 'M');
+const details = computed(() => [
+  { label: '联系 Email', value: props.profile?.email || '—', icon: Message },
+  { label: '联系电话', value: props.profile?.phone || '未设置', icon: Phone },
+  { label: '代理编号', value: props.profile?.agent_code || '—', icon: Postcard },
+  { label: '账户激活时间', value: props.profile?.activated_at || '—', icon: Clock },
+]);
 </script>
 
 <style scoped lang="scss">
-.company-card {
+.profile-card {
   min-width: 0;
   overflow: hidden;
-  border-color: #dfe7ef;
-  border-radius: 14px;
-  box-shadow: 0 18px 48px rgb(16 30 54 / 8%);
+  border: 1px solid rgb(192 211 227 / 70%);
+  border-radius: 20px;
+  background: rgb(255 255 255 / 96%);
+  box-shadow: 0 18px 50px rgb(35 82 126 / 8%);
 
-  :deep(.el-card__header) {
-    padding: 20px 24px;
-  }
-
-  :deep(.el-card__body) {
-    padding: 22px 24px 26px;
-  }
-
-  &__header,
-  &__title {
+  &__hero {
+    position: relative;
     display: flex;
-    align-items: center;
-  }
-
-  &__header {
+    min-height: 150px;
+    align-items: flex-start;
     justify-content: space-between;
     gap: 18px;
+    overflow: hidden;
+    padding: 28px;
+    background:
+      radial-gradient(circle at 94% 10%, rgb(53 199 190 / 18%), transparent 32%),
+      linear-gradient(135deg, #f5fbff 0%, #f1fbf9 100%);
+
+    &::after {
+      position: absolute;
+      right: -45px;
+      bottom: -72px;
+      width: 180px;
+      height: 180px;
+      border: 1px solid rgb(39 185 170 / 18%);
+      border-radius: 50%;
+      content: '';
+    }
   }
 
-  &__title {
+  &__identity {
+    position: relative;
+    z-index: 1;
+    display: flex;
     min-width: 0;
-    gap: 14px;
+    align-items: center;
+    gap: 18px;
+
+    small { color: #668097; font-size: 12px; font-weight: 700; }
+    h2 { margin: 6px 0; color: #071833; font-size: 24px; line-height: 1.25; }
+    p { margin: 0; color: #168f8a; font-size: 13px; font-weight: 800; letter-spacing: 0.06em; }
+  }
+
+  &__avatar {
+    display: inline-flex;
+    width: 72px;
+    height: 72px;
+    flex: 0 0 72px;
+    align-items: center;
+    justify-content: center;
+    border: 4px solid rgb(255 255 255 / 82%);
+    border-radius: 20px;
+    color: #fff;
+    background: linear-gradient(135deg, #25bcae, #2787c4);
+    box-shadow: 0 12px 26px rgb(30 145 170 / 25%);
+    font-size: 28px;
+    font-weight: 850;
+  }
+
+  &__section-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 28px 8px;
+    span { color: #13243b; font-size: 16px; font-weight: 850; }
+    small { color: #8a9aae; font-size: 12px; }
+  }
+
+  &__details {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding: 14px 28px 28px;
+  }
+
+  &__detail {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 13px;
+    padding: 16px;
+    border: 1px solid #e3edf4;
+    border-radius: 13px;
+    background: #fbfdff;
 
     > span {
       display: inline-flex;
-      width: 46px;
-      height: 46px;
-      flex: 0 0 46px;
+      width: 40px;
+      height: 40px;
+      flex: 0 0 40px;
       align-items: center;
       justify-content: center;
-      color: #0b4fb4;
-      background: #eef5ff;
-      border-radius: 50%;
-      font-size: 24px;
+      border-radius: 11px;
+      color: #168f8a;
+      background: #e9f8f6;
+      font-size: 18px;
     }
 
-    h2 {
-      margin: 0;
-      color: #071833;
-      font-size: 22px;
-      font-weight: 850;
-      letter-spacing: 0;
-    }
-  }
-
-  &__dot {
-    display: none;
-  }
-
-  &__body {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 20px;
-  }
-
-  &__field {
-    display: grid;
-    min-width: 0;
-    gap: 9px;
-
-    &.is-wide {
-      grid-column: 1 / -1;
-    }
-
-    label {
-      color: #2f4260;
-      font-size: 14px;
-      font-weight: 850;
-    }
-
-    div {
-      display: grid;
-      min-width: 0;
-      min-height: 54px;
-      grid-template-columns: 52px minmax(0, 1fr);
-      overflow: hidden;
-      border: 1px solid #cbd8e8;
-      border-radius: 10px;
-    }
-
-    span {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      color: #183150;
-      background: #f8fafc;
-      border-right: 1px solid #cbd8e8;
-      font-size: 22px;
-    }
-
-    strong {
-      display: flex;
-      min-width: 0;
-      align-items: center;
-      padding: 0 16px;
-      overflow: hidden;
-      color: #071833;
-      font-size: 15px;
-      font-weight: 650;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
+    div { min-width: 0; }
+    small { display: block; margin-bottom: 5px; color: #8494a8; font-size: 12px; }
+    strong { display: block; overflow: hidden; color: #172942; font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
   }
 
   @include mobile {
-    :deep(.el-card__header),
-    :deep(.el-card__body) {
-      padding: 20px 18px;
-    }
-
-    &__header {
-      align-items: flex-start;
-      flex-direction: column;
-    }
-
-    &__title {
-      gap: 14px;
-
-      > span {
-        width: 52px;
-        height: 52px;
-        flex-basis: 52px;
-      }
-
-      h2 {
-        font-size: 24px;
-      }
-    }
-
-    &__body {
-      grid-template-columns: 1fr;
-      gap: 18px;
-    }
-
-    &__field {
-      div {
-        min-height: 64px;
-        grid-template-columns: 56px minmax(0, 1fr);
-      }
-
-      label,
-      strong {
-        font-size: 16px;
-      }
-    }
+    &__hero { align-items: flex-start; flex-direction: column; padding: 22px; }
+    &__identity { align-items: flex-start; }
+    &__avatar { width: 58px; height: 58px; flex-basis: 58px; border-radius: 16px; }
+    &__section-title { align-items: flex-start; flex-direction: column; gap: 5px; padding: 22px 20px 8px; }
+    &__details { grid-template-columns: 1fr; padding: 12px 20px 22px; }
   }
 }
 </style>
