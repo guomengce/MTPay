@@ -9,13 +9,12 @@
  */
 import { computed, reactive, ref, watch } from 'vue';
 import { ElMessage } from 'element-plus';
-import type { FormInstance, FormRules, UploadRawFile, UploadUserFile } from 'element-plus';
+import type { FormInstance, FormRules, UploadFile, UploadFiles, UploadUserFile } from 'element-plus';
 
-import type { SubmitWhitelistPayload } from '@/api/modules/whitelist';
+import type { SubmitWhitelistPayload, WhitelistFile } from '@/api/modules/whitelist';
 
 export interface WhitelistSubmitData {
   business: SubmitWhitelistPayload;
-  files: File[];
 }
 
 interface WhitelistSubmitFormState {
@@ -236,23 +235,11 @@ export function useWhitelistSubmitForm() {
   }
 
   /** -------------------- 附件提取与校验 -------------------- */
-  function extractFiles(): File[] | null {
-    const files = fileList.value
-      .map((item) => item.raw)
-      .filter((raw): raw is UploadRawFile => Boolean(raw)) as File[];
-    if (files.some((file) => file.size > MAX_FILE_SIZE)) {
-      ElMessage.warning('单个文件不能超过 10 MB');
-      return null;
-    }
-    if (
-      files.some(
-        (file) => !ALLOWED_FILE_EXTENSIONS.has(file.name.split('.').pop()?.toLowerCase() || ''),
-      )
-    ) {
-      ElMessage.warning('仅支持 PDF、PNG、JPG、JPEG 文件');
-      return null;
-    }
-    return files;
+  async function handleFileChange(file: UploadFile, currentFiles: UploadFiles, uploadFile: (file: File) => Promise<WhitelistFile>) {
+    fileList.value=currentFiles;
+    if(!file.raw||file.status==='success')return;
+    if(file.raw.size>MAX_FILE_SIZE||!ALLOWED_FILE_EXTENSIONS.has(file.raw.name.split('.').pop()?.toLowerCase()||'')){ElMessage.warning('仅支持 10 MB 内的 PDF、PNG、JPG、JPEG 文件');fileList.value=fileList.value.filter(item=>item.uid!==file.uid);return;}
+    try{file.status='uploading';file.response=await uploadFile(file.raw);file.status='success';}catch{file.status='fail';fileList.value=fileList.value.filter(item=>item.uid!==file.uid);}
   }
 
   function handleExceed() {
@@ -264,9 +251,11 @@ export function useWhitelistSubmitForm() {
     if (!formRef.value) return null;
     if (!(await formRef.value.validate().catch(() => false))) return null;
     const business = buildPayload();
-    const files = extractFiles();
-    if (!business || !files) return null;
-    return { business, files };
+    if (!business) return null;
+    if(fileList.value.some(item=>item.status==='uploading'||item.status==='ready'))return null;
+    const fileIds=fileList.value.map(item=>(item.response as WhitelistFile|undefined)?.file_id).filter((id):id is number=>typeof id==='number');
+    business.file_ids=fileIds.length?fileIds:undefined;
+    return { business };
   }
 
   function resetForm() {
@@ -289,6 +278,7 @@ export function useWhitelistSubmitForm() {
     formSectionTitle,
     formSectionDescription,
     handleExceed,
+    handleFileChange,
     validateAndBuild,
     resetForm,
   };

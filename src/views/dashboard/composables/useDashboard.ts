@@ -9,6 +9,7 @@ import * as dashboardApi from '@/api/modules/dashboard';
 import type { AssetOverview } from '@/api/modules/dashboard';
 import type { TransactionItem } from '@/api/modules/transaction';
 import type { StatusBadgeType } from '@/components/admin/StatusBadge.vue';
+import { formatExchangeRate, formatFixedFee } from '@/utils/decimal';
 
 const BALANCE_TONE: Record<string, 'teal' | 'blue' | 'green'> = {
   USDT: 'teal',
@@ -115,12 +116,10 @@ export function useDashboard() {
   );
 
   const pendingCount = computed(() => overview.value?.pending_counts?.total ?? 0);
-  const feeAmount = computed(() => overview.value?.capabilities?.withdrawal_fee_amount ?? '');
+  const feeAmount = computed(() => formatFixedFee(overview.value?.capabilities?.withdrawal_fee_amount));
   const companyName = computed(() => overview.value?.user?.company_name ?? '');
 
-  const recentTransactions = computed<RecentTransactionItem[]>(() =>
-    (overview.value?.recent_orders ?? []).map(recentTransaction),
-  );
+  const recentTransactions = computed<TransactionItem[]>(() => overview.value?.recent_orders ?? []);
 
   const rateItems = computed<RateItem[]>(() => {
     const rates = overview.value?.effective_exchange_rates ?? {};
@@ -130,8 +129,8 @@ export function useDashboard() {
         const rate = rates[code]!;
         return {
           pair: `${code} → ${rate.target_currency.code}`,
-          value: rate.rate,
-          sample: `${rate.rate_source_name} · 比例 ${rate.rate}`,
+          value: formatExchangeRate(rate.rate),
+          sample: `${rate.rate_source_name} · 比例 ${formatExchangeRate(rate.rate)}`,
           mark: code === 'USDT' ? '₮' : '$',
         };
       });

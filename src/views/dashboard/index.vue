@@ -1,5 +1,5 @@
 <template>
-  <section class="dashboard-page">
+  <section v-loading="loading" class="dashboard-page">
     <AdminHero
       title="MTPay 营运总览"
       description="管理代理、资金与审核流程"
@@ -19,10 +19,6 @@
           <em>待处理</em>
         </div>
         <p>入金、兑换、白名单及出金</p>
-        <el-divider />
-        <el-button type="primary" plain class="dashboard-page__todo-btn">
-          查看待处理项目 <el-icon><ArrowRight /></el-icon>
-        </el-button>
       </div>
     </div>
 
@@ -39,7 +35,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
-import { ArrowDown, ArrowRight, BellFilled, Switch, Upload, UserFilled } from '@element-plus/icons-vue';
+import { ArrowDown, BellFilled, Switch, Upload, UserFilled } from '@element-plus/icons-vue';
 import BalanceCard from './components/BalanceCard.vue';
 import ExchangeRatePanel from '@/components/admin/ExchangeRatePanel.vue';
 import QuickActionCard from './components/QuickActionCard.vue';
@@ -47,6 +43,7 @@ import RecentTransactions from './components/RecentTransactions.vue';
 import { useDashboard } from './composables/useDashboard';
 
 const {
+  loading,
   balances,
   pendingCount,
   feeAmount,
@@ -215,15 +212,6 @@ onMounted(loadOverview);
     font-weight: 600;
   }
 
-  &__todo :deep(.el-divider) {
-    margin: 14px 0 10px;
-  }
-
-  &__todo-btn {
-    width: 100%;
-    justify-content: space-between;
-  }
-
   &__actions {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -233,7 +221,7 @@ onMounted(loadOverview);
 
   &__content {
     display: grid;
-    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.2fr);
+    grid-template-columns: minmax(0, 1fr);
     gap: 22px;
   }
 
@@ -241,10 +229,6 @@ onMounted(loadOverview);
     &__balances,
     &__actions {
       grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    &__content {
-      grid-template-columns: 1fr;
     }
 
     &__banner {
@@ -264,8 +248,7 @@ onMounted(loadOverview);
 
   @include mobile {
     &__balances,
-    &__actions,
-    &__content {
+    &__actions {
       grid-template-columns: 1fr;
     }
 

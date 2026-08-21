@@ -1,12 +1,5 @@
 <template>
   <section class="convert-form">
-    <header class="convert-form__header">
-      <div>
-        <h3 class="convert-form__title">发起兑换</h3>
-        <p class="convert-form__subtitle">选择支付资产并填写金额，平台审核后兑换为 USD</p>
-      </div>
-    </header>
-
     <el-form
       ref="formRef"
       :model="form"
@@ -72,26 +65,11 @@
 
           <footer class="convert-form__asset-foot">
             <span>当前汇率</span>
-            <strong v-if="rate"> 1 {{ form.source_currency_code }} ≈ {{ rate.rate }} USD </strong>
+            <strong v-if="rate"> 1 {{ form.source_currency_code }} ≈ {{ formatExchangeRate(rate.rate) }} USD </strong>
             <strong v-else>暂无可用汇率</strong>
             <em v-if="rate">{{ rate.rate_source_name }}</em>
           </footer>
         </article>
-      </section>
-
-      <section class="convert-form__summary">
-        <div>
-          <i class="ri-lock-2-line" aria-hidden="true" />
-          <span><strong>资产冻结</strong><small>提交后冻结来源金额</small></span>
-        </div>
-        <div>
-          <i class="ri-scales-3-line" aria-hidden="true" />
-          <span><strong>服务端计价</strong><small>提交时重新确认实际汇率</small></span>
-        </div>
-        <div>
-          <i class="ri-shield-check-line" aria-hidden="true" />
-          <span><strong>审核到账</strong><small>审核通过后计入 USD</small></span>
-        </div>
       </section>
 
       <footer class="convert-form__submit-row">
@@ -125,6 +103,7 @@ import type { FormInstance, FormRules } from 'element-plus';
 import { Money, Right } from '@element-plus/icons-vue';
 
 import type { ExchangeBalance, ExchangeEffectiveRate } from '@/api/modules/exchange';
+import { formatExchangeRate } from '@/utils/decimal';
 
 const props = defineProps<{
   submitting?: boolean;
@@ -440,54 +419,7 @@ defineExpose({ reset });
     font-size: 15px;
   }
 }
-.convert-form__summary {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  overflow: hidden;
-  border: 1px solid #e2ebf1;
-  border-radius: 14px;
-  background: #f8fafc;
 
-  > div {
-    display: flex;
-    min-width: 0;
-    align-items: center;
-    gap: 11px;
-    padding: 14px 16px;
-
-    & + div {
-      border-left: 1px solid #e2ebf1;
-    }
-
-    > i {
-      display: grid;
-      width: 34px;
-      height: 34px;
-      flex: none;
-      place-items: center;
-      border-radius: 10px;
-      color: #07978f;
-      background: #e5f7f4;
-      font-size: 17px;
-    }
-
-    span {
-      display: grid;
-      min-width: 0;
-      gap: 3px;
-    }
-
-    strong {
-      color: #24364d;
-      font-size: 13px;
-    }
-
-    small {
-      color: #8794a6;
-      font-size: 11px;
-    }
-  }
-}
 .convert-form__submit-row {
   display: flex;
   align-items: center;
@@ -519,13 +451,6 @@ defineExpose({ reset });
   }
   .convert-form__connector {
     transform: rotate(90deg);
-  }
-  .convert-form__summary {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .convert-form__summary > div + div {
-    border-top: 1px solid #e2ebf1;
-    border-left: 0;
   }
 }
 

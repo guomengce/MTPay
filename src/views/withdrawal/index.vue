@@ -8,6 +8,7 @@
 
     <section class="withdrawal-page__content">
       <ApplyForm
+        v-loading="configLoading"
         ref="applyFormRef"
         :balance="balance"
         :payers="config?.payers"
@@ -17,6 +18,7 @@
         :config-loading="configLoading"
         :submitting="withdrawalSubmitting"
         :uploading="withdrawalUploading"
+        :upload-file="uploadWithdrawalFile"
         @submit="handleSubmit"
       />
       <RecordList
@@ -36,12 +38,13 @@
       />
     </section>
 
-    <WithdrawalSupplementDialog
+    <SupplementDialog
       v-model="supplementDialogVisible"
       :row="supplementItem"
       :requirement="supplementRequirement"
       :submitting="supplementSubmitting"
       :uploading="supplementUploading"
+      :upload-file="uploadSupplementFile"
       @submit="handleSupplement"
     />
   </main>
@@ -65,7 +68,7 @@ import type {
 import AdminHero from '@/components/admin/AdminHero.vue';
 import ApplyForm from './components/ApplyForm.vue';
 import RecordList from './components/RecordList.vue';
-import WithdrawalSupplementDialog from './components/WithdrawalSupplementDialog.vue';
+import SupplementDialog from './components/SupplementDialog.vue';
 import { useWithdrawalManagement } from './composables/useWithdrawalManagement';
 
 const router = useRouter();
@@ -102,22 +105,15 @@ const supplementRequirement = ref('');
 async function handleSubmit(payload: {
   payer_whitelist_id: number;
   payee_whitelist_id: number;
-  amount: string;
-  files: File[];
+      amount: string;
+      file_ids: number[];
 }) {
   try {
-    // 1. 逐个上传附件
-    const attachmentIds: number[] = [];
-    for (const file of payload.files) {
-      const uploadedFile = await uploadWithdrawalFile(file);
-      attachmentIds.push(uploadedFile.file_id);
-    }
-    // 2. 提交订单
     const result = await submitWithdrawal({
       payer_whitelist_id: payload.payer_whitelist_id,
       payee_whitelist_id: payload.payee_whitelist_id,
       amount: payload.amount,
-      file_ids: attachmentIds,
+      file_ids: payload.file_ids,
     });
     ElMessage.success(`出金订单 ${result.order_no} 已提交，等待审核`);
     applyFormRef.value?.reset();
@@ -148,24 +144,17 @@ function extractSupplementRequirement(d: WithdrawalOrderDetail | null) {
   if (!d) return '请按平台要求补充证明材料。';
   if (d.review?.note) return d.review.note;
   const request = (d.records ?? []).find((record) => {
-    const item = record as Record<string, unknown>;
-    const text = String(item.action_name ?? item.name ?? item.event ?? '');
-    return /要求|补充|补件|supplement/i.test(text);
+    return /要求|补充|补件|supplement/i.test(record.action_name);
   });
-  return String(request?.message ?? '') || '请按平台要求补充证明材料。';
+  return request?.message || '请按平台要求补充证明材料。';
 }
 
-async function handleSupplement(payload: { files: File[]; message?: string }) {
+async function handleSupplement(payload: { file_ids: number[]; message?: string }) {
   if (!supplementItem.value) return;
   try {
-    const fileIds: number[] = [];
-    for (const file of payload.files) {
-      const uploaded = await uploadSupplementFile(file);
-      fileIds.push(uploaded.file_id);
-    }
     await submitSupplement({
       id: supplementItem.value.id,
-      file_ids: fileIds,
+      file_ids: payload.file_ids,
       message: payload.message,
     });
     ElMessage.success('补件已提交，订单将重新进入审核');

@@ -23,19 +23,8 @@ export function useWhitelistFiles() {
     }
   }
 
-  /** 逐个上传多个文件，收集 file_id 数组；遇空数组直接返回空。 */
-  async function uploadFiles(files: File[]): Promise<number[]> {
-    const ids: number[] = [];
-    for (const file of files) {
-      const result = await uploadFile(file);
-      ids.push(result.file_id);
-    }
-    return ids;
-  }
-
   return {
     uploading,
     uploadFile,
-    uploadFiles,
   };
 }

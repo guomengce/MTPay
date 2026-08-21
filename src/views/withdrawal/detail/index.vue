@@ -15,68 +15,15 @@
 
     <div v-loading="loading" class="business-detail__content">
       <template v-if="detail">
-        <DetailOrderHero
-          eyebrow="出金订单"
-          :order-no="detail.order_no"
-          :status="detail.status_name"
-          :status-type="statusType"
-          :status-effect="detail.status === 0 ? 'pending' : undefined"
-        >
-          <WithdrawalDetailAmount :detail="detail" />
+        <WithdrawalDetailContent :detail="detail" :file-loading="fileLoading" @preview="openFilePreview" @download="downloadFile" />
 
-          <template #meta>
-            <div class="detail-meta-item">
-              <i class="ri-calendar-event-line" />
-              <span><small>提交时间</small><strong>{{ detail.submitted_at || '—' }}</strong></span>
-            </div>
-            <div class="detail-meta-item">
-              <i class="ri-refresh-line" />
-              <span><small>最后更新</small><strong>{{ detail.updated_at || '—' }}</strong></span>
-            </div>
-          </template>
-        </DetailOrderHero>
-
-        <div class="business-detail__workspace">
-          <main class="business-detail__main">
-            <div class="business-detail__sections">
-              <WithdrawalFundStatusCard :detail="detail" />
-              <WithdrawalPartyCard :detail="detail" />
-
-              <WithdrawalFilesCard
-                title="申请文件"
-                description="首次提交或补交时上传的证明文件"
-                icon="ri-file-list-3-line"
-                :files="detail.application_files"
-                empty-text="未上传申请文件"
-                @preview="openFilePreview"
-                @download="downloadFile"
-              />
-
-              <WithdrawalFilesCard
-                v-if="detail.payment_files.length"
-                title="付款凭证"
-                description="平台在付款完成时上传的凭证"
-                icon="ri-receipt-line"
-                :files="detail.payment_files"
-                empty-text="暂无付款凭证"
-                @preview="openFilePreview"
-                @download="downloadFile"
-              />
-
-            </div>
-          </main>
-
-          <aside v-if="timelineItems.length" class="business-detail__aside">
-            <WithdrawalTimelineCard :items="timelineItems" />
-          </aside>
-        </div>
-
-        <WithdrawalSupplementDialog
+        <SupplementDialog
           v-model="supplementDialogVisible"
           :row="detail"
           :requirement="supplementRequirement"
           :submitting="supplementSubmitting"
           :uploading="supplementUploading"
+          :upload-file="uploadSupplementFile"
           @submit="handleSupplement"
         />
       </template>
@@ -99,23 +46,16 @@ import { ElMessage } from 'element-plus';
 import { Upload } from '@element-plus/icons-vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import type { StatusBadgeType } from '@/components/admin/StatusBadge.vue';
-import DetailOrderHero from '@/components/detail/DetailOrderHero.vue';
+import WithdrawalDetailContent from '@/views/withdrawal/detail/components/WithdrawalDetailContent.vue';
 import { useWithdrawalDetail } from '@/views/withdrawal/composables/useWithdrawalDetail';
 import { useWithdrawalFiles } from '@/views/withdrawal/composables/useWithdrawalFiles';
 import { useWithdrawalSupplement } from '@/views/withdrawal/composables/useWithdrawalSupplement';
-import { WITHDRAWAL_STATUS_MAP } from '@/views/withdrawal/composables/useWithdrawalList';
-import WithdrawalDetailAmount from '@/views/withdrawal/components/WithdrawalDetailAmount.vue';
-import WithdrawalFilesCard from '@/views/withdrawal/components/WithdrawalFilesCard.vue';
-import WithdrawalFundStatusCard from '@/views/withdrawal/components/WithdrawalFundStatusCard.vue';
-import WithdrawalPartyCard from '@/views/withdrawal/components/WithdrawalPartyCard.vue';
-import WithdrawalSupplementDialog from '@/views/withdrawal/components/WithdrawalSupplementDialog.vue';
-import WithdrawalTimelineCard from '@/views/withdrawal/components/WithdrawalTimelineCard.vue';
+import SupplementDialog from '@/views/withdrawal/components/SupplementDialog.vue';
 
 const route = useRoute();
 const router = useRouter();
 const { loading, detail, fetchDetail } = useWithdrawalDetail();
-const { openPreview, triggerDownload } = useWithdrawalFiles();
+const { loading: fileLoading, openPreview, triggerDownload } = useWithdrawalFiles();
 const {
   submitting: supplementSubmitting,
   uploading: supplementUploading,
@@ -134,47 +74,12 @@ const supplementRequirement = computed(() => {
   if (!d) return '请按平台要求补充证明材料。';
   if (d.review?.note) return d.review.note;
   const request = (d.records ?? []).find((record) => {
-    const item = record as Record<string, unknown>;
-    const text = String(item.action_name ?? item.name ?? item.event ?? '');
+    const text = record.action_name;
     return /要求|补充|补件|supplement/i.test(text);
   });
-  return String(request?.message ?? '') || '请按平台要求补充证明材料。';
+  return request?.message || '请按平台要求补充证明材料。';
 });
 
-const statusType = computed<StatusBadgeType>(() => {
-  const status = detail.value?.status;
-  if (status === undefined) return 'warning';
-  return WITHDRAWAL_STATUS_MAP[status as keyof typeof WITHDRAWAL_STATUS_MAP]?.type ?? 'gray';
-});
-
-const timelineItems = computed<{ event: string; name: string; time: string; description?: string }[]>(() =>
-  (detail.value?.records ?? [])
-    .map(
-      (
-        record,
-      ): { event: string; name: string; time: string; description?: string } | null => {
-      const item = record as Record<string, unknown>;
-      const time = (item.time as string | undefined) || (item.created_at as string | undefined);
-      if (!time) return null;
-      return {
-        event: String(item.event ?? item.action_type ?? ''),
-        name: String(item.action_name ?? item.name ?? item.event ?? '订单处理'),
-        time,
-        description: (item.message as string | undefined) || undefined,
-      };
-      },
-    )
-    .filter(
-      (
-        item,
-      ): item is {
-        event: string;
-        name: string;
-        time: string;
-        description?: string;
-      } => item !== null,
-    ),
-);
 
 function goBack() {
   void router.push('/withdrawal');
@@ -188,17 +93,12 @@ function downloadFile(fileId: number) {
   void triggerDownload(fileId);
 }
 
-async function handleSupplement(payload: { files: File[]; message?: string }) {
+async function handleSupplement(payload: { file_ids: number[]; message?: string }) {
   if (!detail.value) return;
   try {
-    const fileIds: number[] = [];
-    for (const file of payload.files) {
-      const uploaded = await uploadSupplementFile(file);
-      fileIds.push(uploaded.file_id);
-    }
     await submitSupplement({
       id: detail.value.id,
-      file_ids: fileIds,
+      file_ids: payload.file_ids,
       message: payload.message,
     });
     ElMessage.success('补件已提交，订单将重新进入审核');
@@ -225,8 +125,8 @@ watch(id, reload);
   display: flex;
   min-width: 0;
   flex-direction: column;
-  gap: 16px;
-  padding: 24px 32px 40px;
+  gap: 14px;
+  padding: 20px;
 
   &__toolbar {
     display: flex;
@@ -241,16 +141,22 @@ watch(id, reload);
     width: fit-content;
     align-items: center;
     gap: 7px;
-    padding: 0;
-    border: 0;
-    color: #5d7087;
-    background: transparent;
+    height: 36px;
+    padding: 0 14px;
+    border: 1px solid #d6e1eb;
+    border-radius: 10px;
+    color: #38536f;
+    background: #fff;
+    box-shadow: 0 4px 12px rgb(31 66 102 / 5%);
     cursor: pointer;
     font: inherit;
     font-size: 13px;
+    font-weight: 600;
 
     &:hover {
+      border-color: #9fd8d3;
       color: #0b9b92;
+      background: #f2fbfa;
     }
   }
 
@@ -262,9 +168,11 @@ watch(id, reload);
     display: grid;
     min-width: 0;
     align-items: start;
-    grid-template-columns: minmax(0, 1.5fr) minmax(320px, 0.7fr);
+    grid-template-columns: minmax(0, 1.15fr) minmax(420px, 0.95fr);
     gap: 18px;
     margin-top: 18px;
+
+    &.is-single { grid-template-columns: minmax(0, 1fr); }
   }
 
   &__main,
@@ -287,36 +195,9 @@ watch(id, reload);
   }
 }
 
-.detail-meta-item {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-}
-
-.detail-meta-item > i {
-  color: #138f9f;
-  font-size: 18px;
-}
-
-.detail-meta-item > span {
-  display: grid;
-  gap: 3px;
-}
-
-.detail-meta-item small {
-  color: #74869b;
-  font-size: 12px;
-}
-
-.detail-meta-item strong {
-  color: #2e425a;
-  font-size: 13px;
-  font-weight: 600;
-}
-
 @include narrow {
   .business-detail {
-    padding: 18px 20px 32px;
+    padding: 18px;
   }
 
   .business-detail__workspace {
@@ -330,7 +211,7 @@ watch(id, reload);
 
 @include mobile {
   .business-detail {
-    padding: 16px 0 28px;
+    padding: 12px;
   }
 
   .business-detail__back {
@@ -338,7 +219,7 @@ watch(id, reload);
   }
 
   .business-detail__toolbar {
-    align-items: stretch;
+    align-items: flex-start;
     flex-direction: column;
   }
 

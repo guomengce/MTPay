@@ -1,7 +1,7 @@
 /**
  * 白名单补件 Composable
  * - 仅在详情 status=1（待补充文件）时显示并调用；
- * - 上传新一轮附件得到 file_id，再调用 /web/supplementWhitelist 提交补件。
+ * - 仅提交上传控件已经取得的 file_id。
  */
 import { ref } from 'vue';
 
@@ -20,12 +20,11 @@ export function useWhitelistSupplement() {
    */
   async function submit(
     id: number,
-    attachments: File[],
+    fileIds: number[],
     message?: string,
   ): Promise<WhitelistItemDetail> {
     submitting.value = true;
     try {
-      const fileIds = await files.uploadFiles(attachments);
       const detail = await whitelistApi.supplementWhitelist({
         id,
         file_ids: fileIds,

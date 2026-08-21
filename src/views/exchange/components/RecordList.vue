@@ -53,31 +53,34 @@
     >
       <el-table-column prop="order_no" label="订单号" min-width="170">
         <template #default="{ row }">
-          <a
+          <strong
             class="record-list__link"
             href="javascript:void(0)"
             @click.prevent="emit('detail', row.id)"
           >
             {{ row.order_no }}
-          </a>
+        </strong><br/>
+          <small>{{ formatTime(row.submitted_at) }}</small>
         </template>
       </el-table-column>
-      <el-table-column label="兑换路径" min-width="170">
+      <el-table-column label="支付资产" min-width="170">
         <template #default="{ row }">
           <span class="record-list__path"
-            >{{ row.source_currency.code }} → {{ row.target_currency.code }}</span
-          >
+            >{{ row.source_amount }} </span
+          ><br/>
+          <small>{{ row.source_currency.code }}</small>
         </template>
       </el-table-column>
-      <el-table-column label="来源 / 目标" min-width="200" align="right">
+      <el-table-column prop="exchange_rate" label="比例" min-width="170"/>
+      <el-table-column label="获得USD" min-width="170">
         <template #default="{ row }">
-          <div class="record-list__amount-block">
-            <strong>{{ row.source_amount }} {{ row.source_currency.code }}</strong>
-            <small>= {{ row.target_amount }} {{ row.target_currency.code }}</small>
-            <!-- <em>汇率 {{ row.exchange_rate }} ({{ row.rate_source_name }})</em> -->
-          </div>
+          <span class="record-list__path"
+            >{{ row.target_amount }}  </span
+          ><br/>
+          <small>{{ row.target_currency.code }}</small>
         </template>
       </el-table-column>
+      
       <el-table-column label="状态" min-width="120">
         <template #default="{ row }">
           <StatusBadge
@@ -87,9 +90,6 @@
           />
         </template>
       </el-table-column>
-      <el-table-column label="提交时间" min-width="170">
-        <template #default="{ row }">{{ formatTime(row.submitted_at) }}</template>
-      </el-table-column>
       <el-table-column label="操作" width="110" fixed="right" align="center">
         <template #default="{ row }">
           <el-button plain type="primary" size="small" :icon="View" @click="emit('detail', row.id)">
@@ -98,6 +98,8 @@
         </template>
       </el-table-column>
     </el-table>
+
+    <ResponsiveCardList :items="cardItems" @action="handleCardAction" />
 
     <footer class="record-list__pager">
       <el-pagination
@@ -122,6 +124,8 @@ import { computed } from 'vue';
 import { View } from '@element-plus/icons-vue';
 import type { ExchangeBalance, ExchangeListParams, ExchangeOrder } from '@/api/modules/exchange';
 import StatusBadge from '@/components/admin/StatusBadge.vue';
+import ResponsiveCardList, { type ResponsiveCardItem } from '@/components/common/ResponsiveCardList.vue';
+import { formatExchangeRate } from '@/utils/decimal';
 
 import {
   EXCHANGE_STATUS_MAP,
@@ -160,6 +164,16 @@ const statusOptions = [
   { value: 2, label: '已驳回' },
 ];
 const sourceCurrencies = computed(() => props.sourceCurrencies ?? []);
+const cardItems = computed<ResponsiveCardItem[]>(() => props.list.map((row) => ({
+  key: String(row.id), title: row.order_no, subtitle: formatTime(row.submitted_at),
+  status: { label: row.status_name, type: statusMap[row.status]?.type, effect: statusMap[row.status]?.effect },
+  pending: statusMap[row.status]?.effect === 'pending', accent: 'warning',
+  fields: [
+    { label: '支付资产', value: `${row.source_amount} ${row.source_currency.code}`, strong: true },
+    { label: '兑换比例', value: formatExchangeRate(row.exchange_rate), strong: true },
+    { label: '获得资产', value: `${row.target_amount} ${row.target_currency.code}`, strong: true },
+  ], actions: [{ key: 'detail', label: '查看详情', icon: View, type: 'primary', plain: true }],
+})));
 
 const sourceCurrencyFilter = computed<number | undefined>({
   get: () => props.query.source_currency_id,
@@ -203,6 +217,9 @@ function onPage(value: number) {
 function formatTime(value: string | null) {
   return value ?? '—';
 }
+function handleCardAction(actionKey: string, itemKey: string) {
+  if (actionKey === 'detail') emit('detail', Number(itemKey));
+}
 </script>
 
 <style scoped lang="scss">
@@ -234,7 +251,6 @@ function formatTime(value: string | null) {
 }
 .record-list__filters {
   display: grid;
-  grid-template-columns: repeat(2, minmax(150px, 1fr));
   gap: 10px;
 
   > * {
@@ -280,18 +296,6 @@ function formatTime(value: string | null) {
   display: flex;
   justify-content: flex-end;
 }
-@media (min-width: 1100px) {
-  .record-list__filters {
-    grid-template-columns:
-      minmax(130px, 0.75fr)
-      minmax(130px, 0.75fr)
-      minmax(170px, 1fr)
-      minmax(150px, 0.9fr)
-      minmax(150px, 0.9fr)
-      max-content;
-    align-items: center;
-  }
-}
 @include mobile {
   .record-list {
     padding: 18px 16px;
@@ -305,12 +309,7 @@ function formatTime(value: string | null) {
   .record-list__header .el-button {
     width: 100%;
   }
-  .record-list__filters {
-    grid-template-columns: 1fr;
-  }
-  .record-list__filters .filter-actions {
-    justify-self: start;
-  }
+  .record-list__table { display: none; }
   .record-list__pager {
     justify-content: center;
     overflow-x: auto;

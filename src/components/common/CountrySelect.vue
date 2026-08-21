@@ -14,7 +14,7 @@
       v-for="country in visibleCountries"
       :key="country.code"
       :label="country.label"
-      :value="country.code"
+      :value="emitLabel ? country.label : country.code"
     >
       <span class="country-option">
         <span>{{ country.label }}</span>
@@ -28,7 +28,8 @@
 /**
  * 公共国家／地区选择器。
  * - 展示繁体中文名称；
- * - v-model 始终返回 ISO 3166-1 alpha-2 代码；
+ * - 默认 v-model 返回 ISO 3166-1 alpha-2 代码；
+ * - 通过 emitLabel 可切换为返回繁体中文名称（适配需要直接提交名称的后端）；
  * - 支持按繁体名称或两位代码搜索。
  */
 import { ref } from 'vue';
@@ -40,11 +41,13 @@ withDefaults(
     placeholder?: string;
     disabled?: boolean;
     clearable?: boolean;
+    emitLabel?: boolean;
   }>(),
   {
     placeholder: '請選擇國家／地區',
     disabled: false,
     clearable: true,
+    emitLabel: false,
   },
 );
 

@@ -117,12 +117,14 @@
                   <CountrySelect
                     v-model="formState.registration_country"
                     placeholder="請選擇註冊國家／地區"
+                    emit-label
                   />
                 </el-form-item>
                 <el-form-item label="经营国家／地区" prop="operating_country">
                   <CountrySelect
                     v-model="formState.operating_country"
                     placeholder="請選擇經營國家／地區"
+                    emit-label
                   />
                 </el-form-item>
               </div>
@@ -265,6 +267,7 @@
                 :on-exceed="handleExceed"
                 accept=".pdf,.png,.jpg,.jpeg"
                 drag
+                @change="onFileChange"
               >
                 <el-icon class="submit-form__upload-icon"><UploadFilled /></el-icon>
                 <strong>点击选择或拖动文件到此处</strong>
@@ -306,6 +309,7 @@
  * - 文件上传与接口提交仍由父级 useWhitelistForm 处理。
  */
 import { watch } from 'vue';
+import type { UploadFile, UploadFiles } from 'element-plus';
 import {
   Close,
   DocumentAdd,
@@ -317,7 +321,7 @@ import {
   User,
 } from '@element-plus/icons-vue';
 
-import type { SubmitWhitelistPayload, WhitelistItemDetail } from '@/api/modules/whitelist';
+import type { SubmitWhitelistPayload, WhitelistFile, WhitelistItemDetail } from '@/api/modules/whitelist';
 import CountrySelect from '@/components/common/CountrySelect.vue';
 import { REMITTANCE_PURPOSE_OPTIONS } from '@/constants/remittancePurposes';
 import { useWhitelistSubmitForm } from '../composables/useWhitelistSubmitForm';
@@ -326,11 +330,12 @@ const props = defineProps<{
   modelValue: boolean;
   submitting?: boolean;
   uploading?: boolean;
+  uploadFile: (file: File) => Promise<WhitelistFile>;
 }>();
 
 const emit = defineEmits<{
   (event: 'update:modelValue', value: boolean): void;
-  (event: 'submit', payload: { business: SubmitWhitelistPayload; files: File[] }): void;
+  (event: 'submit', payload: { business: SubmitWhitelistPayload }): void;
   (event: 'success', detail: WhitelistItemDetail): void;
 }>();
 
@@ -343,6 +348,7 @@ const {
   formSectionTitle,
   formSectionDescription,
   handleExceed,
+  handleFileChange,
   validateAndBuild,
   resetForm,
 } = useWhitelistSubmitForm();
@@ -350,6 +356,10 @@ const {
 async function handleSubmit() {
   const payload = await validateAndBuild();
   if (payload) emit('submit', payload);
+}
+
+function onFileChange(file: UploadFile, files: UploadFiles) {
+  void handleFileChange(file, files, props.uploadFile);
 }
 
 function close() {

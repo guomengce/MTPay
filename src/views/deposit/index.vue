@@ -8,6 +8,7 @@
 
     <section class="deposit-page__grid">
       <ApplyForm
+        v-loading="channelLoading"
         ref="applyFormRef"
         :channels="channels"
         :channels-loading="channelLoading"
@@ -29,6 +30,7 @@
         @detail="onDetail"
       />
     </section>
+
   </main>
 </template>
 
@@ -37,11 +39,11 @@
  * 入金页面
  * - 通过 useDepositManagement 串联通道 / 列表 / 表单；
  * - 申请提交成功后弹出成功提示并刷新列表；
- * - 详情跳转走 router push，不在组件内调用。
+ * - 详情改为列表页内弹框展示，不再走路由。
  */
 import { onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
+import { useRouter } from 'vue-router';
 
 import type { DepositListParams } from '@/api/modules/deposit';
 import AdminHero from '@/components/admin/AdminHero.vue';
@@ -49,8 +51,8 @@ import ApplyForm from './components/ApplyForm.vue';
 import RecordList from './components/RecordList.vue';
 import { useDepositManagement } from './composables/useDepositManagement';
 
-const router = useRouter();
 const applyFormRef = ref<InstanceType<typeof ApplyForm>>();
+const router = useRouter();
 const {
   channels,
   channelLoading,
@@ -97,8 +99,8 @@ function handleQueryChange(patch: Partial<DepositListParams>) {
   Object.assign(query, patch);
 }
 
-async function onDetail(id: number) {
-  await router.push({ name: 'DepositDetail', params: { id } });
+function onDetail(id: number) {
+  void router.push({ name: 'DepositDetail', params: { id } });
 }
 
 onMounted(async () => {

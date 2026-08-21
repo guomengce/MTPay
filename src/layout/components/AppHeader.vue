@@ -50,10 +50,6 @@
         </button>
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item command="profile">
-              <el-icon><User /></el-icon>
-              <span>个人资料</span>
-            </el-dropdown-item>
             <el-dropdown-item command="security">
               <el-icon><Lock /></el-icon>
               <span>账户安全</span>

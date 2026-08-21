@@ -1,0 +1,40 @@
+@use './breakpoints.scss' as *;
+
+.filter-bar {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  align-items: center;
+  gap: 12px 14px;
+  margin: 0;
+  padding: 16px 18px;
+  border: 1px solid #e4eaf2;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #f9fbfd, #f4f9fb);
+
+  > * { min-width: 0; width: 100%; }
+  .el-input, .el-select, .el-date-editor { width: 100%; }
+
+  .filter-actions,
+  &__actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+
+    .el-button { width: 100%; min-width: 0; margin-left: 0; }
+  }
+}
+
+@media (min-width: 1024px) and (max-width: $narrow-max) {
+  .filter-bar { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .filter-bar .filter-actions, .filter-bar__actions { grid-column: 1 / -1; justify-self: end; width: min(100%, 190px); }
+}
+
+@media (min-width: $narrow-min) and (max-width: 1023px) {
+  .filter-bar { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .filter-bar .filter-actions, .filter-bar__actions { grid-column: 1 / -1; justify-self: end; width: min(100%, 190px); }
+}
+
+@include mobile {
+  .filter-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 14px; gap: 10px; }
+  .filter-bar .filter-actions, .filter-bar__actions { grid-column: 1 / -1; width: 100%; }
+}

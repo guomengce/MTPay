@@ -14,20 +14,16 @@
       <section v-for="rate in displayRates" :key="rate.pair" class="exchange-rate-panel__card">
         <span>{{ rate.pair }}</span>
         <strong>{{ rate.value }}</strong>
-        <p>{{ rate.sample }}</p>
+        <!-- <p>{{ rate.sample }}</p> -->
         <div class="exchange-rate-panel__mark">{{ rate.mark }}</div>
       </section>
-    </div>
-
-    <div class="exchange-rate-panel__notice">
-      <i class="ri-information-fill" aria-hidden="true" />
-      <span>比例已包含兑换价差，不另收兑换手续费。</span>
     </div>
   </el-card>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { formatExchangeRate } from '@/utils/decimal';
 
 export interface ExchangeRateItem {
   pair: string;
@@ -54,7 +50,12 @@ const props = withDefaults(
   },
 );
 
-const displayRates = computed(() => props.rates && props.rates.length ? props.rates : DEFAULT_RATES);
+const displayRates = computed(() =>
+  (props.rates && props.rates.length ? props.rates : DEFAULT_RATES).map((rate) => ({
+    ...rate,
+    value: formatExchangeRate(rate.value),
+  })),
+);
 </script>
 
 <style scoped lang="scss">
@@ -129,7 +130,7 @@ const displayRates = computed(() => props.rates && props.rates.length ? props.ra
   }
   &__card > strong {
     display: block;
-    margin: 25px 0 20px;
+    margin: 30px 0 20px;
     font-size: 50px;
     font-weight: 800;
     line-height: 1;
@@ -154,18 +155,7 @@ const displayRates = computed(() => props.rates && props.rates.length ? props.ra
     font-size: 60px;
     font-weight: 800;
   }
-  &__notice {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 20px;
-    padding: 10px 14px;
-    color: #df8a22;
-    background: #fff8ee;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: 600;
-  }
+
 
   &.is-compact {
     :deep(.el-card__header) {
@@ -178,29 +168,29 @@ const displayRates = computed(() => props.rates && props.rates.length ? props.ra
       display: none;
     }
     .exchange-rate-panel__cards {
-      grid-template-columns: 1fr;
-      gap: 20px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
     }
     .exchange-rate-panel__card {
-      min-height: 150px;
-      padding: 20px;
+      min-height: 130px;
+      padding: 18px 18px;
+    }
+    .exchange-rate-panel__card > span {
+      font-size: 16px;
     }
     .exchange-rate-panel__card > strong {
-      margin: 18px 0 10px;
-      font-size: 34px;
+      margin: 14px 0 10px;
+      font-size: 32px;
     }
     .exchange-rate-panel__card > p {
       font-size: 12px;
     }
     .exchange-rate-panel__mark {
-      top: 18px;
-      right: 30px;
-      width: 60px;
-      height: 60px;
-      font-size: 30px;
-    }
-    .exchange-rate-panel__notice {
-      margin-top: 14px;
+      top: 16px;
+      right: 18px;
+      width: 48px;
+      height: 48px;
+      font-size: 28px;
     }
   }
 

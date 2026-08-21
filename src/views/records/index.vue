@@ -15,6 +15,7 @@
         @reset="reset"
       />
       <TransactionTable :data="list" :loading="loading" @view="openDetail" />
+      <TransactionCardList :data="list" @view="openDetail" />
       <el-empty v-if="!loading && list.length === 0" description="暂无交易记录" />
       <footer class="records-page__pager">
         <el-pagination
@@ -38,6 +39,7 @@ import { useRouter } from 'vue-router';
 import AdminHero from '@/components/admin/AdminHero.vue';
 import type { TransactionItem } from '@/api/modules/transaction';
 import TransactionFilters from './components/TransactionFilters.vue';
+import TransactionCardList from './components/TransactionCardList.vue';
 import TransactionTable from './components/TransactionTable.vue';
 import { useTransactionList } from './composables/useTransactionList';
 
@@ -63,20 +65,27 @@ onMounted(loadList);
 
   &__card {
     min-width: 0;
-    padding: 22px 24px;
+    overflow: hidden;
     border-color: #dfe7ef;
     border-radius: 16px;
     box-shadow: 0 16px 42px rgb(16 30 54 / 7%);
 
     :deep(.el-card__body) {
       display: grid;
-      gap: 16px;
+      padding: 0;
+    }
+
+    :deep(.transaction-filters) {
+      margin: 0;
+      padding: 20px 24px;
+      border-bottom: 1px solid #e2e9f2;
     }
   }
 
   &__pager {
     display: flex;
     justify-content: flex-end;
+    padding: 18px 24px;
   }
 
   @include narrow {
@@ -87,14 +96,13 @@ onMounted(loadList);
     gap: 16px;
     padding: 20px 14px;
 
-    &__card {
-      padding: 16px;
-    }
-
     &__pager {
       justify-content: center;
       overflow-x: auto;
+      padding: 16px;
     }
+
+    &__card :deep(.transaction-filters) { padding: 16px; }
   }
 }
 </style>

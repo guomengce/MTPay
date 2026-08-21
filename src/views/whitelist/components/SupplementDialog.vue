@@ -18,17 +18,6 @@
       </div>
     </template>
 
-    <div v-if="item" class="supplement-dialog__target">
-      <div>
-        <small>白名单</small>
-        <strong>{{ item.subject_name }}</strong>
-      </div>
-      <div>
-        <small>白名单编号</small>
-        <strong class="is-code">{{ item.whitelist_no }}</strong>
-      </div>
-    </div>
-
     <div v-if="supplementRequirement" class="supplement-dialog__requirement">
       <i class="ri-error-warning-line" />
       <div>
@@ -48,6 +37,7 @@
           :limit="5"
           :on-exceed="handleExceed"
           accept=".pdf,.png,.jpg,.jpeg"
+          @change="handleFileChange"
         >
           <el-icon class="el-icon--upload"><UploadFilled /></el-icon>
           <div class="el-upload__text">拖放文件到这里，或<em>点击选择</em></div>
@@ -89,10 +79,10 @@
 /** 白名单补件弹框：只收集文件与说明，接口调用由页面级 composable 统一处理。 */
 import { ref, watch } from 'vue';
 import { ElMessage } from 'element-plus';
-import type { UploadRawFile, UploadUserFile } from 'element-plus';
+import type { UploadFile, UploadFiles, UploadUserFile } from 'element-plus';
 import { UploadFilled } from '@element-plus/icons-vue';
 
-import type { WhitelistItem } from '@/api/modules/whitelist';
+import type { WhitelistFile, WhitelistItem } from '@/api/modules/whitelist';
 
 const props = defineProps<{
   modelValue: boolean;
@@ -100,11 +90,12 @@ const props = defineProps<{
   supplementRequirement?: string;
   submitting?: boolean;
   uploading?: boolean;
+  uploadFile: (file: File) => Promise<WhitelistFile>;
 }>();
 
 const emit = defineEmits<{
   (event: 'update:modelValue', value: boolean): void;
-  (event: 'submit', payload: { files: File[]; message?: string }): void;
+  (event: 'submit', payload: { file_ids: number[]; message?: string }): void;
 }>();
 
 const fileList = ref<UploadUserFile[]>([]);
@@ -122,20 +113,15 @@ function close() {
 function handleExceed() {
   ElMessage.warning('最多上传 5 个文件');
 }
+async function handleFileChange(file:UploadFile,files:UploadFiles){fileList.value=files;if(!file.raw||file.status==='success')return;if(file.raw.size>10*1024*1024){ElMessage.warning('单个文件不能超过 10 MB');fileList.value=fileList.value.filter(item=>item.uid!==file.uid);return}try{file.status='uploading';file.response=await props.uploadFile(file.raw);file.status='success'}catch{file.status='fail';fileList.value=fileList.value.filter(item=>item.uid!==file.uid)}}
 
 function submit() {
-  const files = fileList.value
-    .map((item) => item.raw)
-    .filter((raw): raw is UploadRawFile => Boolean(raw)) as File[];
-  if (!files.length) {
+  const fileIds=fileList.value.map(item=>(item.response as WhitelistFile|undefined)?.file_id).filter((id):id is number=>typeof id==='number');
+  if (!fileIds.length) {
     ElMessage.warning('请至少选择一个补件文件');
     return;
   }
-  if (files.some((file) => file.size > 10 * 1024 * 1024)) {
-    ElMessage.warning('单个文件不能超过 10 MB');
-    return;
-  }
-  emit('submit', { files, message: message.value.trim() || undefined });
+  emit('submit', { file_ids:fileIds, message: message.value.trim() || undefined });
 }
 
 watch(
@@ -175,38 +161,6 @@ watch(
     color: #079d98;
     background: #e7f8f6;
     font-size: 22px;
-  }
-
-  &__target {
-    display: grid;
-    margin-bottom: 16px;
-    padding: 14px 16px;
-    border: 1px solid #dfe8ef;
-    border-radius: 12px;
-    background: #f7fafc;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-
-    div {
-      min-width: 0;
-    }
-    small {
-      display: block;
-      color: #7b8da2;
-      font-size: 12px;
-    }
-    strong {
-      display: block;
-      margin-top: 5px;
-      overflow: hidden;
-      color: #203a58;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    .is-code {
-      color: #087f7b;
-      font-family: 'JetBrains Mono', Consolas, monospace;
-    }
   }
 
   &__requirement {
@@ -269,9 +223,6 @@ watch(
 
 @include mobile {
   .supplement-dialog {
-    &__target {
-      grid-template-columns: 1fr;
-    }
     &__footer {
       align-items: stretch;
       flex-direction: column;

@@ -27,11 +27,6 @@
         background
         @current-change="handlePageChange"
       />
-      <el-select :model-value="limit" @change="handleLimitChange">
-        <el-option :value="10" label="10 条/页" />
-        <el-option :value="15" label="15 条/页" />
-        <el-option :value="20" label="20 条/页" />
-      </el-select>
     </div>
   </section>
 </template>

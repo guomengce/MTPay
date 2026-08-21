@@ -479,3 +479,87 @@
   transform: none;
   box-shadow: none;
 }
+/* ============================================
+ * Upload file list
+ * 文件选择后由业务上传接口即时处理，因此不展示 Element 的模拟进度条。
+ * ============================================ */
+.el-upload-list--text {
+  display: grid;
+  gap: 10px;
+  margin: 16px 0 8px;
+}
+
+.el-upload-list--text .el-upload-list__item {
+  min-height: 48px;
+  margin: 0;
+  padding: 10px 46px 10px 14px;
+  border: 1px solid rgb(12 159 151 / 22%);
+  border-radius: 10px;
+  color: #176a67;
+  background: linear-gradient(90deg, #effaf8, #f7fcfc);
+  line-height: 28px;
+  transition:
+    border-color 0.18s ease,
+    background-color 0.18s ease;
+}
+
+.el-upload-list--text .el-upload-list__item:hover {
+  border-color: rgb(12 159 151 / 42%);
+  color: #087f79;
+  background: #ebf9f7;
+}
+
+.el-upload-list--text .el-upload-list__item-name {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  margin: 0;
+  color: inherit;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.el-upload-list--text .el-upload-list__item-name .el-icon {
+  margin-right: 9px;
+  color: #0c9f97;
+  font-size: 19px;
+}
+
+.el-upload-list--text .el-progress,
+.el-upload-list--text .el-upload-list__item-status-label {
+  display: none !important;
+}
+
+.el-upload-list--text .el-icon--close,
+.el-upload-list--text .el-upload-list__item-delete {
+  display: inline-flex !important;
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  border-radius: 8px;
+  opacity: 1 !important;
+  color: #d34848;
+  background: #fff1f1;
+  cursor: pointer;
+  font-size: 16px;
+  transform: translateY(-50%);
+}
+
+.el-upload-list--text .el-icon--close:hover,
+.el-upload-list--text .el-upload-list__item-delete:hover {
+  color: #fff;
+  background: #df4b4b;
+}
+/* 路由切换时的全屏加载，两个端保持统一主题。 */
+.route-loading-mask {
+  backdrop-filter: blur(2px);
+
+  .el-loading-spinner .circular { width: 46px; height: 46px; }
+  .el-loading-spinner .path { stroke: var(--el-color-primary); stroke-width: 3; }
+  .el-loading-text { margin-top: 12px; color: var(--el-color-primary); font-weight: 700; }
+}

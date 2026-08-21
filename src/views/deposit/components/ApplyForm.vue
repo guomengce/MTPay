@@ -1,10 +1,5 @@
 ﻿﻿﻿<template>
   <section class="apply-form">
-    <header class="apply-form__header">
-      <h3 class="apply-form__title">发起入金</h3>
-      <p class="apply-form__subtitle">选择通道后向指定地址转账并提交 txid，审核通过后将自动入账</p>
-    </header>
-
     <el-form
       ref="formRef"
       :model="form"

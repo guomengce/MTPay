@@ -1,12 +1,5 @@
 <template>
   <section class="apply-form">
-    <header class="apply-form__header">
-      <div>
-        <h3 class="apply-form__title">发起 USD 出金</h3>
-        <p class="apply-form__subtitle">选择已审核通过的交易主体，确认扣款后提交平台审核</p>
-      </div>
-      <span class="apply-form__currency">USD</span>
-    </header>
 
     <el-form
       ref="formRef"
@@ -91,7 +84,10 @@
                 </template>
               </el-input>
               <div class="apply-form__balance-tip">
-                <span>最高可出 {{ maximumAmount }} USD（已预留手续费）</span>
+                <span class="apply-form__maximum">
+                  最高可出 <strong>{{ maximumAmount }} USD</strong>
+                  <small>（已预留手续费 {{ formatFixedFee(feeAmount) || '—' }} USD）</small>
+                </span>
                 <el-button
                   link
                   type="primary"
@@ -153,7 +149,7 @@
             </div>
             <div>
               <dt>固定手续费</dt>
-              <dd>{{ feeAmount || '—' }}<span v-if="feeAmount"> USD</span></dd>
+              <dd>{{ formatFixedFee(feeAmount) || '—' }}<span v-if="feeAmount"> USD</span></dd>
             </div>
             <div class="is-total">
               <dt>预计总扣款</dt>
@@ -197,12 +193,14 @@
  */
 import { computed, reactive, ref as refHook, watch } from 'vue';
 import type { FormInstance, FormRules } from 'element-plus';
-import type { UploadFile, UploadFiles, UploadRawFile, UploadUserFile } from 'element-plus';
+import type { UploadFile, UploadFiles, UploadUserFile } from 'element-plus';
 import { InfoFilled, Money, Right, Upload } from '@element-plus/icons-vue';
+import { formatFixedFee } from '@/utils/decimal';
 
 import type {
   WithdrawalBalance,
   WithdrawalFileRules,
+  WithdrawalFile,
   WithdrawalWhitelistOption,
 } from '@/api/modules/withdrawal';
 
@@ -215,6 +213,7 @@ const props = defineProps<{
   configLoading?: boolean;
   submitting?: boolean;
   uploading?: boolean;
+  uploadFile?: (file: File) => Promise<WithdrawalFile>;
 }>();
 
 const emit = defineEmits<{
@@ -224,7 +223,7 @@ const emit = defineEmits<{
       payer_whitelist_id: number;
       payee_whitelist_id: number;
       amount: string;
-      files: File[];
+      file_ids: number[];
     },
   ): void;
 }>();
@@ -289,8 +288,17 @@ watch(
   },
 );
 
-function handleFileChange(_file: UploadFile, files: UploadFiles) {
+async function handleFileChange(file: UploadFile, files: UploadFiles) {
   fileList.value = files;
+  if (!file.raw || file.status === 'success' || !props.uploadFile) return;
+  try {
+    file.status = 'uploading';
+    file.response = await props.uploadFile(file.raw);
+    file.status = 'success';
+  } catch {
+    file.status = 'fail';
+    fileList.value = fileList.value.filter((item) => item.uid !== file.uid);
+  }
 }
 
 /**
@@ -377,14 +385,13 @@ function fillMaximum() {
 async function handleSubmit() {
   if (!(await formRef.value?.validate().catch(() => false))) return;
   if (formState.payer_whitelist_id == null || formState.payee_whitelist_id == null) return;
-  const files = fileList.value
-    .map((item) => item.raw)
-    .filter((raw): raw is UploadRawFile => Boolean(raw)) as File[];
+  if (fileList.value.some((item) => item.status === 'uploading' || item.status === 'ready')) return;
+  const fileIds = fileList.value.map((item) => (item.response as WithdrawalFile | undefined)?.file_id).filter((id): id is number => typeof id === 'number');
   emit('submit', {
     payer_whitelist_id: formState.payer_whitelist_id,
     payee_whitelist_id: formState.payee_whitelist_id,
     amount: formState.amount.trim(),
-    files,
+    file_ids: fileIds,
   });
 }
 
@@ -399,48 +406,12 @@ defineExpose({ reset });
 <style scoped lang="scss">
 .apply-form {
   min-width: 0;
-  padding: 24px;
+  padding: 0 20px 20px;
   border: 1px solid #e5edf3;
   border-radius: 16px;
   background: #fff;
   box-shadow: 0 16px 40px rgb(22 34 51 / 6%);
 
-  &__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid #e8eef3;
-  }
-
-  &__title {
-    margin: 0;
-    color: #071833;
-    font-size: 20px;
-    font-weight: 700;
-  }
-
-  &__subtitle {
-    margin: 5px 0 0;
-    color: #718197;
-    font-size: 13px;
-    line-height: 1.6;
-  }
-
-  &__currency {
-    display: inline-flex;
-    width: 48px;
-    height: 48px;
-    flex: none;
-    align-items: center;
-    justify-content: center;
-    border-radius: 14px;
-    color: #087f79;
-    background: #e7f8f5;
-    font-size: 14px;
-    font-weight: 750;
-  }
 
   &__form {
     margin-top: 20px;
@@ -463,9 +434,10 @@ defineExpose({ reset });
   &__section {
     min-width: 0;
     padding: 18px;
-    border: 1px solid #e2eaf0;
+    border: 1px solid #cbdfe3;
     border-radius: 14px;
-    background: #fbfcfd;
+    background: linear-gradient(90deg, #f6fbfb 0%, #fbfcfd 24%, #fbfcfd 100%);
+    box-shadow: inset 3px 0 0 #22aaa5;
   }
 
   &__section-header {
@@ -482,10 +454,11 @@ defineExpose({ reset });
       align-items: center;
       justify-content: center;
       border-radius: 10px;
-      color: #087f79;
-      background: #e6f7f4;
+      color: #fff;
+      background: linear-gradient(135deg, #12a49e, #087f79);
       font-size: 12px;
-      font-weight: 700;
+      font-weight: 800;
+      box-shadow: 0 5px 12px rgb(8 127 121 / 18%);
     }
 
     h4 {
@@ -549,9 +522,30 @@ defineExpose({ reset });
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    margin-top: 7px;
-    color: #718197;
-    font-size: 12px;
+    margin-top: 10px;
+    color: #42677a;
+    font-size: 14px;
+  }
+
+  &__maximum {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 5px;
+    font-weight: 600;
+
+    strong {
+      color: #078f89;
+      font-size: 16px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    small {
+      color: #6f8091;
+      font-size: 13px;
+      font-weight: 500;
+    }
   }
 
   &__notice,
@@ -605,11 +599,13 @@ defineExpose({ reset });
   }
 
   &__available {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
     margin: 0 18px;
-    padding: 15px;
-    border: 1px solid #d9ebe8;
-    border-radius: 12px;
-    background: #fff;
+    padding: 6px 0 12px;
+    border-bottom: 1px solid #e2ebef;
 
     small {
       color: #718197;
@@ -617,11 +613,9 @@ defineExpose({ reset });
     }
 
     strong {
-      display: block;
-      margin-top: 6px;
-      color: #07978f;
-      font-size: clamp(20px, 2vw, 27px);
-      font-weight: 700;
+      color: #344b60;
+      font-size: 14px;
+      font-weight: 650;
       font-variant-numeric: tabular-nums;
 
       span {
@@ -668,11 +662,31 @@ defineExpose({ reset });
     }
 
     .is-total {
+      margin: 6px 0;
+      padding: 14px;
+      border: 1px solid #83d2cc;
+      border-radius: 11px;
+      background: linear-gradient(135deg, #e8f9f6, #f4fbfa);
+      box-shadow: 0 8px 18px rgb(8 143 137 / 8%);
+
       dt,
       dd {
-        color: #071833;
-        font-size: 14px;
-        font-weight: 700;
+        color: #087f79;
+        font-weight: 800;
+      }
+
+      dt {
+        font-size: 13px;
+      }
+
+      dd {
+        font-size: 21px;
+
+        span {
+          color: #087f79;
+          font-size: 12px;
+          font-weight: 700;
+        }
       }
     }
   }

@@ -1,6 +1,6 @@
 /**
  * 白名单提交 Composable
- * - 先上传附件拿到 file_id，再调用 /web/submitWhitelist 绑定 file_ids；
+ * - 仅提交已由上传控件取得的 file_ids，不在业务提交阶段上传文件；
  * - 成功后返回详情（含 review / records）；失败由统一请求层提示。
  */
 import { ref } from 'vue';
@@ -19,21 +19,10 @@ export function useWhitelistForm() {
    * 提交白名单。组件层负责按 role+entity_type 组装业务字段；
    * files 数组会先逐个上传，再把收集到的 file_ids 提交。
    */
-  async function submit(
-    payload: SubmitWhitelistPayload,
-    attachments: File[] = [],
-  ): Promise<WhitelistItemDetail> {
+  async function submit(payload: SubmitWhitelistPayload): Promise<WhitelistItemDetail> {
     submitting.value = true;
     try {
-      let fileIds = payload.file_ids ?? [];
-      if (attachments.length > 0) {
-        const uploaded = await files.uploadFiles(attachments);
-        fileIds = [...fileIds, ...uploaded];
-      }
-      const detail = await whitelistApi.submitWhitelist({
-        ...payload,
-        file_ids: fileIds.length > 0 ? fileIds : undefined,
-      });
+      const detail = await whitelistApi.submitWhitelist(payload);
       lastResult.value = detail;
       return detail;
     } finally {

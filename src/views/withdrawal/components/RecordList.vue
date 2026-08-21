@@ -43,32 +43,41 @@
       stripe
       class="record-list__table"
     >
-      <el-table-column prop="order_no" label="订单号" min-width="170">
+      <el-table-column prop="order_no" label="订单号" min-width="180">
         <template #default="{ row }">
-          <a
+          <strong
             class="record-list__link"
             href="javascript:void(0)"
             @click.prevent="emit('detail', row.id)"
           >
             {{ row.order_no }}
-          </a>
+        </strong><br/>
+          <small>{{ formatTime(row.submitted_at) }}</small>
         </template>
       </el-table-column>
-      <el-table-column label="付款人 → 收款人" min-width="240" show-overflow-tooltip>
+      <el-table-column label="交易主体" min-width="380" align="center" header-align="center">
         <template #default="{ row }">
-          <span>{{ row.payer.name }} → {{ row.payee.name }}</span>
+          <WithdrawalPartyFlow
+            :payer-name="row.payer.name"
+            :payer-type="entityTypeName(row.payer.entity_type)"
+            :payee-name="row.payee.name"
+            :payee-type="entityTypeName(row.payee.entity_type)"
+          />
         </template>
       </el-table-column>
-      <el-table-column label="金额 / 总扣款" min-width="220" align="right">
+      <el-table-column label="出金金额" min-width="250" align="left">
         <template #default="{ row }">
           <div class="record-list__amount-block">
-            <strong>{{ row.amount }} {{ row.currency.code }}</strong>
-            <small>总扣款 {{ row.total_amount }} {{ row.currency.code }}</small>
-            <em>固定手续费 {{ row.fee_amount }}</em>
+            <strong class="record-list__amount">
+              {{ row.amount }} <span>{{ row.currency.code }}</span>
+            </strong>
+            <div class="record-list__deduction">
+              <span>总扣款 {{ row.total_amount }}</span>
+            </div>
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="状态" min-width="120">
+      <el-table-column label="状态" min-width="100">
         <template #default="{ row }">
           <StatusBadge
             :label="row.status_name"
@@ -77,10 +86,7 @@
           />
         </template>
       </el-table-column>
-      <el-table-column label="提交时间" min-width="170">
-        <template #default="{ row }">{{ formatTime(row.submitted_at) }}</template>
-      </el-table-column>
-      <el-table-column label="操作" min-width="150" align="center">
+      <el-table-column label="操作" min-width="180" fixed="right" align="center">
         <template #default="{ row }">
           <div class="record-list__actions">
             <el-button type="primary" plain size="small" :icon="View" @click="emit('detail', row.id)">
@@ -93,12 +99,14 @@
               size="small"
               :icon="Upload"
               @click="emit('supplement', row)"
-              >补交文件</el-button
+              >补件</el-button
             >
           </div>
         </template>
       </el-table-column>
     </el-table>
+
+    <ResponsiveCardList :items="cardItems" @action="handleCardAction" />
 
     <footer class="record-list__pager">
       <el-pagination
@@ -123,6 +131,8 @@ import { computed } from 'vue';
 import { Refresh, Upload, View } from '@element-plus/icons-vue';
 import type { WithdrawalListParams, WithdrawalOrder } from '@/api/modules/withdrawal';
 import StatusBadge from '@/components/admin/StatusBadge.vue';
+import ResponsiveCardList, { type ResponsiveCardItem } from '@/components/common/ResponsiveCardList.vue';
+import WithdrawalPartyFlow from './WithdrawalPartyFlow.vue';
 
 import {
   WITHDRAWAL_STATUS_MAP,
@@ -162,6 +172,21 @@ const statusOptions = [
   { value: 4, label: '已驳回' },
   { value: 5, label: '付款失败' },
 ];
+
+const cardItems = computed<ResponsiveCardItem[]>(() => props.list.map((row) => ({
+  key: String(row.id), title: row.order_no, subtitle: formatTime(row.submitted_at),
+  status: { label: row.status_name, type: statusMap[row.status]?.type, effect: statusMap[row.status]?.effect },
+  pending: statusMap[row.status]?.effect === 'pending', accent: row.status === 4 || row.status === 5 ? 'danger' : 'primary',
+  fields: [
+    { label: '付款方', value: `${entityTypeName(row.payer.entity_type)} · ${row.payer.name}`, strong: true },
+    { label: '收款方', value: `${entityTypeName(row.payee.entity_type)} · ${row.payee.name}`, strong: true },
+    { label: '出金金额', value: `${row.amount} ${row.currency.code}`, subValue: `总扣款 ${row.total_amount} ${row.currency.code}`, strong: true },
+  ],
+  actions: [
+    { key: 'detail', label: '查看详情', icon: View, type: 'primary', plain: true },
+    { key: 'supplement', label: '补件', icon: Upload, type: 'warning', plain: true, visible: row.status === 1 },
+  ],
+})));
 
 const statusFilter = computed<WithdrawalStatus | undefined>({
   get: () => props.query.status,
@@ -203,6 +228,17 @@ function refresh() {
 function formatTime(value: string | null) {
   return value ?? '—';
 }
+
+/** 接口 entity_type：1 公司，2 个人。 */
+function entityTypeName(value: 1 | 2) {
+  return value === 1 ? '公司' : '个人';
+}
+function handleCardAction(actionKey: string, itemKey: string) {
+  const row = props.list.find((item) => item.id === Number(itemKey));
+  if (!row) return;
+  if (actionKey === 'detail') emit('detail', row.id);
+  if (actionKey === 'supplement') emit('supplement', row);
+}
 </script>
 
 <style scoped lang="scss">
@@ -234,7 +270,6 @@ function formatTime(value: string | null) {
 }
 .record-list__filters {
   display: grid;
-  grid-template-columns: repeat(2, minmax(150px, 1fr));
   gap: 10px;
 
   > * {
@@ -248,14 +283,14 @@ function formatTime(value: string | null) {
 .record-list__amount-block {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 8px 0;
 }
 .record-list__actions {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-wrap: wrap;
   gap: 6px;
 
   :deep(.el-button + .el-button) {
@@ -270,33 +305,36 @@ function formatTime(value: string | null) {
   color: #1d8db5;
   text-decoration: underline;
 }
-.record-list__amount-block strong {
+.record-list__amount {
   color: #071833;
+  font-size: 17px;
+  font-weight: 750;
   font-variant-numeric: tabular-nums;
+
+  span {
+    color: #087f79;
+    font-size: 11px;
+    font-weight: 700;
+  }
 }
-.record-list__amount-block small {
-  color: #4f647d;
+.record-list__deduction {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  color: #7a899b;
+  font-size: 11px;
   font-variant-numeric: tabular-nums;
-}
-.record-list__amount-block em {
-  color: #8794a6;
-  font-style: normal;
-  font-size: 12px;
+
+  i {
+    width: 1px;
+    height: 11px;
+    background: #d6e0e8;
+  }
 }
 .record-list__pager {
   display: flex;
   justify-content: flex-end;
-}
-@media (min-width: 1100px) {
-  .record-list__filters {
-    grid-template-columns:
-      minmax(140px, 0.8fr)
-      minmax(180px, 1fr)
-      minmax(150px, 0.9fr)
-      minmax(150px, 0.9fr)
-      max-content;
-    align-items: center;
-  }
 }
 @include mobile {
   .record-list {
@@ -311,12 +349,7 @@ function formatTime(value: string | null) {
   .record-list__header .el-button {
     width: 100%;
   }
-  .record-list__filters {
-    grid-template-columns: 1fr;
-  }
-  .record-list__filters .filter-actions {
-    justify-self: start;
-  }
+  .record-list__table { display: none; }
   .record-list__pager {
     justify-content: center;
     overflow-x: auto;

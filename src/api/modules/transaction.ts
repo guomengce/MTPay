@@ -5,6 +5,9 @@
  * 代理端根据 Token 识别身份，不传 user_id / keyword。
  */
 import request from '../request';
+import type { DepositOrderDetail } from './deposit';
+import type { ExchangeOrderDetail } from './exchange';
+import type { WithdrawalOrderDetail } from './withdrawal';
 
 export type TransactionBusinessType = 'deposit' | 'exchange' | 'withdrawal';
 
@@ -65,7 +68,7 @@ export interface TransactionPageResult {
 
 export interface TransactionInfoResult {
   transaction: TransactionItem;
-  detail: Record<string, unknown>;
+  detail: DepositOrderDetail | ExchangeOrderDetail | WithdrawalOrderDetail;
 }
 
 /** 当前代理的统一交易分页列表。 */

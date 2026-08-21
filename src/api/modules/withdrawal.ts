@@ -70,6 +70,19 @@ export interface WithdrawalPartySummary {
   snapshot?: Record<string, unknown>;
 }
 
+/** 出金处理记录；文件只属于产生它的操作节点。 */
+export interface WithdrawalRecord {
+  id: number;
+  action_type: number;
+  action_name: string;
+  actor_type: number;
+  actor_id: number | null;
+  actor_name: string | null;
+  message: string | null;
+  files: WithdrawalFile[];
+  created_at: string | null;
+}
+
 export type WithdrawalStatus = 0 | 1 | 2 | 3 | 4 | 5;
 
 export interface WithdrawalOrder {
@@ -108,7 +121,7 @@ export interface WithdrawalOrderDetail extends WithdrawalOrder {
   fund_times: { frozen_at: string | null; released_at: string | null; rejected_at: string | null };
   application_files: WithdrawalFile[];
   payment_files: WithdrawalFile[];
-  records: Array<Record<string, unknown>>;
+  records: WithdrawalRecord[];
   available_actions: {
     agent_can_supplement: boolean;
     admin_can_request_supplement: boolean;

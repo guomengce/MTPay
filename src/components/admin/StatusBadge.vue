@@ -30,7 +30,7 @@ withDefaults(
   align-self: center;
   justify-self: start;
   flex: 0 0 auto;
-  width: auto;
+  width: fit-content;
   max-width: 100%;
   height: 28px;
   align-items: center;

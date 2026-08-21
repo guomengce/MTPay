@@ -28,6 +28,7 @@
       v-model="submitDialogVisible"
       :submitting="submitSubmitting"
       :uploading="submitUploading"
+      :upload-file="uploadFile"
       @submit="handleSubmit"
     />
 
@@ -37,6 +38,7 @@
       :supplement-requirement="detail?.review.note || undefined"
       :submitting="supplementSubmitting"
       :uploading="supplementUploading"
+      :upload-file="uploadFile"
       @submit="handleSupplement"
     />
   </section>
@@ -80,6 +82,7 @@ const {
   supplementSubmitting,
   supplementUploading,
   submitSupplement,
+  uploadFile,
 } = useWhitelistManagement();
 
 const router = useRouter();
@@ -87,9 +90,9 @@ const submitDialogVisible = ref(false);
 const supplementDialogVisible = ref(false);
 const supplementItem = ref<WhitelistItem | null>(null);
 
-async function handleSubmit(payload: { business: SubmitWhitelistPayload; files: File[] }) {
+async function handleSubmit(payload: { business: SubmitWhitelistPayload }) {
   try {
-    const detail = await submitWhitelist(payload.business, payload.files);
+    const detail = await submitWhitelist(payload.business);
     ElMessage.success(`白名单 ${detail.whitelist_no} 已提交，等待审核`);
     submitDialogVisible.value = false;
     await refreshList();
@@ -113,10 +116,10 @@ async function openSupplement(item: WhitelistItem) {
   }
 }
 
-async function handleSupplement(payload: { files: File[]; message?: string }) {
+async function handleSupplement(payload: { file_ids: number[]; message?: string }) {
   if (!supplementItem.value) return;
   try {
-    await submitSupplement(supplementItem.value.id, payload.files, payload.message);
+    await submitSupplement(supplementItem.value.id, payload.file_ids, payload.message);
     ElMessage.success('补件已提交，白名单已重新进入审核');
     supplementDialogVisible.value = false;
     supplementItem.value = null;

@@ -47,7 +47,7 @@ const codeIcon = computed(() => {
   min-width: 0;
   flex-direction: column;
   overflow: hidden;
-  padding: 16px 24px 14px;
+  padding: 12px 22px 12px;
   color: #ffffff;
   border-radius: 16px;
   box-shadow: 0 14px 30px rgb(16 30 54 / 8%);
@@ -105,28 +105,28 @@ const codeIcon = computed(() => {
 
   &__icon {
     display: inline-flex;
-    width: 44px;
-    height: 44px;
-    flex: 0 0 44px;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
     align-items: center;
     justify-content: center;
     border: 1px solid rgb(255 255 255 / 35%);
     border-radius: 50%;
     background: rgb(255 255 255 / 16%);
     color: #ffffff;
-    font-size: 22px;
+    font-size: 19px;
     font-weight: 800;
   }
 
   &__amount {
     position: relative;
     z-index: 1;
-    margin: 26px 0 6px;
+    margin: 16px 0 4px;
 
     strong {
       display: block;
       overflow-wrap: anywhere;
-      font-size: 34px;
+      font-size: 32px;
       font-weight: 800;
       letter-spacing: 0;
       line-height: 1.1;
@@ -140,7 +140,7 @@ const codeIcon = computed(() => {
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-    margin-top: 18px;
+    margin-top: 10px;
     color: rgb(255 255 255 / 85%);
     font-size: 12px;
     font-weight: 600;

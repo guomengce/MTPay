@@ -8,6 +8,7 @@
 
     <section class="exchange-page__content">
       <ConvertForm
+        v-loading="configLoading"
         ref="convertFormRef"
         :submitting="submitting"
         :balances="config?.balances"
@@ -30,6 +31,7 @@
         @detail="openDetail"
       />
     </section>
+
   </main>
 </template>
 
@@ -52,6 +54,7 @@ import { useExchangeManagement } from './composables/useExchangeManagement';
 
 const {
   config,
+  configLoading,
   listLoading,
   list,
   total,
@@ -65,8 +68,8 @@ const {
   setPage,
   submitExchange,
 } = useExchangeManagement();
-const router = useRouter();
 const convertFormRef = ref<InstanceType<typeof ConvertForm>>();
+const router = useRouter();
 
 async function handleSubmit(payload: { source_currency_code: 'USDT' | 'USDC'; amount: string }) {
   try {

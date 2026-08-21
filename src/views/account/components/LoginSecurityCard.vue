@@ -130,7 +130,8 @@ const emit = defineEmits<{ (e: 'change-password'): void }>();
   @include mobile {
     &__header, &__body { padding-right: 20px; padding-left: 20px; }
     &__item { grid-template-columns: 42px minmax(0, 1fr); }
-    &__item .el-button, &__item :deep(.status-badge) { grid-column: 1 / -1; width: 100%; }
+    &__item .el-button { grid-column: 1 / -1; width: 100%; }
+    &__item :deep(.status-badge) { grid-column: 1 / -1; width: fit-content; }
   }
 }
 </style>
