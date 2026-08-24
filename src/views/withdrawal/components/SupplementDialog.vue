@@ -2,7 +2,7 @@
   <el-dialog
     :model-value="modelValue"
     class="withdrawal-supplement-dialog"
-    width="560px"
+    width="min(560px, calc(100vw - 24px))"
     append-to-body
     destroy-on-close
     :close-on-click-modal="false"

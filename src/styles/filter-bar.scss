@@ -1,6 +1,11 @@
 @use './breakpoints.scss' as *;
 
 .filter-bar {
+  --filter-input-width: 260px;
+  --filter-select-width: 180px;
+  --filter-date-width: 180px;
+  --filter-date-range-width: 280px;
+
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   align-items: center;
@@ -24,6 +29,50 @@
   }
 }
 
+/* 桌面端所有模块复用同一套控件宽度；空间不足时自然换行，操作区始终靠右。 */
+@media (min-width: $desktop-min) {
+  .filter-bar {
+    display: flex !important;
+    flex-wrap: wrap;
+    align-items: center;
+
+    > .el-input,
+    > .el-input-number,
+    > .el-cascader {
+      width: var(--filter-input-width);
+      flex: 0 0 var(--filter-input-width);
+    }
+
+    > .el-select {
+      width: var(--filter-select-width);
+      flex: 0 0 var(--filter-select-width);
+    }
+
+    > .el-date-editor {
+      width: var(--filter-date-width);
+      flex: 0 0 var(--filter-date-width);
+    }
+
+    > .el-date-editor--daterange {
+      width: var(--filter-date-range-width);
+      flex-basis: var(--filter-date-range-width);
+    }
+
+    > .filter-actions,
+    > .filter-bar__actions {
+      display: flex;
+      width: auto;
+      flex: 0 0 auto;
+      margin-left: auto;
+
+      .el-button {
+        width: auto;
+        min-width: 88px;
+      }
+    }
+  }
+}
+
 @media (min-width: 1024px) and (max-width: $narrow-max) {
   .filter-bar { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .filter-bar .filter-actions, .filter-bar__actions { grid-column: 1 / -1; justify-self: end; width: min(100%, 190px); }
@@ -35,6 +84,14 @@
 }
 
 @include mobile {
-  .filter-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 14px; gap: 10px; }
+  .filter-bar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 14px;
+    gap: 10px;
+
+    > .el-date-editor--daterange {
+      grid-column: 1 / -1;
+    }
+  }
   .filter-bar .filter-actions, .filter-bar__actions { grid-column: 1 / -1; width: 100%; }
 }

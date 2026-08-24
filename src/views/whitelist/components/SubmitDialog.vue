@@ -117,14 +117,12 @@
                   <CountrySelect
                     v-model="formState.registration_country"
                     placeholder="請選擇註冊國家／地區"
-                    emit-label
                   />
                 </el-form-item>
                 <el-form-item label="经营国家／地区" prop="operating_country">
                   <CountrySelect
                     v-model="formState.operating_country"
                     placeholder="請選擇經營國家／地區"
-                    emit-label
                   />
                 </el-form-item>
               </div>

@@ -9,8 +9,9 @@
         <p>{{ description }}</p>
       </div>
     </div>
-    <div class="admin-hero__art" aria-hidden="true"></div>
-    <slot name="extra" />
+    <div v-if="$slots.extra" class="admin-hero__extra">
+      <slot name="extra" />
+    </div>
   </header>
 </template>
 
@@ -34,9 +35,20 @@ defineProps<{
 
   &__main {
     display: flex;
+    flex: 1 1 auto;
     min-width: 0;
     align-items: center;
     gap: 16px;
+  }
+
+  &__extra {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: flex-end;
+    min-width: 0;
   }
 
   &__icon {
@@ -73,19 +85,11 @@ defineProps<{
     font-weight: 600;
   }
 
-  &__art {
-    width: 190px;
-    height: 82px;
-    flex: 0 0 190px;
-    opacity: 0.8;
-    background:
-      radial-gradient(circle at 70% 40%, rgb(67 130 255 / 24%), transparent 30%),
-      linear-gradient(135deg, rgb(54 144 255 / 18%), rgb(34 211 190 / 8%));
-    clip-path: polygon(15% 20%, 82% 0, 100% 65%, 43% 100%, 0 80%);
-  }
-
   @include narrow {
+    flex-wrap: wrap;
+
     &__main {
+      flex: 1 1 100%;
       gap: 14px;
     }
 
@@ -100,9 +104,9 @@ defineProps<{
       font-size: 28px;
     }
 
-    &__art {
-      width: 150px;
-      flex-basis: 150px;
+    &__extra {
+      width: 100%;
+      flex: 0 0 100%;
     }
   }
 
@@ -112,6 +116,11 @@ defineProps<{
 
     &__main {
       align-items: flex-start;
+    }
+
+    &__extra {
+      width: 100%;
+      justify-content: stretch;
     }
 
     &__icon {
@@ -127,14 +136,6 @@ defineProps<{
 
     p {
       font-size: 14px;
-    }
-
-    &__art {
-      position: absolute;
-      right: -80px;
-      bottom: -40px;
-      width: 190px;
-      height: 90px;
     }
   }
 }

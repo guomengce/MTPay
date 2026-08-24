@@ -1,5 +1,5 @@
 <template>
-  <section v-loading="loading" class="dashboard-page">
+  <section class="dashboard-page">
     <AdminHero
       title="MTPay 营运总览"
       description="管理代理、资金与审核流程"
@@ -7,6 +7,21 @@
     >
     </AdminHero>
 
+    <div v-if="loading" class="dashboard-page__skeleton" aria-label="正在載入首頁資料">
+      <div class="dashboard-page__skeleton-metrics">
+        <el-skeleton-item v-for="index in 4" :key="index" variant="rect" />
+      </div>
+      <div class="dashboard-page__skeleton-actions">
+        <el-skeleton-item v-for="index in 4" :key="index" variant="rect" />
+      </div>
+      <div class="dashboard-page__skeleton-rates">
+        <el-skeleton-item variant="rect" />
+        <el-skeleton-item variant="rect" />
+      </div>
+      <el-skeleton-item class="dashboard-page__skeleton-table" variant="rect" />
+    </div>
+
+    <template v-else>
     <div class="dashboard-page__balances">
       <BalanceCard v-for="item in balances" :key="item.code" v-bind="item" />
       <div class="dashboard-page__todo">
@@ -30,11 +45,13 @@
       <ExchangeRatePanel compact :agent="companyName" :rates="rateItems" />
       <RecentTransactions :transactions="recentTransactions" />
     </div>
+    </template>
   </section>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
+import { usePageLoading } from '@/composables/usePageLoading';
 import { ArrowDown, BellFilled, Switch, Upload, UserFilled } from '@element-plus/icons-vue';
 import BalanceCard from './components/BalanceCard.vue';
 import ExchangeRatePanel from '@/components/admin/ExchangeRatePanel.vue';
@@ -52,6 +69,7 @@ const {
   rateItems,
   loadOverview,
 } = useDashboard();
+usePageLoading(loading);
 
 const quickActions = computed(() => [
   { icon: ArrowDown, title: '入金 USDT', description: '获取链上地址' },
@@ -71,6 +89,46 @@ onMounted(loadOverview);
 .dashboard-page {
   position: relative;
   min-width: 0;
+
+  &__skeleton {
+    display: grid;
+    gap: 22px;
+  }
+
+  &__skeleton-metrics,
+  &__skeleton-actions,
+  &__skeleton-rates {
+    display: grid;
+    gap: 20px;
+
+    .el-skeleton__item {
+      height: 136px;
+      border-radius: 16px;
+    }
+  }
+
+  &__skeleton-metrics,
+  &__skeleton-actions {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  &__skeleton-actions .el-skeleton__item {
+    height: 82px;
+  }
+
+  &__skeleton-rates {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    .el-skeleton__item {
+      height: 190px;
+    }
+  }
+
+  &__skeleton-table {
+    width: 100%;
+    height: 270px;
+    border-radius: 18px;
+  }
   padding-top: 4px;
 
   &__banner {
@@ -227,7 +285,10 @@ onMounted(loadOverview);
 
   @include narrow {
     &__balances,
-    &__actions {
+    &__actions,
+    &__skeleton-metrics,
+    &__skeleton-actions,
+    &__skeleton-rates {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
@@ -248,8 +309,30 @@ onMounted(loadOverview);
 
   @include mobile {
     &__balances,
-    &__actions {
+    &__actions,
+    &__skeleton-metrics,
+    &__skeleton-actions,
+    &__skeleton-rates {
       grid-template-columns: 1fr;
+    }
+
+    &__skeleton {
+      gap: 14px;
+    }
+
+    &__skeleton-metrics,
+    &__skeleton-actions,
+    &__skeleton-rates {
+      gap: 12px;
+    }
+
+    &__skeleton-metrics .el-skeleton__item,
+    &__skeleton-rates .el-skeleton__item {
+      height: 124px;
+    }
+
+    &__skeleton-table {
+      height: 220px;
     }
 
     &__banner {

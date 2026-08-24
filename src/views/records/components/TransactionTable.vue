@@ -21,7 +21,9 @@
           <WithdrawalPartyFlow
             v-if="row.business_type === 'withdrawal'"
             :payer-name="row.payer_name"
+            :payer-type="entityTypeLabel(row.payer_entity_type_name, row.payer_entity_type)"
             :payee-name="row.payee_name"
+            :payee-type="entityTypeLabel(row.payee_entity_type_name, row.payee_entity_type)"
           />
           <div v-else-if="row.business_type === 'exchange'" class="transaction-table__content is-exchange">
             <div class="transaction-table__exchange-flow">
@@ -87,6 +89,10 @@ function contentLabel(row: TransactionItem) {
     return `${row.currency_code} → ${row.target_currency_code}${row.exchange_rate ? ` · ${formatExchangeRate(row.exchange_rate)}` : ''}`;
   }
   return [row.payer_name, row.payee_name].filter(Boolean).join(' → ');
+}
+
+function entityTypeLabel(name?: string | null, type?: 1 | 2 | null) {
+  return name || (type === 1 ? '公司' : type === 2 ? '个人' : undefined);
 }
 
 function amountLabel(row: TransactionItem) {

@@ -6,9 +6,17 @@
       icon="ri-user-follow-line"
     >
       <template #extra>
-        <el-button :icon="Plus" type="primary" @click="submitDialogVisible = true">
-          新增
-        </el-button>
+        <div class="whitelist-page__hero-actions">
+          <WhitelistFilters
+            v-model:role="role"
+            v-model:entity-type="entityType"
+            :loading="listLoading"
+            @change="applyFilters"
+          />
+          <el-button :icon="Plus" type="primary" @click="submitDialogVisible = true">
+            新增
+          </el-button>
+        </div>
       </template>
     </AdminHero>
 
@@ -62,6 +70,7 @@ import AdminHero from '@/components/admin/AdminHero.vue';
 import ResultPanel from './components/ResultPanel.vue';
 import SubmitDialog from './components/SubmitDialog.vue';
 import SupplementDialog from './components/SupplementDialog.vue';
+import WhitelistFilters from './components/WhitelistFilters.vue';
 import { useWhitelistManagement } from './composables/useWhitelistManagement';
 
 const {
@@ -69,10 +78,13 @@ const {
   total,
   page,
   limit,
+  role,
+  entityType,
   listLoading,
   fetchList,
   setPage,
   setLimit,
+  applyFilters,
   refreshList,
   submitSubmitting,
   submitUploading,
@@ -150,13 +162,32 @@ onMounted(() => {
   min-width: 0;
   gap: 22px;
 
-  @include narrow {
-    padding: 28px 24px;
+  &__hero-actions {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex: 0 1 auto;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+
+    > .el-button {
+      flex: none;
+      margin-left: 0;
+    }
   }
 
   @include mobile {
     gap: 16px;
-    padding: 20px 14px;
+
+    &__hero-actions {
+      width: 100%;
+      flex-wrap: wrap;
+
+      > .el-button {
+        margin-left: auto;
+      }
+    }
   }
 }
 </style>

@@ -1,4 +1,4 @@
-/** ISO 3166-1 alpha-2 国家／地区代码。提交给后端时统一使用这些稳定代码。 */
+/** ISO 3166-1 alpha-2 国家／地区代码，用于生成选项和兼容历史代码值。 */
 export const COUNTRY_CODES = [
   'AD',
   'AE',
@@ -266,7 +266,7 @@ const COUNTRY_NAME_OVERRIDES: Partial<Record<CountryCode, string>> = {
   TW: '台灣',
 };
 
-/** 繁体中文国家名称仅用于展示，业务值始终是 ISO 两位码。 */
+/** 繁体中文国家名称；白名单注册/经营国家字段直接提交该名称。 */
 export const COUNTRY_OPTIONS: CountryOption[] = COUNTRY_CODES.map((code) => ({
   code,
   label: COUNTRY_NAME_OVERRIDES[code] || displayNames.of(code) || code,
@@ -276,7 +276,7 @@ const COUNTRY_LABEL_MAP = new Map<string, string>(
   COUNTRY_OPTIONS.map(({ code, label }) => [code, label]),
 );
 
-/** 将后端 ISO 代码转换为繁体名称；未知值保持原样，避免隐藏后端数据。 */
+/** 将历史 ISO 代码转换为繁体名称；后端已返回名称时保持原样。 */
 export function getCountryLabel(value: unknown): string {
   if (typeof value !== 'string' || !value.trim()) return '—';
   const code = value.trim().toUpperCase();

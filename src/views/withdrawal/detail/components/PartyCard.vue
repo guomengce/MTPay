@@ -72,6 +72,6 @@ async function copyNo(role: string, value: string) {
 
 @include mobile {
   .party-flow { grid-template-columns: 1fr; }
-  .party-flow__arrow { height: 30px; justify-content: center; transform: rotate(90deg); }
+  .party-flow__arrow { display: none; }
 }
 </style>

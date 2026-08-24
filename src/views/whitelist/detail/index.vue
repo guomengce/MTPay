@@ -12,7 +12,7 @@
       />
     </header>
 
-    <div v-loading="loading" class="whitelist-detail__content">
+    <div class="whitelist-detail__content">
       <template v-if="detail">
         <div class="whitelist-detail__grid">
           <div class="whitelist-detail__main">
@@ -83,6 +83,7 @@ import { ElMessage } from 'element-plus';
 import { useRoute, useRouter } from 'vue-router';
 
 import StatusBadge from '@/components/admin/StatusBadge.vue';
+import { usePageLoading } from '@/composables/usePageLoading';
 import DetailCard from '@/components/detail/DetailCard.vue';
 import DetailFieldGrid from '@/components/detail/DetailFieldGrid.vue';
 import type { DetailFieldItem } from '@/components/detail/DetailFieldGrid.vue';
@@ -102,6 +103,7 @@ const route = useRoute();
 const router = useRouter();
 const id = computed(() => Number(route.params.id));
 const { loading, detail, fetchDetail } = useWhitelistDetail();
+usePageLoading(loading);
 const {
   companyIdentityFields,
   registrationFields,

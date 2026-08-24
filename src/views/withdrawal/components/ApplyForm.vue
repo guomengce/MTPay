@@ -725,7 +725,9 @@ defineExpose({ reset });
 
 @include mobile {
   .apply-form {
-    padding: 18px 16px;
+    width: 100%;
+    min-width: 0;
+    padding: 14px;
     border-radius: 14px;
 
     &__header {
@@ -734,11 +736,13 @@ defineExpose({ reset });
     }
 
     &__workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
       gap: 14px;
     }
 
     &__section {
-      padding: 15px;
+      padding: 14px;
     }
 
     &__party-fields {
@@ -754,6 +758,46 @@ defineExpose({ reset });
       align-items: flex-start;
       flex-direction: column;
       gap: 2px;
+    }
+
+    &__summary,
+    &__main,
+    &__form,
+    &__workspace {
+      width: 100%;
+      min-width: 0;
+    }
+
+    &__available,
+    &__summary-rows,
+    &__server-note {
+      margin-right: 14px;
+      margin-left: 14px;
+    }
+
+    &__action {
+      width: calc(100% - 28px);
+      margin-right: 14px;
+      margin-left: 14px;
+    }
+
+    :deep(.el-upload),
+    :deep(.el-upload-list),
+    :deep(.el-select),
+    :deep(.el-input) {
+      width: 100%;
+      min-width: 0;
+    }
+
+    :deep(.el-upload .el-button) {
+      width: 100%;
+    }
+
+    :deep(.el-upload-list__item-name) {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
   }
 }

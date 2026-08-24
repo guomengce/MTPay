@@ -1,6 +1,6 @@
 /**
  * 白名单列表 Composable
- * - 文档仅允许 page/limit 两个查询参数，禁止虚构 status/keyword；
+ * - 支持按白名单角色和主体类型筛选；
  * - Laravel 分页：列表读 data.data，总数读 data.total；
  * - 提交/补件成功后由组合入口触发刷新。
  */
@@ -25,6 +25,8 @@ export function useWhitelistList() {
   const total = ref(0);
   const page = ref(1);
   const limit = ref(15);
+  const role = ref<1 | 2>();
+  const entityType = ref<1 | 2>();
 
   async function fetchList() {
     loading.value = true;
@@ -32,6 +34,8 @@ export function useWhitelistList() {
       const data: WhitelistPageResult = await whitelistApi.fetchWhitelistList({
         page: page.value,
         limit: limit.value,
+        role: role.value,
+        entity_type: entityType.value,
       });
       list.value = data.data ?? [];
       total.value = data.total ?? 0;
@@ -51,6 +55,11 @@ export function useWhitelistList() {
     page.value = 1;
   }
 
+  async function applyFilters() {
+    page.value = 1;
+    await fetchList();
+  }
+
   async function refresh() {
     await fetchList();
   }
@@ -61,9 +70,12 @@ export function useWhitelistList() {
     total,
     page,
     limit,
+    role,
+    entityType,
     fetchList,
     setPage,
     setLimit,
+    applyFilters,
     refresh,
   };
 }

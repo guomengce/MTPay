@@ -69,15 +69,16 @@ onMounted(loadList);
     border-color: #dfe7ef;
     border-radius: 16px;
     box-shadow: 0 16px 42px rgb(16 30 54 / 7%);
-
+    padding: 20px;;
     :deep(.el-card__body) {
       display: grid;
       padding: 0;
     }
 
-    :deep(.transaction-filters) {
+    .transaction-filters {
       margin: 0;
       padding: 20px 24px;
+      margin-bottom:10px;
       border-bottom: 1px solid #e2e9f2;
     }
   }
@@ -88,21 +89,23 @@ onMounted(loadList);
     padding: 18px 24px;
   }
 
-  @include narrow {
-    padding: 28px 24px;
-  }
-
   @include mobile {
     gap: 16px;
-    padding: 20px 14px;
 
     &__pager {
-      justify-content: center;
+      justify-content: flex-end;
       overflow-x: auto;
       padding: 16px;
     }
 
-    &__card :deep(.transaction-filters) { padding: 16px; }
+    &__card{
+      padding:16px;
+    }
+    .transaction-filters{
+      margin-bottom:10px;
+    }
+
+    // &__card :deep(.transaction-filters) { padding: 16px; }
   }
 }
 </style>

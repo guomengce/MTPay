@@ -77,10 +77,14 @@ export interface WhitelistItemDetail extends WhitelistItem {
 
 /* ---------- 请求参数 ---------- */
 
-/** 列表查询仅支持 page/limit，文档未声明 status/keyword 等筛选参数。 */
+/** 白名单列表查询参数。 */
 export interface WhitelistListParams {
   page?: number;
   limit?: number;
+  /** 1 付款人 / 2 收款人。 */
+  role?: 1 | 2;
+  /** 1 公司 / 2 个人。 */
+  entity_type?: 1 | 2;
 }
 
 /** 提交白名单参数。role + entity_type 决定后续条件字段；file_ids 可选，最多 5 个。 */
@@ -161,7 +165,7 @@ export function submitWhitelist(payload: SubmitWhitelistPayload) {
 }
 
 /**
- * 当前代理的白名单分页列表。文档只允许 page/limit 两个参数，禁止附加 status/keyword。
+ * 当前代理的白名单分页列表。
  */
 export function fetchWhitelistList(params: WhitelistListParams = {}) {
   return request.get<unknown, WhitelistPageResult>('/web/getWhitelistList', { params });

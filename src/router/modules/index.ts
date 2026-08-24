@@ -10,7 +10,6 @@ export const featureRoutes: RouteRecordRaw[] = [
       icon: 'Grid',
       requiresAuth: true,
       hidden: false,
-      keepAlive: true,
     },
   },
   {
@@ -22,7 +21,6 @@ export const featureRoutes: RouteRecordRaw[] = [
       icon: 'Wallet',
       requiresAuth: true,
       hidden: false,
-      keepAlive: false,
     },
   },
   {
@@ -34,20 +32,19 @@ export const featureRoutes: RouteRecordRaw[] = [
       icon: 'Switch',
       requiresAuth: true,
       hidden: false,
-      keepAlive: false,
     },
   },
   {
     path: '/deposit/detail/:id',
     name: 'DepositDetail',
     component: () => import('@/views/deposit/detail/index.vue'),
-    meta: { title: '入金详情', icon: '', requiresAuth: true, hidden: true, keepAlive: false },
+    meta: { title: '入金详情', icon: '', requiresAuth: true, hidden: true },
   },
   {
     path: '/exchange/detail/:id',
     name: 'ExchangeDetail',
     component: () => import('@/views/exchange/detail/index.vue'),
-    meta: { title: '兑换详情', icon: '', requiresAuth: true, hidden: true, keepAlive: false },
+    meta: { title: '兑换详情', icon: '', requiresAuth: true, hidden: true },
   },
   {
     path: '/whitelist',
@@ -58,7 +55,6 @@ export const featureRoutes: RouteRecordRaw[] = [
       icon: 'List',
       requiresAuth: true,
       hidden: false,
-      keepAlive: false,
     },
   },
   {
@@ -70,7 +66,6 @@ export const featureRoutes: RouteRecordRaw[] = [
       icon: '',
       requiresAuth: true,
       hidden: true,
-      keepAlive: false,
     },
   },
   {
@@ -82,7 +77,6 @@ export const featureRoutes: RouteRecordRaw[] = [
       icon: 'Upload',
       requiresAuth: true,
       hidden: false,
-      keepAlive: false,
     },
   },
   {
@@ -94,7 +88,6 @@ export const featureRoutes: RouteRecordRaw[] = [
       icon: '',
       requiresAuth: true,
       hidden: true,
-      keepAlive: false,
     },
   },
   {
@@ -106,7 +99,6 @@ export const featureRoutes: RouteRecordRaw[] = [
       icon: 'Tickets',
       requiresAuth: true,
       hidden: false,
-      keepAlive: false,
     },
   },
   {
@@ -118,7 +110,6 @@ export const featureRoutes: RouteRecordRaw[] = [
       icon: '',
       requiresAuth: true,
       hidden: true,
-      keepAlive: false,
     },
   },
   {
@@ -130,7 +121,6 @@ export const featureRoutes: RouteRecordRaw[] = [
       icon: 'User',
       requiresAuth: true,
       hidden: false,
-      keepAlive: false,
     },
   },
 ];

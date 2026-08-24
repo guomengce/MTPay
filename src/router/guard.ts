@@ -1,28 +1,10 @@
 import { appConfig } from '@/config';
-import { ElLoading, type LoadingInstance } from 'element-plus';
 import router from '@/router';
 import { useAuthStore } from '@/stores/modules/auth';
-
-let routeLoading: LoadingInstance | null = null;
-
-function startRouteLoading() {
-  routeLoading?.close();
-  routeLoading = ElLoading.service({
-    lock: true,
-    fullscreen: true,
-    text: '页面加载中…',
-    background: 'rgba(245, 249, 252, 0.72)',
-    customClass: 'route-loading-mask',
-  });
-}
-
-function stopRouteLoading() {
-  routeLoading?.close();
-  routeLoading = null;
-}
+import { usePageLoadingStore } from '@/stores/modules/pageLoading';
 
 router.beforeEach((to) => {
-  startRouteLoading();
+  usePageLoadingStore().start();
   const authStore = useAuthStore();
   const title = to.meta?.title ? `${String(to.meta.title)} - ${appConfig.title}` : appConfig.title;
   document.title = title;
@@ -44,5 +26,5 @@ router.beforeEach((to) => {
   return true;
 });
 
-router.afterEach(stopRouteLoading);
-router.onError(stopRouteLoading);
+router.afterEach(() => usePageLoadingStore().finish());
+router.onError(() => usePageLoadingStore().finish());

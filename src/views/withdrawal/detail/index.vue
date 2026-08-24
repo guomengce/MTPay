@@ -13,7 +13,7 @@
       >
     </div>
 
-    <div v-loading="loading" class="business-detail__content">
+    <div class="business-detail__content">
       <template v-if="detail">
         <WithdrawalDetailContent :detail="detail" :file-loading="fileLoading" @preview="openFilePreview" @download="downloadFile" />
 
@@ -45,6 +45,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { ElMessage } from 'element-plus';
 import { Upload } from '@element-plus/icons-vue';
 import { useRoute, useRouter } from 'vue-router';
+import { usePageLoading } from '@/composables/usePageLoading';
 
 import WithdrawalDetailContent from '@/views/withdrawal/detail/components/WithdrawalDetailContent.vue';
 import { useWithdrawalDetail } from '@/views/withdrawal/composables/useWithdrawalDetail';
@@ -55,6 +56,7 @@ import SupplementDialog from '@/views/withdrawal/components/SupplementDialog.vue
 const route = useRoute();
 const router = useRouter();
 const { loading, detail, fetchDetail } = useWithdrawalDetail();
+usePageLoading(loading);
 const { loading: fileLoading, openPreview, triggerDownload } = useWithdrawalFiles();
 const {
   submitting: supplementSubmitting,

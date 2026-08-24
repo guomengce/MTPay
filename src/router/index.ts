@@ -13,7 +13,6 @@ export const routes: RouteRecordRaw[] = [
       icon: '',
       requiresAuth: false,
       hidden: true,
-      keepAlive: false,
     },
   },
   {
@@ -25,7 +24,6 @@ export const routes: RouteRecordRaw[] = [
       icon: '',
       requiresAuth: false,
       hidden: true,
-      keepAlive: false,
     },
   },
   {
@@ -37,7 +35,6 @@ export const routes: RouteRecordRaw[] = [
       icon: '',
       requiresAuth: false,
       hidden: true,
-      keepAlive: false,
     },
   },
   {
@@ -49,7 +46,6 @@ export const routes: RouteRecordRaw[] = [
       icon: '',
       requiresAuth: false,
       hidden: true,
-      keepAlive: false,
     },
   },
   {
@@ -61,7 +57,6 @@ export const routes: RouteRecordRaw[] = [
       icon: '',
       requiresAuth: true,
       hidden: true,
-      keepAlive: false,
     },
     children: featureRoutes,
   },
@@ -74,7 +69,6 @@ export const routes: RouteRecordRaw[] = [
       icon: '',
       requiresAuth: false,
       hidden: true,
-      keepAlive: false,
     },
   },
   {
@@ -86,7 +80,6 @@ export const routes: RouteRecordRaw[] = [
       icon: '',
       requiresAuth: false,
       hidden: true,
-      keepAlive: false,
     },
   },
 ];

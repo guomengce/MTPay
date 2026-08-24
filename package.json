@@ -17,6 +17,7 @@
     "crypto-js": "^4.2.0",
     "element-plus": "^2.9.1",
     "jsencrypt": "^3.5.4",
+    "opencc-js": "^1.4.2",
     "pinia": "^2.3.0",
     "qrcode.vue": "^3.10.0",
     "remixicon": "^4.9.1",

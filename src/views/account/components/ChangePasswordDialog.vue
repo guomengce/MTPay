@@ -2,7 +2,7 @@
   <el-dialog
     :model-value="modelValue"
     class="password-dialog"
-    width="540px"
+    width="min(540px, calc(100vw - 24px))"
     append-to-body
     destroy-on-close
     :close-on-click-modal="false"

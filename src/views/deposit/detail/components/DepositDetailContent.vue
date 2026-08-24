@@ -49,4 +49,14 @@ async function copyField(item: DetailFieldItem) { try { await navigator.clipboar
 .deposit-summary__icon { display: grid; width: 58px; height: 58px; flex: 0 0 58px; place-items: center; border-radius: 17px; color: #fff; background: linear-gradient(135deg,#19b8a8,#268ee6); font-size: 28px; }
 .deposit-summary small,.meta small { color:#74869b;font-size:12px; }.deposit-summary p{display:flex;align-items:baseline;gap:9px;margin:6px 0 4px}.deposit-summary strong{color:#10243d;font-size:clamp(28px,3vw,40px)}.deposit-summary p span{color:#078f89;font-weight:700}.deposit-summary em{color:#74869b;font-size:13px;font-style:normal}.meta{display:grid;gap:3px}.meta small,.meta span{color:#74869b;font-size:11px}.meta strong{color:#30475f;font-size:13px}.empty-result{margin:0;padding:20px 0;color:#7b8b9f;font-size:13px}
 @include narrow { .deposit-detail-content__workspace{grid-template-columns:1fr} }
+@include mobile {
+  .deposit-detail-content { gap: 14px; }
+  .deposit-detail-content__workspace { grid-template-columns: 1fr; gap: 14px; }
+  .deposit-detail-content__main { gap: 14px; }
+  .deposit-summary { align-items: flex-start; gap: 12px; }
+  .deposit-summary__icon { width: 48px; height: 48px; flex-basis: 48px; border-radius: 14px; font-size: 23px; }
+  .deposit-summary p { flex-wrap: wrap; gap: 5px 8px; }
+  .deposit-summary strong { font-size: 28px; overflow-wrap: anywhere; }
+  .deposit-summary em { overflow-wrap: anywhere; }
+}
 </style>

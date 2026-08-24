@@ -116,9 +116,12 @@ const emit = defineEmits<{ (event: 'copy', item: DetailFieldItem): void }>();
     &__item,
     &__item.is-wide {
       grid-column: auto;
-      grid-template-columns: minmax(82px, 0.4fr) minmax(0, 1fr);
-      gap: 10px;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 5px;
+      padding: 12px 0;
     }
+
+    dd { width: 100%; }
   }
 }
 </style>

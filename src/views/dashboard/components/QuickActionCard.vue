@@ -90,4 +90,45 @@ defineProps<{
     font-size: 16px;
   }
 }
+
+@include mobile {
+  .quick-action-card {
+    align-items: flex-start;
+    gap: 12px;
+    padding: 15px 16px;
+
+    &__icon {
+      width: 42px;
+      height: 42px;
+      flex-basis: 42px;
+      font-size: 20px;
+    }
+
+    &__text {
+      gap: 5px;
+      padding-top: 1px;
+
+      strong,
+      span {
+        overflow: visible;
+        text-overflow: clip;
+        white-space: normal;
+        overflow-wrap: anywhere;
+      }
+
+      span {
+        display: -webkit-box;
+        line-height: 1.45;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
+      }
+    }
+
+    &__arrow {
+      margin-top: 13px;
+      flex: 0 0 auto;
+    }
+  }
+}
 </style>

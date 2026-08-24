@@ -99,6 +99,15 @@ defineProps<{
     &__business {
       margin-top: 22px;
     }
+
+    &__meta {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      align-items: start;
+      gap: 14px;
+      margin-top: 18px;
+      padding-top: 16px;
+    }
   }
 }
 </style>

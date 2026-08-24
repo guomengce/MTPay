@@ -141,7 +141,7 @@
 
 /* -------- 基础规则（所有按钮通用）-------- */
 .el-button {
-  --el-button-size: var(--mt-form-control-height);
+  --el-button-size: var(--mt-btn-height);
   height: var(--el-button-size);
   min-height: var(--el-button-size);
   min-width: 84px;

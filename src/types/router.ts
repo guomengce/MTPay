@@ -5,7 +5,6 @@ export interface AppRouteMeta {
   icon: string;
   requiresAuth: boolean;
   hidden: boolean;
-  keepAlive: boolean;
 }
 
 export type AppRouteRecordRaw = RouteRecordRaw & {

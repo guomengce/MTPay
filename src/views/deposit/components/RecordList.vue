@@ -20,16 +20,13 @@
       <el-input v-model="orderNoFilter" placeholder="订单号" clearable />
       <el-input v-model="txidFilter" show-overflow-tooltip placeholder="Txid" clearable />
       <el-date-picker
-        v-model="startedAtDate"
-        type="date"
-        placeholder="起始日期"
+        v-model="dateRange"
+        type="daterange"
+        range-separator="至"
+        start-placeholder="開始日期"
+        end-placeholder="結束日期"
         value-format="YYYY-MM-DD"
-      />
-      <el-date-picker
-        v-model="endedAtDate"
-        type="date"
-        placeholder="结束日期"
-        value-format="YYYY-MM-DD"
+        unlink-panels
       />
       <div class="filter-actions">
         <el-button type="primary" :loading="loading" @click="onSearch">查询</el-button>
@@ -173,17 +170,15 @@ const txidFilter = computed<string>({
   set: (value) => emit('query-change', { txid: value }),
 });
 
-const startedAtDate = computed<string>({
-  get: () => props.query.started_at,
-  set: (value) => {
-    emit('query-change', { started_at: value ?? '' });
-  },
-});
-
-const endedAtDate = computed<string>({
-  get: () => props.query.ended_at,
-  set: (value) => {
-    emit('query-change', { ended_at: value ?? '' });
+const dateRange = computed<string[]>({
+  get: () => props.query.started_at && props.query.ended_at
+    ? [props.query.started_at, props.query.ended_at]
+    : [],
+  set: (value: string[]) => {
+    emit('query-change', {
+      started_at: value?.[0] || '',
+      ended_at: value?.[1] || '',
+    });
   },
 });
 
@@ -283,7 +278,7 @@ function handleCardAction(actionKey: string, itemKey: string) {
   .record-list__table { display: none; }
 
   .record-list__pager {
-    justify-content: center;
+    justify-content: flex-end;
     overflow-x: auto;
   }
 }

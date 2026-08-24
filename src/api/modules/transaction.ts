@@ -36,6 +36,11 @@ export interface TransactionItem {
   total_amount: string | null;
   payer_name: string | null;
   payee_name: string | null;
+  /** 后端补充后用于统一交易列表展示主体类别；旧接口可能不返回。 */
+  payer_entity_type?: 1 | 2 | null;
+  payer_entity_type_name?: string | null;
+  payee_entity_type?: 1 | 2 | null;
+  payee_entity_type_name?: string | null;
   status: number;
   status_name: string;
   status_group: string;

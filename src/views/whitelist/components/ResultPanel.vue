@@ -83,7 +83,7 @@ function handleLimitChange(nextLimit: number) {
   &__pagination {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
     gap: 18px;
     padding-top: 18px;
     color: #071833;
@@ -103,7 +103,7 @@ function handleLimitChange(nextLimit: number) {
 
   @include mobile {
     &__pagination {
-      align-items: stretch;
+      align-items: flex-end;
       flex-direction: column;
     }
 

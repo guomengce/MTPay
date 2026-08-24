@@ -8,7 +8,6 @@
 
     <section class="withdrawal-page__content">
       <ApplyForm
-        v-loading="configLoading"
         ref="applyFormRef"
         :balance="balance"
         :payers="config?.payers"
@@ -66,6 +65,7 @@ import type {
   WithdrawalOrderDetail,
 } from '@/api/modules/withdrawal';
 import AdminHero from '@/components/admin/AdminHero.vue';
+import { usePageLoading } from '@/composables/usePageLoading';
 import ApplyForm from './components/ApplyForm.vue';
 import RecordList from './components/RecordList.vue';
 import SupplementDialog from './components/SupplementDialog.vue';
@@ -97,6 +97,7 @@ const {
   submitSupplement,
   uploadSupplementFile,
 } = useWithdrawalManagement();
+usePageLoading(configLoading);
 const applyFormRef = ref<InstanceType<typeof ApplyForm>>();
 const supplementDialogVisible = ref(false);
 const supplementItem = ref<WithdrawalOrder | null>(null);
@@ -188,11 +189,14 @@ onMounted(async () => {
 <style scoped lang="scss">
 .withdrawal-page {
   display: flex;
+  width: 100%;
   min-width: 0;
+  overflow: hidden;
   flex-direction: column;
   gap: 22px;
 
   &__content {
+    width: 100%;
     display: grid;
     min-width: 0;
     grid-template-columns: minmax(0, 1fr);

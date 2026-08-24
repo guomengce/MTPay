@@ -8,6 +8,7 @@
     </header>
 
     <TransactionTable :data="transactions" @view="openDetail" />
+    <TransactionCardList :data="transactions" @view="openDetail" />
   </section>
 </template>
 
@@ -15,6 +16,7 @@
 import { useRouter } from 'vue-router';
 import type { TransactionItem } from '@/api/modules/transaction';
 import TransactionTable from '@/views/records/components/TransactionTable.vue';
+import TransactionCardList from '@/views/records/components/TransactionCardList.vue';
 defineProps<{ transactions: TransactionItem[] }>();
 const router=useRouter();
 function openDetail(row:TransactionItem){void router.push({name:'TransactionDetail',params:{businessType:row.detail_type,businessId:row.detail_id}})}

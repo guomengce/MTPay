@@ -25,10 +25,13 @@ export function useWhitelistManagement() {
     total: list.total,
     page: list.page,
     limit: list.limit,
+    role: list.role,
+    entityType: list.entityType,
     listLoading: list.loading,
     fetchList: list.fetchList,
     setPage: list.setPage,
     setLimit: list.setLimit,
+    applyFilters: list.applyFilters,
     refreshList: list.refresh,
 
     // 详情

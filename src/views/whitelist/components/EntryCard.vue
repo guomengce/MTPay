@@ -4,7 +4,14 @@
       <span class="entry-card__avatar">{{ avatarText }}</span>
       <div class="entry-card__heading">
         <h3>{{ item.subject_name }}</h3>
-        <p>{{ item.role_name }} · {{ item.entity_type_name }} · {{ countryName }}</p>
+        <div class="entry-card__meta">
+          <StatusBadge :label="item.role_name" :type="item.role === 1 ? 'primary' : 'mt'" />
+          <StatusBadge
+            :label="item.entity_type_name"
+            :type="item.entity_type === 1 ? 'warning' : 'success'"
+          />
+          <span>{{ countryName }}</span>
+        </div>
       </div>
     </header>
 
@@ -135,13 +142,24 @@ const avatarText = computed(() => {
       white-space: nowrap;
     }
 
-    p {
+    .entry-card__meta {
+      display: flex;
+      min-width: 0;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
       margin: 5px 0 0;
-      overflow: hidden;
+
+      :deep(.status-badge) {
+        height: 24px;
+        padding: 0 9px;
+        font-size: 11px;
+      }
+
+      > span {
       color: #718298;
-      font-size: 13px;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+        font-size: 12px;
+      }
     }
   }
 

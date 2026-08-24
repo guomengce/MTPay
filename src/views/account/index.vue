@@ -1,5 +1,5 @@
 <template>
-  <section v-loading="loading" class="account-page">
+  <section class="account-page">
     <AdminHero title="账户与安全" description="查看代理资料，管理登录密码与当前会话" icon="ri-shield-user-line" />
 
     <div class="account-page__grid">
@@ -21,6 +21,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import AdminHero from '@/components/admin/AdminHero.vue';
+import { usePageLoading } from '@/composables/usePageLoading';
 import ChangePasswordDialog from './components/ChangePasswordDialog.vue';
 import CompanyProfileCard from './components/CompanyProfileCard.vue';
 import LoginSecurityCard from './components/LoginSecurityCard.vue';
@@ -28,6 +29,7 @@ import { useAccount } from './composables/useAccount';
 
 const passwordDialogVisible = ref(false);
 const { loading, submitting, profile, fetchProfile, changePassword } = useAccount();
+usePageLoading(loading);
 
 onMounted(fetchProfile);
 </script>

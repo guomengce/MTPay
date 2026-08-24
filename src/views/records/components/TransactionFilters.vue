@@ -14,8 +14,15 @@
       <el-option label="失败" value="failed" />
     </el-select>
     <el-input v-model="orderNo" placeholder="订单号" clearable />
-    <el-date-picker v-model="startedAt" type="date" placeholder="起始日期" value-format="YYYY-MM-DD" />
-    <el-date-picker v-model="endedAt" type="date" placeholder="结束日期" value-format="YYYY-MM-DD" />
+    <el-date-picker
+      v-model="dateRange"
+      type="daterange"
+      range-separator="至"
+      start-placeholder="開始日期"
+      end-placeholder="結束日期"
+      value-format="YYYY-MM-DD"
+      unlink-panels
+    />
     <div class="filter-actions">
       <el-button type="primary" :loading="loading" @click="emit('search')">查询</el-button>
       <el-button @click="emit('reset')">重置</el-button>
@@ -47,13 +54,14 @@ const orderNo = computed({
   get: () => props.query.order_no,
   set: (value: string) => emit('update', { order_no: value }),
 });
-const startedAt = computed({
-  get: () => props.query.started_at,
-  set: (value: string) => emit('update', { started_at: value || '' }),
-});
-const endedAt = computed({
-  get: () => props.query.ended_at,
-  set: (value: string) => emit('update', { ended_at: value || '' }),
+const dateRange = computed<string[]>({
+  get: () => props.query.started_at && props.query.ended_at
+    ? [props.query.started_at, props.query.ended_at]
+    : [],
+  set: (value: string[]) => emit('update', {
+    started_at: value?.[0] || '',
+    ended_at: value?.[1] || '',
+  }),
 });
 </script>
 
