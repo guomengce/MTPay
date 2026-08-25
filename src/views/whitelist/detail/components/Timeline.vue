@@ -1,5 +1,5 @@
 <template>
-  <DetailCard class="whitelist-timeline" title="处理时间线" description="处理流程与每次提交的证明文件" icon="ri-time-line">
+  <DetailCard class="whitelist-timeline" title="处理时间线" icon="ri-time-line">
     <ol class="timeline-list">
       <li v-for="record in records" :key="record.id">
         <span class="timeline-list__dot" />

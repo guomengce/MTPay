@@ -68,7 +68,9 @@
           <small>{{ row.source_currency.code }}</small>
         </template>
       </el-table-column>
-      <el-table-column prop="exchange_rate" label="比例" min-width="170"/>
+      <el-table-column label="比例" min-width="170">
+        <template #default="{ row }">{{ formatExchangeRate(row.exchange_rate) || '—' }}</template>
+      </el-table-column>
       <el-table-column label="获得USD" min-width="170">
         <template #default="{ row }">
           <span class="record-list__path"

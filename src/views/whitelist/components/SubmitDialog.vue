@@ -16,7 +16,6 @@
         </span>
         <div>
           <h2>新增白名单</h2>
-          <p>填写付款人或收款人的真实资料，审核通过后可用于出金申请</p>
         </div>
         <el-button
           class="submit-dialog__close"
@@ -34,6 +33,7 @@
         ref="formRef"
         :model="formState"
         :rules="rules"
+        :validate-on-rule-change="false"
         label-position="top"
         class="submit-form"
       >
@@ -42,23 +42,22 @@
             <span>01</span>
             <div>
               <h3>选择主体身份</h3>
-              <p>不同角色和主体类型需要填写不同的审核资料</p>
             </div>
           </header>
 
-          <div class="identity-grid">
+     
             <el-form-item label="白名单角色" prop="role">
               <el-radio-group v-model="formState.role" class="identity-options">
                 <el-radio-button :value="1">
                   <span class="identity-option">
                     <el-icon><Upload /></el-icon>
-                    <span><strong>付款人</strong><small>资金汇出方</small></span>
+                    <span><strong>付款人</strong></span>
                   </span>
                 </el-radio-button>
                 <el-radio-button :value="2">
                   <span class="identity-option">
                     <el-icon><Download /></el-icon>
-                    <span><strong>收款人</strong><small>资金接收方</small></span>
+                    <span><strong>收款人</strong></span>
                   </span>
                 </el-radio-button>
               </el-radio-group>
@@ -69,18 +68,17 @@
                 <el-radio-button :value="1">
                   <span class="identity-option">
                     <el-icon><OfficeBuilding /></el-icon>
-                    <span><strong>公司</strong><small>企业或机构</small></span>
+                    <span><strong>公司</strong></span>
                   </span>
                 </el-radio-button>
                 <el-radio-button :value="2">
                   <span class="identity-option">
                     <el-icon><User /></el-icon>
-                    <span><strong>个人</strong><small>自然人主体</small></span>
+                    <span><strong>个人</strong></span>
                   </span>
                 </el-radio-button>
               </el-radio-group>
             </el-form-item>
-          </div>
         </section>
 
         <template v-if="hasSubjectSelection">
@@ -89,7 +87,6 @@
               <span>02</span>
               <div>
                 <h3>{{ formSectionTitle }}</h3>
-                <p>{{ formSectionDescription }}</p>
               </div>
             </header>
 
@@ -169,8 +166,8 @@
                     placeholder="请选择注册日期"
                   />
                 </el-form-item>
-                <el-form-item label="证件编号" prop="document_no">
-                  <el-input v-model="formState.document_no" placeholder="请输入证件编号" />
+                <el-form-item label="公司編號" prop="document_no">
+                  <el-input v-model="formState.document_no" placeholder="请输入公司編號" />
                 </el-form-item>
               </div>
               <div v-else class="submit-form__row submit-form__row--three">
@@ -200,7 +197,6 @@
               <span>03</span>
               <div>
                 <h3>银行与汇款资料</h3>
-                <p>用于核对收款账户和汇款用途</p>
               </div>
             </header>
 
@@ -251,7 +247,6 @@
               <span>{{ formState.role === 2 ? '04' : '03' }}</span>
               <div>
                 <h3>证明文件 <small>选填</small></h3>
-                <p>上传有助于审核主体身份的证明材料</p>
               </div>
             </header>
 
@@ -279,11 +274,6 @@
 
     <template #footer>
       <footer class="submit-dialog__footer">
-        <p>
-          <el-icon><Lock /></el-icon>
-          提交资料将加密传输并仅用于业务审核
-        </p>
-        <div>
           <el-button plain @click="close">取消</el-button>
           <el-button
             type="primary"
@@ -293,7 +283,6 @@
           >
             提交申请
           </el-button>
-        </div>
       </footer>
     </template>
   </el-dialog>
@@ -312,7 +301,6 @@ import {
   Close,
   DocumentAdd,
   Download,
-  Lock,
   OfficeBuilding,
   Upload,
   UploadFilled,
@@ -344,7 +332,6 @@ const {
   rules,
   hasSubjectSelection,
   formSectionTitle,
-  formSectionDescription,
   handleExceed,
   handleFileChange,
   validateAndBuild,
@@ -433,12 +420,6 @@ defineExpose({ close });
       font-weight: 750;
     }
 
-    p {
-      margin: 5px 0 0;
-      color: #6a7c91;
-      font-size: 13px;
-      line-height: 1.5;
-    }
   }
 
   &__close {
@@ -456,29 +437,12 @@ defineExpose({ close });
   &__footer {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
     gap: 18px;
     padding: 16px 24px;
     border-top: 1px solid #e2e9f0;
     background: #fff;
 
-    p {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      margin: 0;
-      color: #6a7c91;
-      font-size: 12px;
-    }
-
-    p .el-icon {
-      color: #159b95;
-    }
-
-    > div {
-      display: flex;
-      gap: 10px;
-    }
   }
 }
 
@@ -593,11 +557,6 @@ defineExpose({ close });
       font-weight: 500;
     }
 
-    p {
-      margin: 3px 0 0;
-      color: #7a8a9c;
-      font-size: 12px;
-    }
   }
 
   &--identity {
@@ -666,10 +625,6 @@ defineExpose({ close });
     font-weight: 650;
   }
 
-  small {
-    color: #8391a2;
-    font-size: 11px;
-  }
 }
 
 .upload-form-item {
@@ -727,13 +682,6 @@ defineExpose({ close });
       flex-direction: column;
       padding: 14px 16px;
 
-      > div {
-        width: 100%;
-      }
-
-      > div .el-button {
-        flex: 1;
-      }
     }
   }
 

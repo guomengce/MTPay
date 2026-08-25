@@ -2,7 +2,7 @@
   <section class="subject-section">
     <header class="subject-section__header">
       <span class="subject-section__icon"><i class="ri-bank-line" /></span>
-      <div><h3>银行资料</h3><p>收款账户及汇款用途</p></div>
+      <div><h3>银行资料</h3></div>
     </header>
     <dl class="subject-section__grid">
       <div v-for="field in fields" :key="field.key" :class="fieldClass(field)">

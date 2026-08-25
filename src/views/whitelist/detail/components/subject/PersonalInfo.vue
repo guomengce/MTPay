@@ -2,7 +2,7 @@
   <section class="subject-section">
     <header class="subject-section__header">
       <span class="subject-section__icon"><i class="ri-id-card-line" /></span>
-      <div><h3>个人资料</h3><p>姓名、国籍与证件信息</p></div>
+      <div><h3>个人资料</h3></div>
     </header>
     <dl class="subject-section__grid">
       <div v-for="field in fields" :key="field.key" :class="fieldClass(field)">

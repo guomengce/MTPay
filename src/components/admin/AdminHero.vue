@@ -6,7 +6,7 @@
       </span>
       <div>
         <h1>{{ title }}</h1>
-        <p>{{ description }}</p>
+        <p v-if="description">{{ description }}</p>
       </div>
     </div>
     <div v-if="$slots.extra" class="admin-hero__extra">
@@ -18,7 +18,7 @@
 <script setup lang="ts">
 defineProps<{
   title: string;
-  description: string;
+  description?: string;
   icon: string;
 }>();
 </script>
@@ -71,7 +71,7 @@ defineProps<{
   }
 
   h1 {
-    margin: 0 0 5px;
+    margin: 0;
     color: #071833;
     font-size: clamp(28px, 2.25vw, 34px);
     font-weight: 850;
@@ -79,7 +79,7 @@ defineProps<{
   }
 
   p {
-    margin: 0;
+    margin: 5px 0 0;
     color: #64748b;
     font-size: 14px;
     font-weight: 600;

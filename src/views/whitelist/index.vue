@@ -2,7 +2,6 @@
   <section class="whitelist-page">
     <AdminHero
       title="白名单管理"
-      description="提交付款人/收款人资料，审核通过后可用于出金；支持待补件时补充材料"
       icon="ri-user-follow-line"
     >
       <template #extra>

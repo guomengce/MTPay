@@ -2,7 +2,6 @@
   <DetailCard
     class="subject-info"
     title="主体信息"
-    description="代理提交并由平台审核的完整白名单资料"
     icon="ri-profile-line"
   >
     <div class="subject-info__tags">

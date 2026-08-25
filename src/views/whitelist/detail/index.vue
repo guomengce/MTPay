@@ -37,7 +37,6 @@
             <DetailCard
               v-if="reviewItems.length || detail.status === 1"
               :title="detail.status === 3 ? '驳回信息' : '审核信息'"
-              description="管理员对本次申请的处理结果"
               :icon="detail.status === 3 ? 'ri-close-circle-line' : 'ri-shield-check-line'"
             >
               <template v-if="detail.status === 1" #extra>

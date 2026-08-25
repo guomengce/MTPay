@@ -89,12 +89,6 @@ export function useWhitelistSubmitForm() {
     return `${roleName} · ${entityName}资料`;
   });
 
-  const formSectionDescription = computed(() =>
-    formState.entity_type === 1
-      ? '填写企业登记、所在地及身份识别信息'
-      : '填写个人身份、国籍及居住地址信息',
-  );
-
   /** -------------------- 动态校验规则 -------------------- */
   const rules = computed<FormRules>(() => {
     const role = formState.role;
@@ -112,7 +106,7 @@ export function useWhitelistSubmitForm() {
         registration_country: [{ required: true, message: '请选择注册国家', trigger: 'change' }],
         operating_country: [{ required: true, message: '请选择经营国家', trigger: 'change' }],
         registration_date: [{ required: true, message: '请选择注册日期', trigger: 'change' }],
-        document_no: [{ required: true, message: '请输入证件编号', trigger: 'blur' }],
+        document_no: [{ required: true, message: '请输入公司編號', trigger: 'blur' }],
         city: [{ required: true, message: '请输入城市', trigger: 'blur' }],
         address: [{ required: true, message: '请输入地址', trigger: 'blur' }],
       });
@@ -267,6 +261,7 @@ export function useWhitelistSubmitForm() {
   watch(
     () => [formState.role, formState.entity_type],
     () => formRef.value?.clearValidate(),
+    { flush: 'post' },
   );
 
   return {
@@ -276,7 +271,6 @@ export function useWhitelistSubmitForm() {
     rules,
     hasSubjectSelection,
     formSectionTitle,
-    formSectionDescription,
     handleExceed,
     handleFileChange,
     validateAndBuild,

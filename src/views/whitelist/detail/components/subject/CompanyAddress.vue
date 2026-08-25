@@ -2,7 +2,7 @@
   <section class="subject-section">
     <header class="subject-section__header">
       <span class="subject-section__icon"><i class="ri-map-pin-line" /></span>
-      <div><h3>公司地址资料</h3><p>注册、经营与详细地址</p></div>
+      <div><h3>公司地址资料</h3></div>
     </header>
     <dl class="subject-section__grid">
       <div v-for="field in fields" :key="field.key" :class="fieldClass(field)">
