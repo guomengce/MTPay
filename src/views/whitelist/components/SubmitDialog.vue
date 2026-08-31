@@ -15,20 +15,29 @@
           <el-icon><DocumentAdd /></el-icon>
         </span>
         <div>
-          <h2>新增白名单</h2>
+          <h2>{{ t('whitelist.add') }}</h2>
         </div>
         <el-button
           class="submit-dialog__close"
           text
           circle
           :icon="Close"
-          aria-label="关闭"
+          :aria-label="t('common.actions.close')"
           @click="close"
         />
       </header>
     </template>
 
     <div class="submit-dialog__body">
+      <el-steps
+        class="submit-dialog__steps"
+        :active="activeStep"
+        finish-status="success"
+        align-center
+      >
+        <el-step :title="t('whitelist.selectIdentity')" /><el-step :title="t('whitelist.fillApplication')" />
+      </el-steps>
+
       <el-form
         ref="formRef"
         :model="formState"
@@ -37,54 +46,26 @@
         label-position="top"
         class="submit-form"
       >
-        <section class="form-section form-section--identity">
-          <header class="form-section__header">
-            <span>01</span>
-            <div>
-              <h3>选择主体身份</h3>
-            </div>
-          </header>
-
-     
-            <el-form-item label="白名单角色" prop="role">
-              <el-radio-group v-model="formState.role" class="identity-options">
-                <el-radio-button :value="1">
-                  <span class="identity-option">
-                    <el-icon><Upload /></el-icon>
-                    <span><strong>付款人</strong></span>
-                  </span>
-                </el-radio-button>
-                <el-radio-button :value="2">
-                  <span class="identity-option">
-                    <el-icon><Download /></el-icon>
-                    <span><strong>收款人</strong></span>
-                  </span>
-                </el-radio-button>
-              </el-radio-group>
+        <section v-show="activeStep === 0" class="form-section form-section--identity">
+          <div class="identity-grid">
+            <el-form-item :label="t('whitelist.role')" prop="role">
+              <el-select v-model="formState.role" :placeholder="t('whitelist.rolePlaceholder')">
+                <el-option :value="1" :label="t('whitelist.payer')" /><el-option :value="2" :label="t('whitelist.payee')" />
+              </el-select>
             </el-form-item>
 
-            <el-form-item label="主体类型" prop="entity_type">
-              <el-radio-group v-model="formState.entity_type" class="identity-options">
-                <el-radio-button :value="1">
-                  <span class="identity-option">
-                    <el-icon><OfficeBuilding /></el-icon>
-                    <span><strong>公司</strong></span>
-                  </span>
-                </el-radio-button>
-                <el-radio-button :value="2">
-                  <span class="identity-option">
-                    <el-icon><User /></el-icon>
-                    <span><strong>个人</strong></span>
-                  </span>
-                </el-radio-button>
-              </el-radio-group>
+            <el-form-item :label="t('whitelist.entityType')" prop="entity_type">
+              <el-select v-model="formState.entity_type" :placeholder="t('whitelist.entityPlaceholder')">
+                <el-option :value="1" :label="t('whitelist.company')" /><el-option :value="2" :label="t('whitelist.individual')" />
+              </el-select>
             </el-form-item>
+          </div>
         </section>
 
-        <template v-if="hasSubjectSelection">
+        <template v-if="activeStep === 1 && hasSubjectSelection">
           <section class="form-section">
             <header class="form-section__header">
-              <span>02</span>
+              <span>01</span>
               <div>
                 <h3>{{ formSectionTitle }}</h3>
               </div>
@@ -92,34 +73,33 @@
 
             <template v-if="formState.entity_type === 1">
               <div class="submit-form__row">
-                <el-form-item label="公司名称" prop="company_name">
-                  <el-input v-model="formState.company_name" placeholder="请输入公司完整名称" />
+                <el-form-item :label="t('whitelist.companyName')" prop="company_name">
+                  <el-input v-model="formState.company_name" :placeholder="t('whitelist.companyNamePlaceholder')" />
                 </el-form-item>
-                <el-form-item v-if="formState.role === 1" label="公司类型" prop="company_type">
-                  <el-select v-model="formState.company_type" placeholder="请选择公司类型">
-                    <el-option :value="1" label="非金融机构" />
-                    <el-option :value="2" label="金融机构" />
+                <el-form-item v-if="formState.role === 1" :label="t('whitelist.companyType')" prop="company_type">
+                  <el-select v-model="formState.company_type" :placeholder="t('whitelist.companyTypePlaceholder')">
+                    <el-option :value="1" :label="t('whitelist.nonFinancial')" /><el-option :value="2" :label="t('whitelist.financial')" />
                   </el-select>
                 </el-form-item>
-                <el-form-item v-else label="经营国家／地区" prop="operating_country">
+                <el-form-item v-else :label="t('whitelist.operatingCountry')" prop="operating_country">
                   <CountrySelect
                     v-model="formState.operating_country"
-                    placeholder="請選擇經營國家／地區"
+                    :placeholder="t('common.messages.selectField', { field: t('whitelist.operatingCountry') })"
                   />
                 </el-form-item>
               </div>
 
               <div v-if="formState.role === 1" class="submit-form__row">
-                <el-form-item label="注册国家／地区" prop="registration_country">
+                <el-form-item :label="t('whitelist.registrationCountry')" prop="registration_country">
                   <CountrySelect
                     v-model="formState.registration_country"
-                    placeholder="請選擇註冊國家／地區"
+                    :placeholder="t('common.messages.selectField', { field: t('whitelist.registrationCountry') })"
                   />
                 </el-form-item>
-                <el-form-item label="经营国家／地区" prop="operating_country">
+                <el-form-item :label="t('whitelist.operatingCountry')" prop="operating_country">
                   <CountrySelect
                     v-model="formState.operating_country"
-                    placeholder="請選擇經營國家／地區"
+                    :placeholder="t('common.messages.selectField', { field: t('whitelist.operatingCountry') })"
                   />
                 </el-form-item>
               </div>
@@ -127,66 +107,65 @@
 
             <template v-else>
               <div class="submit-form__row">
-                <el-form-item label="名" prop="given_name">
-                  <el-input v-model="formState.given_name" placeholder="请输入名" />
+                <el-form-item :label="t('whitelist.givenName')" prop="given_name">
+                  <el-input v-model="formState.given_name" :placeholder="t('common.messages.enterField', { field: t('whitelist.givenName') })" />
                 </el-form-item>
-                <el-form-item label="姓" prop="surname">
-                  <el-input v-model="formState.surname" placeholder="请输入姓" />
+                <el-form-item :label="t('whitelist.surname')" prop="surname">
+                  <el-input v-model="formState.surname" :placeholder="t('common.messages.enterField', { field: t('whitelist.surname') })" />
                 </el-form-item>
               </div>
               <div class="submit-form__row">
-                <el-form-item label="国籍" prop="nationality">
-                  <CountrySelect v-model="formState.nationality" placeholder="請選擇國籍" />
+                <el-form-item :label="t('whitelist.nationality')" prop="nationality">
+                  <CountrySelect v-model="formState.nationality" :placeholder="t('common.messages.selectField', { field: t('whitelist.nationality') })" />
                 </el-form-item>
-                <el-form-item label="居住国家／地区" prop="residence_country">
+                <el-form-item :label="t('whitelist.residenceCountry')" prop="residence_country">
                   <CountrySelect
                     v-model="formState.residence_country"
-                    placeholder="請選擇居住國家／地區"
+                    :placeholder="t('common.messages.selectField', { field: t('whitelist.residenceCountry') })"
                   />
                 </el-form-item>
               </div>
             </template>
 
             <div class="submit-form__row">
-              <el-form-item label="所在城市" prop="city">
-                <el-input v-model="formState.city" placeholder="请输入所在城市" />
+              <el-form-item :label="t('whitelist.city')" prop="city">
+                <el-input v-model="formState.city" :placeholder="t('common.messages.enterField', { field: t('whitelist.city') })" />
               </el-form-item>
-              <el-form-item label="详细地址" prop="address">
-                <el-input v-model="formState.address" placeholder="请输入完整地址" />
+              <el-form-item :label="t('whitelist.address')" prop="address">
+                <el-input v-model="formState.address" :placeholder="t('common.messages.enterField', { field: t('whitelist.address') })" />
               </el-form-item>
             </div>
 
             <template v-if="formState.role === 1">
               <div v-if="formState.entity_type === 1" class="submit-form__row">
-                <el-form-item label="注册日期" prop="registration_date">
+                <el-form-item :label="t('whitelist.registrationDate')" prop="registration_date">
                   <el-date-picker
                     v-model="formState.registration_date"
                     type="date"
                     value-format="YYYY-MM-DD"
-                    placeholder="请选择注册日期"
+                    :placeholder="t('common.messages.selectField', { field: t('whitelist.registrationDate') })"
                   />
                 </el-form-item>
-                <el-form-item label="公司編號" prop="document_no">
-                  <el-input v-model="formState.document_no" placeholder="请输入公司編號" />
+                <el-form-item :label="t('whitelist.companyNo')" prop="document_no">
+                  <el-input v-model="formState.document_no" :placeholder="t('common.messages.enterField', { field: t('whitelist.companyNo') })" />
                 </el-form-item>
               </div>
               <div v-else class="submit-form__row submit-form__row--three">
-                <el-form-item label="出生日期" prop="birth_date">
+                <el-form-item :label="t('whitelist.birthDate')" prop="birth_date">
                   <el-date-picker
                     v-model="formState.birth_date"
                     type="date"
                     value-format="YYYY-MM-DD"
-                    placeholder="请选择出生日期"
+                    :placeholder="t('common.messages.selectField', { field: t('whitelist.birthDate') })"
                   />
                 </el-form-item>
-                <el-form-item label="证件类型" prop="document_type">
-                  <el-select v-model="formState.document_type" placeholder="请选择证件类型">
-                    <el-option :value="1" label="身份证件" />
-                    <el-option :value="2" label="护照" />
+                <el-form-item :label="t('whitelist.documentType')" prop="document_type">
+                  <el-select v-model="formState.document_type" :placeholder="t('common.messages.selectField', { field: t('whitelist.documentType') })">
+                    <el-option :value="1" :label="t('whitelist.identityDocument')" /><el-option :value="2" :label="t('whitelist.passport')" />
                   </el-select>
                 </el-form-item>
-                <el-form-item label="证件编号" prop="document_no">
-                  <el-input v-model="formState.document_no" placeholder="请输入证件编号" />
+                <el-form-item :label="t('whitelist.documentNo')" prop="document_no">
+                  <el-input v-model="formState.document_no" :placeholder="t('common.messages.enterField', { field: t('whitelist.documentNo') })" />
                 </el-form-item>
               </div>
             </template>
@@ -194,34 +173,34 @@
 
           <section v-if="formState.role === 2" class="form-section">
             <header class="form-section__header">
-              <span>03</span>
+              <span>02</span>
               <div>
-                <h3>银行与汇款资料</h3>
+                <h3>{{ t('whitelist.bankInfo') }}</h3>
               </div>
             </header>
 
             <div class="submit-form__row">
-              <el-form-item label="银行名称" prop="bank_name">
-                <el-input v-model="formState.bank_name" placeholder="请输入银行名称" />
+              <el-form-item :label="t('whitelist.bankName')" prop="bank_name">
+                <el-input v-model="formState.bank_name" :placeholder="t('common.messages.enterField', { field: t('whitelist.bankName') })" />
               </el-form-item>
-              <el-form-item label="银行账号" prop="bank_account">
-                <el-input v-model="formState.bank_account" placeholder="请输入银行账号" />
+              <el-form-item :label="t('whitelist.bankAccount')" prop="bank_account">
+                <el-input v-model="formState.bank_account" :placeholder="t('common.messages.enterField', { field: t('whitelist.bankAccount') })" />
               </el-form-item>
             </div>
             <div class="submit-form__row">
               <el-form-item label="SWIFT" prop="swift">
-                <el-input v-model="formState.swift" placeholder="请输入 SWIFT 代码" />
+                <el-input v-model="formState.swift" :placeholder="t('common.messages.enterField', { field: 'SWIFT' })" />
               </el-form-item>
-              <el-form-item label="中间行 SWIFT（可选）" prop="intermediary_swift">
-                <el-input v-model="formState.intermediary_swift" placeholder="没有可不填写" />
+              <el-form-item :label="t('whitelist.intermediarySwift')" prop="intermediary_swift">
+                <el-input v-model="formState.intermediary_swift" :placeholder="t('whitelist.optional')" />
               </el-form-item>
             </div>
             <div class="submit-form__row">
-              <el-form-item label="汇款目的" prop="remittance_purpose">
+              <el-form-item :label="t('whitelist.remittancePurpose')" prop="remittance_purpose">
                 <el-select
                   v-model="formState.remittance_purpose"
                   filterable
-                  placeholder="请选择或搜索汇款目的"
+                  :placeholder="t('common.messages.selectField', { field: t('whitelist.remittancePurpose') })"
                 >
                   <el-option
                     v-for="option in REMITTANCE_PURPOSE_OPTIONS"
@@ -236,17 +215,17 @@
                   </el-option>
                 </el-select>
               </el-form-item>
-              <el-form-item label="备注（可选）" prop="remark">
-                <el-input v-model="formState.remark" placeholder="补充说明本次汇款用途" />
+              <el-form-item :label="t('whitelist.remark')" prop="remark">
+                <el-input v-model="formState.remark" :placeholder="t('whitelist.remark')" />
               </el-form-item>
             </div>
           </section>
 
           <section class="form-section form-section--files">
             <header class="form-section__header">
-              <span>{{ formState.role === 2 ? '04' : '03' }}</span>
+              <span>{{ formState.role === 2 ? '03' : '02' }}</span>
               <div>
-                <h3>证明文件 <small>选填</small></h3>
+                <h3>{{ t('whitelist.proofFiles') }} <small>{{ t('whitelist.optional') }}</small></h3>
               </div>
             </header>
 
@@ -263,8 +242,7 @@
                 @change="onFileChange"
               >
                 <el-icon class="submit-form__upload-icon"><UploadFilled /></el-icon>
-                <strong>点击选择或拖动文件到此处</strong>
-                <small>PDF / PNG / JPG / JPEG，单文件不超过 10 MB，最多 5 个</small>
+                <strong>{{ t('whitelist.uploadText') }}</strong><small>{{ t('whitelist.uploadHint') }}</small>
               </el-upload>
             </el-form-item>
           </section>
@@ -274,14 +252,21 @@
 
     <template #footer>
       <footer class="submit-dialog__footer">
-          <el-button plain @click="close">取消</el-button>
+          <el-button v-if="activeStep === 0" plain @click="close">{{ t('common.actions.cancel') }}</el-button><el-button v-else plain @click="activeStep = 0">{{ t('whitelist.previous') }}</el-button>
           <el-button
+            v-if="activeStep === 0"
+            type="primary"
+            @click="goNext"
+          >
+            {{ t('whitelist.next') }}
+          </el-button>
+          <el-button
+            v-else
             type="primary"
             :loading="submitting || uploading"
-            :disabled="!hasSubjectSelection"
             @click="handleSubmit"
           >
-            提交申请
+            {{ t('whitelist.submitApplication') }}
           </el-button>
       </footer>
     </template>
@@ -295,16 +280,14 @@
  * - 表单状态、动态校验、参数组装和附件校验统一由 useWhitelistSubmitForm 管理；
  * - 文件上传与接口提交仍由父级 useWhitelistForm 处理。
  */
-import { watch } from 'vue';
+import { ref, watch } from 'vue';
+import { ElMessage } from 'element-plus';
+import { useI18n } from 'vue-i18n';
 import type { UploadFile, UploadFiles } from 'element-plus';
 import {
   Close,
   DocumentAdd,
-  Download,
-  OfficeBuilding,
-  Upload,
   UploadFilled,
-  User,
 } from '@element-plus/icons-vue';
 
 import type { SubmitWhitelistPayload, WhitelistFile, WhitelistItemDetail } from '@/api/modules/whitelist';
@@ -338,6 +321,18 @@ const {
   resetForm,
 } = useWhitelistSubmitForm();
 
+const activeStep = ref(0);
+const { t } = useI18n();
+
+function goNext() {
+  if (formState.role === null || formState.entity_type === null) {
+    ElMessage.warning(t('whitelist.selectIdentityWarning'));
+    return;
+  }
+  formRef.value?.clearValidate();
+  activeStep.value = 1;
+}
+
 async function handleSubmit() {
   const payload = await validateAndBuild();
   if (payload) emit('submit', payload);
@@ -349,13 +344,17 @@ function onFileChange(file: UploadFile, files: UploadFiles) {
 
 function close() {
   emit('update:modelValue', false);
+  activeStep.value = 0;
   resetForm();
 }
 
 watch(
   () => props.modelValue,
   (val) => {
-    if (!val) resetForm();
+    if (!val) {
+      activeStep.value = 0;
+      resetForm();
+    }
   },
 );
 
@@ -369,6 +368,7 @@ defineExpose({ close });
   border-radius: 22px;
   background: #f5f8fb;
   box-shadow: 0 28px 80px rgb(8 31 58 / 22%);
+  padding:0;
 }
 
 :global(.whitelist-submit-dialog .el-dialog__header) {
@@ -389,23 +389,23 @@ defineExpose({ close });
     display: flex;
     position: relative;
     align-items: center;
-    gap: 15px;
-    padding: 22px 26px;
+    gap: 11px;
+    padding: 13px 20px;
     border-bottom: 1px solid #e2e9f0;
     background: radial-gradient(circle at 78% 0%, rgb(25 184 168 / 12%), transparent 32%), #fff;
 
     &-icon {
       display: inline-flex;
-      width: 48px;
-      height: 48px;
-      flex: 0 0 48px;
+      width: 38px;
+      height: 38px;
+      flex: 0 0 38px;
       align-items: center;
       justify-content: center;
-      border-radius: 14px;
+      border-radius: 11px;
       color: #fff;
       background: linear-gradient(135deg, #19b8a8, #268ee6);
       box-shadow: 0 10px 24px rgb(20 166 174 / 22%);
-      font-size: 24px;
+      font-size: 19px;
     }
 
     div {
@@ -416,7 +416,7 @@ defineExpose({ close });
     h2 {
       margin: 0;
       color: #0a2342;
-      font-size: 22px;
+      font-size: 19px;
       font-weight: 750;
     }
 
@@ -432,6 +432,22 @@ defineExpose({ close });
     max-height: calc(92vh - 174px);
     overflow-y: auto;
     padding: 20px 24px 24px;
+  }
+
+  &__steps {
+    max-width: 620px;
+    margin: 0 auto 20px;
+    padding: 4px 8px 0;
+
+    :deep(.el-step__title) {
+      color: #60748a;
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    :deep(.el-step__title.is-process) { color: #087f79; }
+    :deep(.el-step__head.is-process) { color: #0aa49a; border-color: #0aa49a; }
+    :deep(.el-step__head.is-success) { color: #0aa49a; border-color: #0aa49a; }
   }
 
   &__footer {
@@ -560,6 +576,7 @@ defineExpose({ close });
   }
 
   &--identity {
+    padding-top: 22px;
     padding-bottom: 4px;
   }
 
@@ -572,59 +589,6 @@ defineExpose({ close });
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 18px;
-}
-
-.identity-options {
-  display: grid;
-  width: 100%;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-
-  :deep(.el-radio-button) {
-    width: 100%;
-  }
-
-  :deep(.el-radio-button__inner) {
-    width: 100%;
-    height: auto;
-    padding: 0;
-    border: 1px solid #dce5ee !important;
-    border-radius: 12px !important;
-    box-shadow: none !important;
-    background: #f9fbfd;
-  }
-
-  :deep(.el-radio-button.is-active .el-radio-button__inner) {
-    border-color: #18aaa3 !important;
-    color: #087f7b;
-    background: #ecfaf8;
-  }
-}
-
-.identity-option {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px;
-
-  > .el-icon {
-    color: #4f789a;
-    font-size: 20px;
-  }
-
-  > span {
-    display: grid;
-    min-width: 0;
-    gap: 2px;
-    text-align: left;
-  }
-
-  strong {
-    color: #193450;
-    font-size: 14px;
-    font-weight: 650;
-  }
-
 }
 
 .upload-form-item {
@@ -689,15 +653,16 @@ defineExpose({ close });
     padding: 17px 15px 1px;
   }
 
-  .identity-grid,
   .submit-form__row,
   .submit-form__row--three {
     grid-template-columns: 1fr;
     gap: 0;
   }
 
-  .identity-options {
-    gap: 8px;
+  .identity-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
   }
+
 }
 </style>

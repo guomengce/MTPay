@@ -1,3 +1,4 @@
+import type { LoginChallenge } from '@/utils/loginChallenge';
 /**
  * 代理端账户认证模块
  * 负责：登录加密信封、登录、登出、激活、重置密码、查看个人资料。
@@ -18,6 +19,7 @@ export interface AgentProfile {
   company_name: string;
   email: string;
   phone: string | null;
+  safeheron_account_key: string | null;
   status: number;
   status_name: string;
   activated_at: string | null;
@@ -57,7 +59,7 @@ export function login(credentials: { email: string; password: string }) {
   const publicKey = fetchLoginPublicKey();
   return publicKey.then(({ public: publicKeyBody }) => {
     const envelope = createLoginEnvelope(publicKeyBody, credentials);
-    return request.post<unknown, AgentLoginResult>('/web/agentLogin', envelope);
+    return request.post<unknown, AgentLoginResult | LoginChallenge>('/web/agentLogin', envelope);
   });
 }
 
@@ -120,4 +122,9 @@ export function resetAgentPassword(payload: {
  */
 export function forgotAgentPassword(email: string) {
   return request.post<unknown, []>('/web/forgotAgentPassword', { email });
+}
+
+/** Public second login step; only this success grants a session after a challenge. */
+export function verifyTwoFactorLogin(payload: { login_challenge: string; code: string }) {
+  return request.post<unknown, AgentLoginResult>('/web/verifyTwoFactorLogin', payload);
 }

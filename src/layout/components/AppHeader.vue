@@ -4,7 +4,7 @@
       <button
         class="app-header__menu-btn"
         type="button"
-        aria-label="切换菜单"
+        :aria-label="t('common.actions.toggleMenu')"
         @click="appStore.toggleSidebar"
       >
         <el-icon><component :is="appStore.sidebarCollapsed ? Expand : Fold" /></el-icon>
@@ -17,10 +17,10 @@
             class="app-header__crumb-current"
             :aria-current="'page'"
           >
-            {{ item.title }}
+            {{ t(item.title) }}
           </span>
           <RouterLink v-else class="app-header__crumb-link" :to="item.path">
-            {{ item.title }}
+            {{ t(item.title) }}
           </RouterLink>
           <el-icon v-if="index < breadcrumbs.length - 1" class="app-header__crumb-sep">
             <ArrowRight />
@@ -30,15 +30,12 @@
     </div>
 
     <div class="app-header__right">
-      <button
-        class="app-header__bell"
-        type="button"
-        :aria-label="hasUnread ? '消息（有未读）' : '消息'"
-        @click="handleMessages"
-      >
-        <el-icon><Bell /></el-icon>
-        <span v-if="hasUnread" class="app-header__bell-dot" aria-hidden="true" />
-      </button>
+      <LanguageSwitcher />
+      <NotificationPopover>
+        <button class="app-header__bell" type="button" :aria-label="hasUnread ? t('common.messages.unread') : t('common.messages.notifications')">
+          <el-icon><Bell /></el-icon><span v-if="hasUnread" class="app-header__bell-count">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
+        </button>
+      </NotificationPopover>
 
       <span class="app-header__divider" aria-hidden="true" />
 
@@ -52,11 +49,11 @@
           <el-dropdown-menu>
             <el-dropdown-item command="security">
               <el-icon><Lock /></el-icon>
-              <span>账户安全</span>
+              <span>{{ t('auth.accountSecurity') }}</span>
             </el-dropdown-item>
             <el-dropdown-item divided command="logout">
               <el-icon><SwitchButton /></el-icon>
-              <span>退出登录</span>
+              <span>{{ t('auth.logout') }}</span>
             </el-dropdown-item>
           </el-dropdown-menu>
         </template>
@@ -78,17 +75,22 @@ import {
   User,
 } from '@element-plus/icons-vue';
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 
 import { useAppStore } from '@/stores/modules/app';
 import { useAuthStore } from '@/stores/modules/auth';
 import { useLogout } from '@/composables/useLogout';
+import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue';
+import NotificationPopover from './NotificationPopover.vue';
+import { useNotifications } from '@/views/notifications/composables/useNotifications';
 
 const route = useRoute();
 const router = useRouter();
 const appStore = useAppStore();
 const authStore = useAuthStore();
 const { submitLogout } = useLogout();
+const { t } = useI18n();
 
 interface CrumbItem {
   title: string;
@@ -110,23 +112,20 @@ const breadcrumbs = computed<CrumbItem[]>(() => {
   if (items.length === 0) {
     items.push({ title: String(route.meta.title || ''), path: route.path });
   }
-  return [{ title: '系统平台', path: '/dashboard' }, ...items];
+  return [{ title: 'menu.platform', path: '/dashboard' }, ...items];
 });
 
-const userName = computed(() => authStore.userInfo?.name || '未登录用户');
+const userName = computed(() => authStore.userInfo?.name || t('auth.guest'));
 const userInitial = computed(() => {
   const name = userName.value.trim();
   return name ? name.charAt(0).toUpperCase() : 'U';
 });
 
-const hasUnread = computed(() => false);
+const { unreadCount } = useNotifications();
+const hasUnread = computed(() => unreadCount.value > 0);
 
 function handleAgentEntry() {
   router.push('/dashboard').catch(() => undefined);
-}
-
-function handleMessages() {
-  // 项目目前未接入消息中心逻辑，保留 UI 与事件接口
 }
 
 async function handleUserCommand(command: string) {
@@ -323,21 +322,20 @@ async function handleUserCommand(command: string) {
   }
 }
 
-.app-header__bell-dot {
+.app-header__bell-count {
   position: absolute;
-  top: 8px;
-  right: 9px;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
+  top: -5px;
+  right: -5px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 11px;
+  line-height: 18px;
+  text-align: center;
   background: #ef4444;
   box-shadow: 0 0 0 2px #ffffff;
-}
-
-.app-header__bell-text {
-  color: var(--portal-text-secondary);
-  font-size: 13px;
-  font-weight: 700;
 }
 
 .app-header__user-btn {
@@ -411,9 +409,6 @@ async function handleUserCommand(command: string) {
     display: none;
   }
 
-  .app-header__bell-text {
-    display: none;
-  }
 }
 
 @include mobile {
@@ -434,7 +429,6 @@ async function handleUserCommand(command: string) {
 
   .app-header__status,
   .app-header__entry-label,
-  .app-header__bell-text,
   .app-header__user-name {
     display: none;
   }

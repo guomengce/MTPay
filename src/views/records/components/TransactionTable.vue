@@ -1,7 +1,7 @@
 <template>
   <div class="transaction-table">
     <el-table v-loading="loading" :data="data" class="transaction-table__table" stripe>
-      <el-table-column label="提交时间" min-width="180">
+      <el-table-column :label="t('records.submittedAt')" min-width="180">
         <template #default="{ row }">
           <a class="transaction-table__link" href="javascript:void(0)" @click.prevent="emit('view', row)">
             {{ row.order_no }}
@@ -9,14 +9,14 @@
           <small class="transaction-table__time">{{ row.submitted_at || '—' }}</small>
         </template>
       </el-table-column>
-      <el-table-column label="类型" min-width="90">
+      <el-table-column :label="t('records.type')" min-width="170">
         <template #default="{ row }">
           <span class="transaction-table__type" :class="`is-${row.business_type}`">
-            {{ row.business_name }}
+            {{ businessLabel(row.business_type) }}
           </span>
         </template>
       </el-table-column>
-      <el-table-column label="内容" min-width="320" align="center" header-align="center">
+      <el-table-column :label="t('records.content')" min-width="320" align="center" header-align="center">
         <template #default="{ row }">
           <WithdrawalPartyFlow
             v-if="row.business_type === 'withdrawal'"
@@ -31,37 +31,37 @@
               <FlowArrow />
               <strong>{{ row.target_currency_code || '—' }}</strong>
             </div>
-            <small>兑换比例：{{ formatExchangeRate(row.exchange_rate) || '—' }}</small>
+            <small>{{ t('records.exchangeRate') }}：{{ formatExchangeRate(row.exchange_rate) || '—' }}</small>
           </div>
           <span v-else class="transaction-table__content">{{ contentLabel(row) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="金额" min-width="220">
+      <el-table-column :label="t('records.amount')" min-width="220">
         <template #default="{ row }">
           <div class="transaction-table__amount-block">
             <strong>{{ amountLabel(row) }}</strong>
             <small v-if="row.business_type === 'withdrawal'">
-              总扣款 {{ row.total_amount || '—' }} {{ row.currency_code }}
+              {{ t('records.totalDeduction') }} {{ formatMoney(row.total_amount || '—') }} {{ row.currency_code }}
             </small>
             <small v-else-if="row.business_type === 'exchange'">
-              获得 {{ row.target_amount || '—' }} {{ row.target_currency_code || '' }}
+              {{ t('records.received') }} {{ formatMoney(row.target_amount || '—') }} {{ row.target_currency_code || '' }}
             </small>
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="状态" min-width="130">
+      <el-table-column :label="t('records.status')" min-width="160">
         <template #default="{ row }">
           <StatusBadge
-            :label="row.status_name"
+            :label="statusLabel(row)"
             :type="statusType(row)"
             :effect="statusEffect(row)"
           />
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="110" fixed="right" align="center">
+      <el-table-column :label="t('records.actions')" min-width="140" fixed="right" align="center">
         <template #default="{ row }">
           <el-button type="primary" plain size="small" :icon="View" @click="emit('view', row)">
-            详情
+            {{ t('records.details') }}
           </el-button>
         </template>
       </el-table-column>
@@ -70,20 +70,30 @@
 </template>
 
 <script setup lang="ts">
+import { formatMoney } from '@/utils/formatMoney';
+
 import { View } from '@element-plus/icons-vue';
+import { useI18n } from 'vue-i18n';
 
 import type { TransactionItem } from '@/api/modules/transaction';
 import StatusBadge, { type StatusBadgeType } from '@/components/admin/StatusBadge.vue';
 import FlowArrow from '@/components/common/FlowArrow.vue';
 import { formatExchangeRate } from '@/utils/decimal';
 import WithdrawalPartyFlow from '@/views/withdrawal/components/WithdrawalPartyFlow.vue';
+import { transactionAmount, transactionBusinessLabel } from '../transactionPresentation';
 
 defineProps<{ data: TransactionItem[]; loading?: boolean }>();
 const emit = defineEmits<{ (e: 'view', row: TransactionItem): void }>();
+const { t } = useI18n();
+function businessLabel(type: TransactionItem['business_type']) { return transactionBusinessLabel(type, t); }
+function statusLabel(row: TransactionItem) { const key = row.status_group === 'needs_supplement' ? 'supplement' : row.status_group; return t(`records.${key}`); }
 
 function contentLabel(row: TransactionItem) {
   if (row.business_type === 'deposit') {
     return [row.currency_code, row.network_code].filter(Boolean).join(' · ');
+  }
+  if (row.business_type === 'fiat_deposit') {
+    return row.currency_code || '—';
   }
   if (row.business_type === 'exchange') {
     return `${row.currency_code} → ${row.target_currency_code}${row.exchange_rate ? ` · ${formatExchangeRate(row.exchange_rate)}` : ''}`;
@@ -92,11 +102,11 @@ function contentLabel(row: TransactionItem) {
 }
 
 function entityTypeLabel(name?: string | null, type?: 1 | 2 | null) {
-  return name || (type === 1 ? '公司' : type === 2 ? '个人' : undefined);
+  return name || (type === 1 ? t('records.company') : type === 2 ? t('records.individual') : undefined);
 }
 
 function amountLabel(row: TransactionItem) {
-  return `${row.amount} ${row.currency_code}`;
+  return transactionAmount(row);
 }
 
 function statusType(row: TransactionItem): StatusBadgeType {
@@ -146,10 +156,14 @@ function statusEffect(row: TransactionItem) {
     background: #eef3f7;
     font-size: 12px;
     font-weight: 700;
+    white-space: nowrap;
 
     &.is-deposit { color: #07835d; background: #e3f7ee; }
+    &.is-fiat_deposit { color: #1267a8; background: #e8f3fb; }
     &.is-exchange { color: #b45309; background: #fef3c7; }
     &.is-withdrawal { color: #0a7f7a; background: #e4f6f2; }
+    &.is-manual_increase { color: #047857; background: #dff7ec; }
+    &.is-manual_decrease { color: #dc2626; background: #fee2e2; }
   }
 
   &__content {

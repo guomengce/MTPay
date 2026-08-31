@@ -2,14 +2,14 @@
   <main class="business-detail withdrawal-detail">
     <div class="business-detail__toolbar">
       <button class="business-detail__back" type="button" @click="goBack">
-        <i class="ri-arrow-left-line" />返回出金列表
+        <i class="ri-arrow-left-line" />{{ t('withdrawal.back') }}
       </button>
       <el-button
         v-if="supplementVisible"
         type="primary"
         :icon="Upload"
         @click="supplementDialogVisible = true"
-        >补交文件</el-button
+        >{{ t('withdrawal.supplement') }}</el-button
       >
     </div>
 
@@ -28,8 +28,8 @@
         />
       </template>
 
-      <el-empty v-else-if="!loading" description="未找到该出金订单">
-        <el-button type="primary" @click="goBack">返回出金列表</el-button>
+      <el-empty v-else-if="!loading" :description="t('withdrawal.notFound')">
+        <el-button type="primary" @click="goBack">{{ t('withdrawal.back') }}</el-button>
       </el-empty>
     </div>
   </main>
@@ -45,6 +45,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { ElMessage } from 'element-plus';
 import { Upload } from '@element-plus/icons-vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { usePageLoading } from '@/composables/usePageLoading';
 
 import WithdrawalDetailContent from '@/views/withdrawal/detail/components/WithdrawalDetailContent.vue';
@@ -55,6 +56,7 @@ import SupplementDialog from '@/views/withdrawal/components/SupplementDialog.vue
 
 const route = useRoute();
 const router = useRouter();
+const { t } = useI18n();
 const { loading, detail, fetchDetail } = useWithdrawalDetail();
 usePageLoading(loading);
 const { loading: fileLoading, openPreview, triggerDownload } = useWithdrawalFiles();
@@ -73,13 +75,13 @@ const supplementVisible = computed(() =>
 );
 const supplementRequirement = computed(() => {
   const d = detail.value;
-  if (!d) return '请按平台要求补充证明材料。';
+  if (!d) return t('withdrawal.defaultSupplement');
   if (d.review?.note) return d.review.note;
   const request = (d.records ?? []).find((record) => {
     const text = record.action_name;
     return /要求|补充|补件|supplement/i.test(text);
   });
-  return request?.message || '请按平台要求补充证明材料。';
+  return request?.message || t('withdrawal.defaultSupplement');
 });
 
 
@@ -103,7 +105,7 @@ async function handleSupplement(payload: { file_ids: number[]; message?: string 
       file_ids: payload.file_ids,
       message: payload.message,
     });
-    ElMessage.success('补件已提交，订单将重新进入审核');
+    ElMessage.success(t('withdrawal.supplemented'));
     supplementDialogVisible.value = false;
     await reload();
   } catch {

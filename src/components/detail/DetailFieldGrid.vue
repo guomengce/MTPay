@@ -8,13 +8,13 @@
     >
       <dt>{{ item.label }}</dt>
       <dd :class="{ 'is-mono': item.mono, 'is-accent': item.accent }">
-        <span>{{ item.value }}</span>
+        <span>{{ item.displayValue ?? item.value }}</span>
         <el-button
           v-if="item.copyable"
           text
           circle
           :icon="DocumentCopy"
-          :aria-label="`复制${item.label}`"
+          :aria-label="`${t('common.actions.copy')} ${item.label}`"
           @click="emit('copy', item)"
         />
       </dd>
@@ -26,6 +26,7 @@
 export interface DetailFieldItem {
   label: string;
   value: string;
+  displayValue?: string;
   wide?: boolean;
   mono?: boolean;
   accent?: boolean;
@@ -35,9 +36,11 @@ export interface DetailFieldItem {
 
 <script setup lang="ts">
 import { DocumentCopy } from '@element-plus/icons-vue';
+import { useI18n } from 'vue-i18n';
 
 defineProps<{ items: DetailFieldItem[] }>();
 const emit = defineEmits<{ (event: 'copy', item: DetailFieldItem): void }>();
+const { t } = useI18n();
 </script>
 
 <style scoped lang="scss">

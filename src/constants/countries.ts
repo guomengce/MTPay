@@ -275,10 +275,35 @@ export const COUNTRY_OPTIONS: CountryOption[] = COUNTRY_CODES.map((code) => ({
 const COUNTRY_LABEL_MAP = new Map<string, string>(
   COUNTRY_OPTIONS.map(({ code, label }) => [code, label]),
 );
+const COUNTRY_CODE_BY_LABEL = new Map<string, CountryCode>(
+  COUNTRY_OPTIONS.map(({ code, label }) => [label, code]),
+);
+
+function displayLocale(locale = 'zh-HK') {
+  if (locale.toLowerCase().startsWith('zh-cn')) return 'zh-Hans';
+  if (locale.toLowerCase().startsWith('en')) return 'en';
+  return 'zh-Hant';
+}
+
+/** 取得当前界面语言的国家名称；value 始终保留繁体名称供接口提交。 */
+export function getLocalizedCountryOptions(locale = 'zh-HK') {
+  const targetLocale = displayLocale(locale);
+  const names = new Intl.DisplayNames([targetLocale], { type: 'region' });
+  const sorter = new Intl.Collator([targetLocale], { sensitivity: 'base' });
+  return COUNTRY_OPTIONS.map((country) => ({
+    ...country,
+    displayLabel: names.of(country.code) || country.label,
+  })).sort((left, right) => sorter.compare(left.displayLabel, right.displayLabel));
+}
 
 /** 将历史 ISO 代码转换为繁体名称；后端已返回名称时保持原样。 */
-export function getCountryLabel(value: unknown): string {
+export function getCountryLabel(value: unknown, locale = 'zh-HK'): string {
   if (typeof value !== 'string' || !value.trim()) return '—';
   const code = value.trim().toUpperCase();
-  return COUNTRY_LABEL_MAP.get(code) || value;
+  const countryCode = COUNTRY_LABEL_MAP.has(code)
+    ? (code as CountryCode)
+    : COUNTRY_CODE_BY_LABEL.get(value.trim());
+  if (!countryCode) return value;
+  const names = new Intl.DisplayNames([displayLocale(locale)], { type: 'region' });
+  return names.of(countryCode) || COUNTRY_LABEL_MAP.get(countryCode) || value;
 }

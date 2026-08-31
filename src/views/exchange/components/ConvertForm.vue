@@ -11,16 +11,11 @@
       <section class="convert-form__workspace">
         <article class="convert-form__asset-card is-source">
           <div class="convert-form__asset-head">
-            <div>
-              <small>支付资产</small>
-              <strong>选择来源币种</strong>
-            </div>
+             <strong>{{ t('exchange.sourceCurrency') }}</strong>
             <el-form-item prop="source_currency_code" class="convert-form__currency-field">
-              <el-radio-group v-model="form.source_currency_code" class="convert-form__source">
-                <el-radio-button v-for="code in sourceOptions" :key="code" :value="code">
-                  {{ code }}
-                </el-radio-button>
-              </el-radio-group>
+              <el-select v-model="form.source_currency_code" :placeholder="t('exchange.sourcePlaceholder')">
+                <el-option v-for="code in sourceOptions" :key="code" :value="code" :label="code" />
+              </el-select>
             </el-form-item>
           </div>
 
@@ -33,12 +28,12 @@
           </el-form-item>
 
           <footer class="convert-form__asset-foot">
-            <span class="convert-form__balance-label">可用余额</span>
+            <span class="convert-form__balance-label">{{ t('exchange.available') }}</span>
             <strong v-if="balance">
-              {{ balance.available_balance }} {{ balance.currency.code }}
+              {{ formatMoney(balance.available_balance) }} {{ balance.currency.code }}
             </strong>
             <strong v-else>—</strong>
-            <el-button v-if="balance" link @click="useMaxBalance">全部兑换</el-button>
+            <el-button v-if="balance" link @click="useMaxBalance">{{ t('exchange.max') }}</el-button>
           </footer>
         </article>
 
@@ -48,43 +43,39 @@
 
         <article class="convert-form__asset-card is-target">
           <div class="convert-form__asset-head">
-            <div>
-              <small>到账资产</small>
-              <strong>兑换目标</strong>
-            </div>
-            <span class="convert-form__usd-badge">USD</span>
+            <strong>{{ t('exchange.target') }}</strong>
+            <el-form-item prop="target_currency_code" class="convert-form__currency-field">
+              <el-select v-model="form.target_currency_code" :placeholder="t('exchange.targetPlaceholder')">
+                <el-option v-for="code in targetOptions" :key="code" :value="code" :label="code" />
+              </el-select>
+            </el-form-item>
           </div>
 
           <div class="convert-form__target-value">
-            <small>预计到账</small>
+            <small>{{ t('exchange.estimated') }}</small>
             <div>
-              <span>{{ estimatedTargetAmount }}</span>
-              <strong>USD</strong>
+              <span>{{ formatMoney(estimatedTargetAmount) }}</span>
+              <strong>{{ form.target_currency_code }}</strong>
             </div>
           </div>
 
           <footer class="convert-form__asset-foot">
-            <span>当前汇率</span>
-            <strong v-if="rate"> 1 {{ form.source_currency_code }} ≈ {{ formatExchangeRate(rate.rate) }} USD </strong>
-            <strong v-else>暂无可用汇率</strong>
-            <em v-if="rate">{{ rate.rate_source_name }}</em>
+            <span>{{ t('exchange.currentRate') }}</span>
+            <strong v-if="rate"> 1 {{ form.source_currency_code }} ≈ {{ formatExchangeRate(rate.rate) }} {{ form.target_currency_code }} </strong>
+            <strong v-else>{{ t('exchange.noRate') }}</strong>
+            
           </footer>
         </article>
       </section>
 
       <footer class="convert-form__submit-row">
-        <p>
-          <i class="ri-information-line" aria-hidden="true" />
-          实际汇率与到账金额以服务端创建的订单快照为准
-        </p>
         <el-button
           type="primary"
           class="convert-form__action"
           :loading="submitting"
           @click="handleSubmit"
         >
-          确认兑换
-          <el-icon class="el-icon--right"><Right /></el-icon>
+          {{ t('exchange.confirm') }}
         </el-button>
       </footer>
     </el-form>
@@ -92,13 +83,16 @@
 </template>
 
 <script setup lang="ts">
+import { formatMoney } from '@/utils/formatMoney';
+
 /**
  * 兑换表单组件
  * - 只负责 UI 与提交事件；
  * - 来源币种、汇率、余额由父组件通过 props 传入；
  * - 表单字段直接 emit 到父组件，组件内部不保存业务状态。
  */
-import { computed, reactive, ref as refHook } from 'vue';
+import { computed, reactive, ref as refHook, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import type { FormInstance, FormRules } from 'element-plus';
 import { Money, Right } from '@element-plus/icons-vue';
 
@@ -108,18 +102,24 @@ import { formatExchangeRate } from '@/utils/decimal';
 const props = defineProps<{
   submitting?: boolean;
   balances?: ExchangeBalance[];
-  rates?: { USDT?: ExchangeEffectiveRate; USDC?: ExchangeEffectiveRate };
+  rates?: Partial<Record<string, ExchangeEffectiveRate>>;
 }>();
 
 const emit = defineEmits<{
-  (e: 'submit', payload: { source_currency_code: 'USDT' | 'USDC'; amount: string }): void;
+  (e: 'submit', payload: { source_currency_code: string; amount: string }): void;
 }>();
 
 const formRef = refHook<FormInstance>();
-const sourceOptions = ['USDT', 'USDC'] as const;
+const { t } = useI18n();
+const sourceOptions = computed(() => (props.balances ?? []).map((item) => item.currency.code));
+const targetOptions = computed(() => {
+  const values = Object.values(props.rates ?? {});
+  return [...new Set(values.map((item) => item?.target_currency.code).filter(Boolean))] as string[];
+});
 
 const form = reactive({
-  source_currency_code: 'USDT' as 'USDT' | 'USDC',
+  source_currency_code: 'USDT',
+  target_currency_code: 'USD',
   amount: '',
 });
 
@@ -128,8 +128,23 @@ const balance = computed<ExchangeBalance | undefined>(() =>
 );
 
 const rate = computed<ExchangeEffectiveRate | undefined>(
-  () => props.rates?.[form.source_currency_code],
+  () => {
+    const current = props.rates?.[form.source_currency_code];
+    return current?.target_currency.code === form.target_currency_code ? current : undefined;
+  },
 );
+
+watch(sourceOptions, (options) => {
+  if (options.length && !options.includes(form.source_currency_code)) {
+    form.source_currency_code = options[0];
+  }
+}, { immediate: true });
+
+watch(targetOptions, (options) => {
+  if (options.length && !options.includes(form.target_currency_code)) {
+    form.target_currency_code = options[0];
+  }
+}, { immediate: true });
 
 /**
  * 根据当前配置汇率生成只读到账预估。
@@ -140,17 +155,18 @@ const estimatedTargetAmount = computed(() => {
   return multiplyDecimalStrings(form.amount, rate.value.rate, 2) ?? '0.00';
 });
 
-const rules: FormRules<{ source_currency_code: 'USDT' | 'USDC'; amount: string }> = {
-  source_currency_code: [{ required: true, message: '请选择来源币种', trigger: 'change' }],
+const rules = computed<FormRules<{ source_currency_code: string; target_currency_code: string; amount: string }>>(() => ({
+  source_currency_code: [{ required: true, message: t('exchange.sourceRequired'), trigger: 'change' }],
+  target_currency_code: [{ required: true, message: t('exchange.targetRequired'), trigger: 'change' }],
   amount: [
-    { required: true, message: '请输入金额', trigger: 'blur' },
+    { required: true, message: t('exchange.amountRequired'), trigger: 'blur' },
     {
       pattern: /^(?!0+(?:\.0+)?$)\d{1,20}(?:\.\d{1,8})?$/,
-      message: '请输入大于 0 的金额，整数最多 20 位、小数最多 8 位',
+      message: t('exchange.amountInvalid'),
       trigger: 'blur',
     },
   ],
-};
+}));
 
 async function handleSubmit() {
   if (!(await formRef.value?.validate().catch(() => false))) return;
@@ -290,15 +306,11 @@ defineExpose({ reset });
 .convert-form__amount-field {
   margin-bottom: 0;
 }
-.convert-form__source {
-  display: flex;
+.convert-form__currency-field {
+  width: 150px;
 
-  :deep(.el-radio-button__inner) {
-    min-width: 72px;
-    padding: 10px 16px;
-    border-color: #d3e0e8;
-    box-shadow: none;
-  }
+  :deep(.el-select) { width: 100%; }
+  :deep(.el-select__wrapper) { min-height: 40px; }
 }
 .convert-form__amount-field {
   :deep(.el-input__wrapper) {
@@ -367,17 +379,6 @@ defineExpose({ reset });
   box-shadow: 0 10px 24px rgb(22 158 160 / 24%);
   font-size: 20px;
 }
-.convert-form__usd-badge {
-  display: grid;
-  width: 48px;
-  height: 48px;
-  place-items: center;
-  border-radius: 14px;
-  color: #245fc7;
-  background: #eaf2ff;
-  font-size: 13px;
-  font-weight: 700;
-}
 .convert-form__target-value {
   display: flex;
   min-height: 68px;
@@ -423,7 +424,7 @@ defineExpose({ reset });
 .convert-form__submit-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 20px;
 
   p {
@@ -467,14 +468,7 @@ defineExpose({ reset });
     align-items: flex-start;
     flex-direction: column;
   }
-  .convert-form__currency-field,
-  .convert-form__source {
-    width: 100%;
-  }
-  .convert-form__source :deep(.el-radio-button) {
-    flex: 1;
-  }
-  .convert-form__source :deep(.el-radio-button__inner) {
+  .convert-form__currency-field {
     width: 100%;
   }
   .convert-form__asset-foot {

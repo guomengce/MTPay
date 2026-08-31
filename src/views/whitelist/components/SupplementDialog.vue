@@ -12,8 +12,8 @@
       <div class="supplement-dialog__header">
         <span class="supplement-dialog__icon"><i class="ri-file-upload-line" /></span>
         <div>
-          <h2>补充白名单文件</h2>
-          <p>根据平台的补件要求上传新的证明材料</p>
+          <h2>{{ t('whitelist.supplementTitle') }}</h2>
+          <p>{{ t('whitelist.supplementDesc') }}</p>
         </div>
       </div>
     </template>
@@ -21,13 +21,13 @@
     <div v-if="supplementRequirement" class="supplement-dialog__requirement">
       <i class="ri-error-warning-line" />
       <div>
-        <strong>平台补件要求</strong>
+        <strong>{{ t('whitelist.platformRequirement') }}</strong>
         <p>{{ supplementRequirement }}</p>
       </div>
     </div>
 
     <el-form label-position="top">
-      <el-form-item label="补充文件" required>
+      <el-form-item :label="t('whitelist.supplementFiles')" required>
         <el-upload
           v-model:file-list="fileList"
           class="supplement-dialog__upload"
@@ -40,34 +40,34 @@
           @change="handleFileChange"
         >
           <el-icon class="el-icon--upload"><UploadFilled /></el-icon>
-          <div class="el-upload__text">拖放文件到这里，或<em>点击选择</em></div>
+          <div class="el-upload__text">{{ t('whitelist.dropFiles') }}<em>{{ t('whitelist.clickSelect') }}</em></div>
           <template #tip>
             <div class="el-upload__tip">
-              支持 PDF、PNG、JPG、JPEG；单个文件不超过 10 MB，最多 5 个
+              {{ t('whitelist.fileLimit') }}
             </div>
           </template>
         </el-upload>
       </el-form-item>
 
-      <el-form-item label="补件说明">
+      <el-form-item :label="t('whitelist.supplementNote')">
         <el-input
           v-model="message"
           type="textarea"
           :rows="3"
           maxlength="1000"
           show-word-limit
-          placeholder="说明本次补充的文件内容（选填）"
+          :placeholder="t('whitelist.supplementPlaceholder')"
         />
       </el-form-item>
     </el-form>
 
     <template #footer>
       <div class="supplement-dialog__footer">
-        <span><i class="ri-lock-line" /> 文件将通过安全连接上传</span>
+        <span><i class="ri-lock-line" /> {{ t('whitelist.secureUpload') }}</span>
         <div>
-          <el-button @click="close">取消</el-button>
+          <el-button @click="close">{{ t('common.actions.cancel') }}</el-button>
           <el-button type="primary" :loading="submitting || uploading" @click="submit">
-            提交补件
+            {{ t('whitelist.submitSupplement') }}
           </el-button>
         </div>
       </div>
@@ -81,6 +81,7 @@ import { ref, watch } from 'vue';
 import { ElMessage } from 'element-plus';
 import type { UploadFile, UploadFiles, UploadUserFile } from 'element-plus';
 import { UploadFilled } from '@element-plus/icons-vue';
+import { useI18n } from 'vue-i18n';
 
 import type { WhitelistFile, WhitelistItem } from '@/api/modules/whitelist';
 
@@ -100,6 +101,7 @@ const emit = defineEmits<{
 
 const fileList = ref<UploadUserFile[]>([]);
 const message = ref('');
+const { t } = useI18n();
 
 function reset() {
   fileList.value = [];
@@ -111,14 +113,14 @@ function close() {
 }
 
 function handleExceed() {
-  ElMessage.warning('最多上传 5 个文件');
+  ElMessage.warning(t('whitelist.maxFiles'));
 }
-async function handleFileChange(file:UploadFile,files:UploadFiles){fileList.value=files;if(!file.raw||file.status==='success')return;if(file.raw.size>10*1024*1024){ElMessage.warning('单个文件不能超过 10 MB');fileList.value=fileList.value.filter(item=>item.uid!==file.uid);return}try{file.status='uploading';file.response=await props.uploadFile(file.raw);file.status='success'}catch{file.status='fail';fileList.value=fileList.value.filter(item=>item.uid!==file.uid)}}
+async function handleFileChange(file:UploadFile,files:UploadFiles){fileList.value=files;if(!file.raw||file.status==='success')return;if(file.raw.size>10*1024*1024){ElMessage.warning(t('whitelist.fileTooLarge'));fileList.value=fileList.value.filter(item=>item.uid!==file.uid);return}try{file.status='uploading';file.response=await props.uploadFile(file.raw);file.status='success'}catch{file.status='fail';fileList.value=fileList.value.filter(item=>item.uid!==file.uid)}}
 
 function submit() {
   const fileIds=fileList.value.map(item=>(item.response as WhitelistFile|undefined)?.file_id).filter((id):id is number=>typeof id==='number');
   if (!fileIds.length) {
-    ElMessage.warning('请至少选择一个补件文件');
+    ElMessage.warning(t('whitelist.selectFile'));
     return;
   }
   emit('submit', { file_ids:fileIds, message: message.value.trim() || undefined });

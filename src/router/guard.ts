@@ -1,15 +1,12 @@
-import { appConfig } from '@/config';
+import { getLoginChallenge, clearLoginChallenge } from '@/utils/loginChallenge';
 import router from '@/router';
 import { useAuthStore } from '@/stores/modules/auth';
 import { usePageLoadingStore } from '@/stores/modules/pageLoading';
 
 router.beforeEach((to) => {
-  usePageLoadingStore().start();
+  usePageLoadingStore().startRoute();
   const authStore = useAuthStore();
-  const title = to.meta?.title ? `${String(to.meta.title)} - ${appConfig.title}` : appConfig.title;
-  document.title = title;
-
-  if (to.name === 'Login' && authStore.isLoggedIn) {
+  if ((to.name === 'Login' || to.name === 'TwoFactor') && authStore.isLoggedIn) {
     return { path: '/dashboard', replace: true };
   }
 
@@ -23,8 +20,10 @@ router.beforeEach((to) => {
     };
   }
 
+  if (to.name === 'TwoFactor' && !getLoginChallenge()) return { name: 'Login', replace: true };
+  if (to.name !== 'TwoFactor') clearLoginChallenge();
   return true;
 });
 
-router.afterEach(() => usePageLoadingStore().finish());
-router.onError(() => usePageLoadingStore().finish());
+router.afterEach(() => usePageLoadingStore().finishRoute());
+router.onError(() => usePageLoadingStore().finishRoute());

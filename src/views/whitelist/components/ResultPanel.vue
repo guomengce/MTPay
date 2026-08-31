@@ -3,7 +3,7 @@
     <div v-loading="loading" class="result-panel__grid-wrap">
       <el-empty
         v-if="!loading && list.length === 0"
-        description="暂无白名单记录，点击右上方新增按钮提交申请"
+        :description="t('whitelist.empty')"
         :image-size="80"
       />
       <div v-else class="result-panel__grid">
@@ -18,7 +18,7 @@
     </div>
 
     <div v-if="total > 0" class="result-panel__pagination">
-      <span>共 {{ total }} 条</span>
+      <span>{{ t('whitelist.total', { total }) }}</span>
       <el-pagination
         layout="prev, pager, next"
         :total="total"
@@ -38,6 +38,7 @@
  * - 仅触发 view / supplement / page / limit 事件，回调由页面级 useWhitelistManagement 处理。
  */
 import EntryCard from './EntryCard.vue';
+import { useI18n } from 'vue-i18n';
 import type { WhitelistItem } from '@/api/modules/whitelist';
 
 defineProps<{
@@ -54,6 +55,7 @@ const emit = defineEmits<{
   (event: 'page', page: number): void;
   (event: 'limit', limit: number): void;
 }>();
+const { t } = useI18n();
 
 function handlePageChange(nextPage: number) {
   emit('page', nextPage);

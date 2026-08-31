@@ -1,7 +1,7 @@
 <template>
   <section class="whitelist-page">
     <AdminHero
-      title="白名单管理"
+      :title="t('whitelist.title')"
       icon="ri-user-follow-line"
     >
       <template #extra>
@@ -13,7 +13,7 @@
             @change="applyFilters"
           />
           <el-button :icon="Plus" type="primary" @click="submitDialogVisible = true">
-            新增
+            {{ t('whitelist.add') }}
           </el-button>
         </div>
       </template>
@@ -61,7 +61,8 @@
 import { onMounted, ref } from 'vue';
 import { ElMessage } from 'element-plus';
 import { Plus } from '@element-plus/icons-vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
 import type { SubmitWhitelistPayload, WhitelistItem } from '@/api/modules/whitelist';
 import AdminHero from '@/components/admin/AdminHero.vue';
@@ -97,14 +98,16 @@ const {
 } = useWhitelistManagement();
 
 const router = useRouter();
+const route = useRoute();
 const submitDialogVisible = ref(false);
 const supplementDialogVisible = ref(false);
 const supplementItem = ref<WhitelistItem | null>(null);
+const { t } = useI18n();
 
 async function handleSubmit(payload: { business: SubmitWhitelistPayload }) {
   try {
     const detail = await submitWhitelist(payload.business);
-    ElMessage.success(`白名单 ${detail.whitelist_no} 已提交，等待审核`);
+    ElMessage.success(t('whitelist.submitted', { number: detail.whitelist_no }));
     submitDialogVisible.value = false;
     await refreshList();
   } catch {
@@ -131,7 +134,7 @@ async function handleSupplement(payload: { file_ids: number[]; message?: string 
   if (!supplementItem.value) return;
   try {
     await submitSupplement(supplementItem.value.id, payload.file_ids, payload.message);
-    ElMessage.success('补件已提交，白名单已重新进入审核');
+    ElMessage.success(t('whitelist.supplemented'));
     supplementDialogVisible.value = false;
     supplementItem.value = null;
     await refreshList();
@@ -152,6 +155,10 @@ function onLimit(value: number) {
 
 onMounted(() => {
   void fetchList();
+  if (route.query.action === 'create') {
+    submitDialogVisible.value = true;
+    void router.replace({ name: 'Whitelist' });
+  }
 });
 </script>
 
@@ -169,11 +176,6 @@ onMounted(() => {
     align-items: center;
     justify-content: flex-end;
     gap: 12px;
-
-    > .el-button {
-      flex: none;
-      margin-left: 0;
-    }
   }
 
   @include mobile {

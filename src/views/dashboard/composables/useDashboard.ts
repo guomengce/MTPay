@@ -1,9 +1,11 @@
+import { formatMoney } from '@/utils/formatMoney';
 /**
  * 业务总览 Composable
  * - 一次调用 /web/getAgentAssetOverview，数据在组合层映射给页面；
  * - 近期交易复用统一交易 TransactionItem，页面不自行换算金额。
  */
 import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import * as dashboardApi from '@/api/modules/dashboard';
 import type { AssetOverview } from '@/api/modules/dashboard';
@@ -30,7 +32,7 @@ export interface RecentTransactionItem {
   date: string;
   time: string;
   type: string;
-  typeTone: 'deposit' | 'withdrawal' | 'exchange';
+  typeTone: 'deposit' | 'fiat_deposit' | 'withdrawal' | 'exchange' | 'manual_increase' | 'manual_decrease';
   id: string;
   content: string;
   amount: string;
@@ -85,7 +87,7 @@ function recentTransaction(row: TransactionItem): RecentTransactionItem {
     typeTone: row.business_type,
     id: row.order_no,
     content,
-    amount: `${row.amount} ${row.currency_code}`,
+    amount: `${formatMoney(row.amount)} ${row.currency_code}`,
     amountTone: row.business_type === 'withdrawal' ? 'minus' : 'neutral',
     status: row.status_name,
     statusBadge,
@@ -93,6 +95,7 @@ function recentTransaction(row: TransactionItem): RecentTransactionItem {
 }
 
 export function useDashboard() {
+  const { t } = useI18n();
   const loading = ref(false);
   const overview = ref<AssetOverview | null>(null);
 
@@ -108,15 +111,15 @@ export function useDashboard() {
   const balances = computed<BalanceItem[]>(() =>
     (overview.value?.assets ?? []).map((asset) => ({
       code: asset.currency.code,
-      title: `${asset.currency.code} 可用余额`,
+      title: t('dashboard.availableBalance', { currency: asset.currency.code }),
       amount: asset.available_balance,
-      frozen: `冻结 ${asset.frozen_balance} ${asset.currency.code}`,
+      frozen: t('dashboard.frozenBalance', { amount: formatMoney(asset.frozen_balance), currency: asset.currency.code }),
       tone: BALANCE_TONE[asset.currency.code] ?? 'teal',
     })),
   );
 
   const pendingCount = computed(() => overview.value?.pending_counts?.total ?? 0);
-  const feeAmount = computed(() => formatFixedFee(overview.value?.capabilities?.withdrawal_fee_amount));
+  const feeAmount = computed(() => formatMoney(formatFixedFee(overview.value?.capabilities?.withdrawal_fee_amount)));
   const companyName = computed(() => overview.value?.user?.company_name ?? '');
 
   const recentTransactions = computed<TransactionItem[]>(() => overview.value?.recent_orders ?? []);
@@ -130,7 +133,7 @@ export function useDashboard() {
         return {
           pair: `${code} → ${rate.target_currency.code}`,
           value: formatExchangeRate(rate.rate),
-          sample: `${rate.rate_source_name} · 比例 ${formatExchangeRate(rate.rate)}`,
+          sample: `${rate.rate_source_name} · ${t('dashboard.rate')} ${formatExchangeRate(rate.rate)}`,
           mark: code === 'USDT' ? '₮' : '$',
         };
       });

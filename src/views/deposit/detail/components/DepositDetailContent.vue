@@ -1,28 +1,31 @@
 <template>
   <div class="deposit-detail-content">
-    <DetailOrderHero eyebrow="数字货币入金订单" :order-no="detail.order_no" :status="detail.status_name" :status-type="statusType" :status-effect="detail.status === 0 ? 'pending' : undefined">
+    <DetailOrderHero :eyebrow="t('deposit.orderEyebrow')" :order-no="detail.order_no" :status="statusLabel" :status-type="statusType" :status-effect="detail.status === 0 ? 'pending' : undefined">
       <div class="deposit-summary">
         <span class="deposit-summary__icon"><el-icon><Wallet /></el-icon></span>
-        <div><small>申报入金金额</small><p><strong>{{ detail.amount }}</strong><span>{{ detail.currency.code }}</span></p><em>{{ detail.currency.name }} · {{ detail.network.name }}（{{ detail.network.code }}）</em></div>
+        <div><small>{{ t('deposit.declaredAmount') }}</small><p><strong>{{ formatMoney(detail.amount) }}</strong><span>{{ detail.currency.code }}</span></p><em>{{ detail.currency.name }} · {{ detail.network.name }}（{{ detail.network.code }}）</em></div>
       </div>
       <template #meta>
-        <div class="meta"><small>申请代理</small><strong>{{ detail.user.company_name }}</strong><span>{{ detail.user.agent_code }} · {{ detail.user.email }}</span></div>
-        <div class="meta"><small>提交时间</small><strong>{{ detail.submitted_at || '—' }}</strong></div>
+        <div class="meta"><small>{{ t('deposit.applicant') }}</small><strong>{{ detail.user.company_name }}</strong><span>{{ detail.user.email }}</span></div>
+        <div class="meta"><small>{{ t('deposit.submittedAt') }}</small><strong>{{ detail.submitted_at || '—' }}</strong></div>
       </template>
     </DetailOrderHero>
     <div class="deposit-detail-content__workspace">
       <div class="deposit-detail-content__main">
-        <DetailCard title="链上核验" description="确认交易哈希与平台收款地址一致" icon="ri-links-line"><DetailFieldGrid :items="chainItems" @copy="copyField" /></DetailCard>
-        <DetailCard title="审核结果" description="本次审核处理记录" icon="ri-shield-check-line"><DetailFieldGrid v-if="reviewItems.length" :items="reviewItems" /><p v-else class="empty-result">待审核，审核结果尚未产生</p></DetailCard>
+        <DetailCard :title="t('deposit.chainVerification')" :description="t('deposit.chainVerificationDesc')" icon="ri-links-line"><DetailFieldGrid :items="chainItems" @copy="copyField" /></DetailCard>
+        <DetailCard :title="t('deposit.reviewResult')" :description="t('deposit.reviewResultDesc')" icon="ri-shield-check-line"><DetailFieldGrid v-if="reviewItems.length" :items="reviewItems" /><p v-else class="empty-result">{{ t('deposit.reviewPending') }}</p></DetailCard>
       </div>
-      <DetailCard v-if="detail.timeline.length" title="处理时间线" description="本次入金订单的处理流程" icon="ri-time-line"><DetailTimeline :items="detail.timeline" /></DetailCard>
+      <DetailCard v-if="detail.timeline.length" :title="t('deposit.timeline')" :description="t('deposit.timelineDesc')" icon="ri-time-line"><DetailTimeline :items="detail.timeline" /></DetailCard>
     </div>
   </div>
 </template>
 <script setup lang="ts">
+import { formatMoney } from '@/utils/formatMoney';
+
 import { computed } from 'vue';
 import { ElMessage } from 'element-plus';
 import { Wallet } from '@element-plus/icons-vue';
+import { useI18n } from 'vue-i18n';
 import type { DepositOrderDetail } from '@/api/modules/deposit';
 import type { StatusBadgeType } from '@/components/admin/StatusBadge.vue';
 import DetailCard from '@/components/detail/DetailCard.vue';
@@ -30,16 +33,18 @@ import DetailFieldGrid, { type DetailFieldItem } from '@/components/detail/Detai
 import DetailOrderHero from '@/components/detail/DetailOrderHero.vue';
 import DetailTimeline from '@/components/detail/DetailTimeline.vue';
 const props = defineProps<{ detail: DepositOrderDetail }>();
+const { t } = useI18n();
 const statusType = computed<StatusBadgeType>(() => props.detail.status === 1 ? 'success' : props.detail.status === 2 ? 'danger' : 'warning');
+const statusLabel = computed(() => t(props.detail.status === 1 ? 'deposit.statusCredited' : props.detail.status === 2 ? 'deposit.statusRejected' : 'deposit.statusPending'));
 const chainItems = computed<DetailFieldItem[]>(() => [
-  { label: '交易哈希 Txid', value: props.detail.txid, wide: true, mono: true, copyable: true },
-  { label: '平台收款地址', value: props.detail.receiving_address_snapshot, wide: true, mono: true, copyable: true },
+  { label: t('deposit.txid'), value: props.detail.txid, wide: true, mono: true, copyable: true },
+  { label: t('deposit.platformAddress'), value: props.detail.receiving_address_snapshot, wide: true, mono: true, copyable: true },
 ]);
 const reviewItems = computed<DetailFieldItem[]>(() => {
   const d = props.detail; if (d.status === 0) return [];
-  return [d.credited_at ? { label: '入账时间', value: d.credited_at, accent: true } : null, d.review.admin_name ? { label: '审核人', value: d.review.admin_name } : null, d.review.reviewed_at ? { label: '审核时间', value: d.review.reviewed_at } : null, d.review.note ? { label: d.status === 2 ? '驳回原因' : '审核备注', value: d.review.note, wide: true } : null].filter(Boolean) as DetailFieldItem[];
+  return [d.credited_at ? { label: t('deposit.creditedAt'), value: d.credited_at, accent: true } : null, d.review.admin_name ? { label: t('deposit.reviewer'), value: d.review.admin_name } : null, d.review.reviewed_at ? { label: t('deposit.reviewedAt'), value: d.review.reviewed_at } : null, d.review.note ? { label: t(d.status === 2 ? 'deposit.rejectionReason' : 'deposit.reviewNote'), value: d.review.note, wide: true } : null].filter(Boolean) as DetailFieldItem[];
 });
-async function copyField(item: DetailFieldItem) { try { await navigator.clipboard.writeText(item.value); ElMessage.success(`${item.label}已复制`); } catch { ElMessage.error('复制失败，请手动复制'); } }
+async function copyField(item: DetailFieldItem) { try { await navigator.clipboard.writeText(item.value); ElMessage.success(t('deposit.copiedField', { field: item.label })); } catch { ElMessage.error(t('deposit.copyFieldFailed')); } }
 </script>
 <style scoped lang="scss">
 .deposit-detail-content { display: grid; min-width: 0; gap: 18px; }

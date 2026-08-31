@@ -1,21 +1,21 @@
 <template>
   <main class="withdrawal-page">
     <AdminHero
-      title="USD 出金"
-      description="选择已通过的付款人与收款人提交出金，审核通过后由平台完成付款"
+      :title="t('withdrawal.title')"
       icon="ri-bank-card-line"
     />
 
     <section class="withdrawal-page__content">
+      <el-alert v-if="securityError && !securityDialogVisible" :title="securityError" type="error" :closable="false" />
       <ApplyForm
         ref="applyFormRef"
-        :balance="balance"
+        :currency-options="currencyOptions"
         :payers="config?.payers"
         :payees="config?.payees"
-        :fee-amount="config?.fee_amount"
         :file-rules="config?.file_rules"
         :config-loading="configLoading"
-        :submitting="withdrawalSubmitting"
+        :submitting="securityBusy"
+        :locked="securityLocked"
         :uploading="withdrawalUploading"
         :upload-file="uploadWithdrawalFile"
         @submit="handleSubmit"
@@ -46,6 +46,13 @@
       :upload-file="uploadSupplementFile"
       @submit="handleSupplement"
     />
+    <WithdrawalSecurityDialog
+      :model-value="securityDialogVisible" :busy="securityBusy" :email="securityEmail"
+      :email-verified="emailVerified" :two-factor-verified="twoFactorVerified"
+      :expired="securityExpired" :uncertain="securityUncertain" :error="securityError"
+      :resend-seconds="resendSeconds" :ready="securityReady"
+      @close="closeSecurity" @send-email-code="sendEmail" @verify="verifySecurity" @confirm="submitSecurity"
+    />
   </main>
 </template>
 
@@ -57,7 +64,8 @@
  */
 import { onMounted, ref } from 'vue';
 import { ElMessage } from 'element-plus';
-import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { useRouter, onBeforeRouteLeave } from 'vue-router';
 
 import type {
   WithdrawalListParams,
@@ -69,12 +77,14 @@ import { usePageLoading } from '@/composables/usePageLoading';
 import ApplyForm from './components/ApplyForm.vue';
 import RecordList from './components/RecordList.vue';
 import SupplementDialog from './components/SupplementDialog.vue';
+import WithdrawalSecurityDialog from './components/WithdrawalSecurityDialog.vue';
 import { useWithdrawalManagement } from './composables/useWithdrawalManagement';
+import { useWithdrawalSecurity } from './composables/useWithdrawalSecurity';
 
 const router = useRouter();
 const {
   config,
-  balance,
+  currencyOptions,
   configLoading,
   listLoading,
   list,
@@ -82,13 +92,11 @@ const {
   page,
   limit,
   query,
-  withdrawalSubmitting,
   withdrawalUploading,
   loadConfig,
   fetchList,
   resetQuery,
   setPage,
-  submitWithdrawal,
   uploadWithdrawalFile,
   detail,
   fetchDetail,
@@ -102,31 +110,30 @@ const applyFormRef = ref<InstanceType<typeof ApplyForm>>();
 const supplementDialogVisible = ref(false);
 const supplementItem = ref<WithdrawalOrder | null>(null);
 const supplementRequirement = ref('');
-
-async function handleSubmit(payload: {
-  payer_whitelist_id: number;
-  payee_whitelist_id: number;
-      amount: string;
-      file_ids: number[];
-}) {
-  try {
-    const result = await submitWithdrawal({
-      payer_whitelist_id: payload.payer_whitelist_id,
-      payee_whitelist_id: payload.payee_whitelist_id,
-      amount: payload.amount,
-      file_ids: payload.file_ids,
-    });
-    ElMessage.success(`出金订单 ${result.order_no} 已提交，等待审核`);
+const {
+  visible: securityDialogVisible, busy: securityBusy, locked: securityLocked, email: securityEmail,
+  emailVerified, twoFactorVerified, expired: securityExpired, uncertain: securityUncertain,
+  error: securityError, resendSeconds, ready: securityReady,
+  begin: handleSubmit, sendEmail, verify: verifySecurity, close: closeSecurity, submit: submitSecurity,
+} = useWithdrawalSecurity({
+  fee: (currencyId) => currencyOptions.value.find((item) => item.currency.id === currencyId)?.fee_amount,
+  refresh: async () => { await Promise.all([loadConfig(true), fetchList()]); },
+  completed: async () => {
     applyFormRef.value?.reset();
+    ElMessage.success(t('withdrawalSecurity.submitted'));
     await Promise.all([loadConfig(true), fetchList()]);
-  } catch {
-    /* 统一请求层已提示后端错误 */
-  }
-}
+  },
+});
 
 function openDetail(id: number) {
   void router.push({ name: 'WithdrawalDetail', params: { id } });
 }
+
+onBeforeRouteLeave(async () => {
+  if (securityBusy.value) return false;
+  if (securityDialogVisible.value) await closeSecurity();
+  return !securityDialogVisible.value;
+});
 
 async function openSupplement(row: WithdrawalOrder) {
   if (row.status !== 1) return;
@@ -137,17 +144,17 @@ async function openSupplement(row: WithdrawalOrder) {
     await fetchDetail(row.id);
     supplementRequirement.value = extractSupplementRequirement(detail.value);
   } catch {
-    supplementRequirement.value = '请按平台要求补充证明材料。';
+    supplementRequirement.value = t('withdrawal.defaultSupplement');
   }
 }
 
 function extractSupplementRequirement(d: WithdrawalOrderDetail | null) {
-  if (!d) return '请按平台要求补充证明材料。';
+  if (!d) return t('withdrawal.defaultSupplement');
   if (d.review?.note) return d.review.note;
   const request = (d.records ?? []).find((record) => {
     return /要求|补充|补件|supplement/i.test(record.action_name);
   });
-  return request?.message || '请按平台要求补充证明材料。';
+  return request?.message || t('withdrawal.defaultSupplement');
 }
 
 async function handleSupplement(payload: { file_ids: number[]; message?: string }) {
@@ -158,7 +165,7 @@ async function handleSupplement(payload: { file_ids: number[]; message?: string 
       file_ids: payload.file_ids,
       message: payload.message,
     });
-    ElMessage.success('补件已提交，订单将重新进入审核');
+    ElMessage.success(t('withdrawal.supplemented'));
     supplementDialogVisible.value = false;
     supplementItem.value = null;
     await fetchList();
@@ -184,6 +191,7 @@ function handleQueryChange(patch: Partial<WithdrawalListParams>) {
 onMounted(async () => {
   await Promise.all([loadConfig(true), fetchList()]);
 });
+const { t } = useI18n();
 </script>
 
 <style scoped lang="scss">

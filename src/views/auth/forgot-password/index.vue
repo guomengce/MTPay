@@ -1,10 +1,6 @@
 ﻿<template>
   <main class="forgot-page">
     <section class="forgot-card">
-      <div class="forgot-card__brand">
-        <span class="forgot-card__logo">M</span>
-        <strong>MTPay</strong>
-      </div>
 
       <template v-if="sent">
         <el-icon class="forgot-card__result-icon"><CircleCheckFilled /></el-icon>
@@ -14,7 +10,6 @@
       </template>
 
       <template v-else>
-        <div class="forgot-card__eyebrow">账户安全</div>
         <h1>找回密码</h1>
         <p>输入代理账户 Email，我们会向该邮箱发送密码重置链接。</p>
 

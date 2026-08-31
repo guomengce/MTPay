@@ -20,7 +20,7 @@ export function useWithdrawalManagement() {
 
   return {
     config: config.config,
-    balance: config.balance,
+    currencyOptions: config.currencyOptions,
     configLoading: config.loading,
     loadConfig: config.loadConfig,
 

@@ -8,8 +8,8 @@
       <div>
         <strong>{{ item.name }}</strong>
         <time v-if="item.time">{{ item.time }}</time>
-        <small v-else-if="index === activeIndex">当前阶段</small>
-        <small v-else>尚未发生</small>
+        <small v-else-if="index === activeIndex">{{ t('deposit.currentStage') }}</small>
+        <small v-else>{{ t('deposit.notOccurred') }}</small>
         <p v-if="item.description" class="detail-timeline__desc">{{ item.description }}</p>
       </div>
     </li>
@@ -18,12 +18,14 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{
   items: { event: string; name: string; time: string | null; description?: string }[];
 }>();
 
 const activeIndex = computed(() => props.items.findIndex((item) => !item.time));
+const { t } = useI18n();
 </script>
 
 <style scoped lang="scss">

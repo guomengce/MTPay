@@ -1,7 +1,7 @@
 /**
  * 代理端统一交易记录
  * -----------------------------------------------------------------------------
- * 聚合入金、兑换、出金三类订单；列表与详情均只读。
+ * 聚合入金、兑换、出金与人工资产调整；列表与详情均只读。
  * 代理端根据 Token 识别身份，不传 user_id / keyword。
  */
 import request from '../request';
@@ -9,7 +9,14 @@ import type { DepositOrderDetail } from './deposit';
 import type { ExchangeOrderDetail } from './exchange';
 import type { WithdrawalOrderDetail } from './withdrawal';
 
-export type TransactionBusinessType = 'deposit' | 'exchange' | 'withdrawal';
+export type TransactionBusinessType =
+  | 'deposit'
+  | 'fiat_deposit'
+  | 'fiat_deposit'
+  | 'exchange'
+  | 'withdrawal'
+  | 'manual_increase'
+  | 'manual_decrease';
 
 export interface TransactionUserRef {
   id: number;
@@ -73,7 +80,18 @@ export interface TransactionPageResult {
 
 export interface TransactionInfoResult {
   transaction: TransactionItem;
-  detail: DepositOrderDetail | ExchangeOrderDetail | WithdrawalOrderDetail;
+  detail: DepositOrderDetail | ExchangeOrderDetail | WithdrawalOrderDetail | ManualBalanceAdjustmentDetail;
+}
+
+export interface ManualBalanceAdjustmentDetail {
+  id?: number;
+  user_id?: number;
+  currency_code?: string;
+  direction?: 'increase' | 'decrease';
+  amount?: string;
+  reason?: string | null;
+  admin_name?: string | null;
+  created_at?: string | null;
 }
 
 /** 当前代理的统一交易分页列表。 */

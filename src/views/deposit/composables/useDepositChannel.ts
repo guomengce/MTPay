@@ -1,7 +1,7 @@
 /**
  * 入金通道 Composable
  * - 加载当前代理可用的入金通道（含币种、网络、收款地址）；
- * - 通道下拉列表和收款地址展示由 ApplyForm 组件触发 `loadChannels`；
+ * - 页面加载通道，DepositChannels 组件联动币种、网络及收款地址；
  * - 后端按请求 Token 识别代理，不接受 user_id 参数。
  */
 import { ref } from 'vue';

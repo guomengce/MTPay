@@ -10,7 +10,9 @@
           <p v-if="subtitle">{{ subtitle }}</p>
         </div>
       </div>
-      <slot name="extra" />
+      <div v-if="$slots.extra" class="admin-panel__extra">
+        <slot name="extra" />
+      </div>
     </header>
     <slot />
   </section>
@@ -38,6 +40,7 @@ defineProps<{
     min-width: 0;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: wrap;
     gap: 16px;
     padding: 24px 28px;
     border-bottom: 1px solid #e2e9f2;
@@ -47,7 +50,48 @@ defineProps<{
     display: flex;
     min-width: 0;
     align-items: center;
+    flex: 0 0 auto;
     gap: 16px;
+  }
+
+  &__extra {
+    display: flex;
+    min-width: 0;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  &__extra > :deep(*) {
+    min-width: 0;
+  }
+
+  &__extra :deep(.filter-bar) {
+    --mt-filter-control-height: 36px;
+    --filter-input-width: 220px;
+
+    width: fit-content;
+    max-width: 100%;
+    margin-left: auto;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    gap: 8px 10px;
+  }
+
+  &__extra :deep(.filter-bar > .filter-actions),
+  &__extra :deep(.filter-bar > .filter-bar__actions) {
+    margin-left: 0 !important;
+  }
+
+  &__extra :deep(.filter-actions .el-button),
+  &__extra :deep(.filter-bar__actions .el-button) {
+    width: auto;
+    min-width: 64px;
+    height: 34px;
+    min-height: 34px;
+    padding-inline: 13px;
   }
 
   &__icon {
@@ -68,6 +112,7 @@ defineProps<{
     color: #0a1b35;
     font-size: 23px;
     font-weight: 900;
+    white-space: nowrap;
   }
 
   p {
@@ -76,11 +121,44 @@ defineProps<{
     font-weight: 650;
   }
 
+  @include narrow {
+    &__header {
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    &__extra {
+      width: 100%;
+      flex-basis: 100%;
+      justify-content: stretch;
+    }
+
+    &__extra :deep(.filter-bar) {
+      width: 100%;
+      margin-left: 0;
+    }
+  }
+
   @include mobile {
     &__header {
       align-items: flex-start;
       flex-direction: column;
       padding: 18px;
+    }
+
+    &__extra {
+      width: 100%;
+      justify-content: stretch;
+    }
+
+    &__extra :deep(.filter-actions .el-button),
+    &__extra :deep(.filter-bar__actions .el-button) {
+      width: 100%;
+    }
+
+    &__extra :deep(.filter-bar) {
+      width: 100%;
+      margin-left: 0;
     }
 
     h2 {

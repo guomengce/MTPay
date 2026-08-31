@@ -6,6 +6,7 @@
 import { ref } from 'vue';
 
 import * as withdrawalApi from '@/api/modules/withdrawal';
+import { fetchWhitelistDetail } from '@/api/modules/whitelist';
 import type { WithdrawalOrderDetail } from '@/api/modules/withdrawal';
 
 export function useWithdrawalDetail() {
@@ -15,7 +16,26 @@ export function useWithdrawalDetail() {
   async function fetchDetail(id: number) {
     loading.value = true;
     try {
-      detail.value = await withdrawalApi.fetchWithdrawalDetail(id);
+      const result = await withdrawalApi.fetchWithdrawalDetail(id);
+      const parties = await Promise.allSettled([
+        fetchWhitelistDetail(result.payer.whitelist_id),
+        fetchWhitelistDetail(result.payee.whitelist_id),
+      ]);
+
+      // 出金详情接口目前只返回主体摘要，用白名单详情补齐业务资料。
+      // 若后端后续直接返回 data/snapshot，则优先使用出金下单时保存的快照。
+      const hydrate = (party: typeof result.payer, index: number) => {
+        if (party.data || party.snapshot) return party;
+        const source = parties[index];
+        if (source?.status !== 'fulfilled') return party;
+        return { ...party, data: source.value.business_data };
+      };
+
+      detail.value = {
+        ...result,
+        payer: hydrate(result.payer, 0),
+        payee: hydrate(result.payee, 1),
+      };
     } finally {
       loading.value = false;
     }

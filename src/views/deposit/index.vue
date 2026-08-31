@@ -1,19 +1,15 @@
 <template>
   <main class="deposit-page">
     <AdminHero
-      title="数字货币入金"
-      description="选择币种与网络，完成链上转账后提交交易信息，审核通过后自动入账"
+      :title="t('deposit.title')"
       icon="ri-wallet-3-line"
     />
 
     <section class="deposit-page__grid">
-      <ApplyForm
+      <DepositChannels
         v-loading="channelLoading"
-        ref="applyFormRef"
         :channels="channels"
         :channels-loading="channelLoading"
-        :submitting="submitting"
-        @submit="handleSubmit"
       />
       <RecordList
         :list="list"
@@ -37,53 +33,34 @@
 <script setup lang="ts">
 /**
  * 入金页面
- * - 通过 useDepositManagement 串联通道 / 列表 / 表单；
- * - 申请提交成功后弹出成功提示并刷新列表；
- * - 详情改为列表页内弹框展示，不再走路由。
+ * - 展示自动入金通道及记录，仅使用查询接口；
+ * - 详情通过独立路由加载。
  */
-import { onMounted, ref } from 'vue';
-import { ElMessage } from 'element-plus';
+import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
 import type { DepositListParams } from '@/api/modules/deposit';
 import AdminHero from '@/components/admin/AdminHero.vue';
-import ApplyForm from './components/ApplyForm.vue';
+import DepositChannels from './components/DepositChannels.vue';
 import RecordList from './components/RecordList.vue';
-import { useDepositManagement } from './composables/useDepositManagement';
+import { useDepositChannel } from './composables/useDepositChannel';
+import { useDepositList } from './composables/useDepositList';
 
-const applyFormRef = ref<InstanceType<typeof ApplyForm>>();
 const router = useRouter();
+const { t } = useI18n();
+const { channels, loading: channelLoading, loadChannels } = useDepositChannel();
 const {
-  channels,
-  channelLoading,
-  listLoading,
+  loading: listLoading,
   list,
   total,
   page,
   limit,
   query,
-  submitting,
-  loadChannels,
   fetchList,
   resetQuery,
   setPage,
-  submitDeposit,
-} = useDepositManagement();
-
-async function handleSubmit(payload: {
-  currency_network_id: number;
-  amount: string;
-  txid: string;
-}) {
-  try {
-    const detail = await submitDeposit(payload);
-    ElMessage.success(`入金订单 ${detail.order_no} 已提交，等待审核`);
-    applyFormRef.value?.reset();
-    await fetchList();
-  } catch {
-    /* 统一请求层已提示后端错误 */
-  }
-}
+} = useDepositList();
 
 function onPage(value: number) {
   setPage(value);

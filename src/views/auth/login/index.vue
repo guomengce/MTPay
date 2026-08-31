@@ -7,7 +7,9 @@
         <span class="login-page__logo">M</span>
         <strong>MTPay</strong>
       </div>
-      <a class="login-page__help" href="javascript:void(0)" @click.prevent="handleContact">帮助中心</a>
+      <div class="login-page__header-actions">
+        <LanguageSwitcher />
+      </div>
     </header>
 
     <section class="login-page__form">
@@ -35,41 +37,39 @@
  * - 失败由统一请求层展示后端 message。
  */
 import { ElMessage } from 'element-plus';
-import { ref } from 'vue';
+import { ref, onBeforeUnmount } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
 import * as authApi from '@/api/modules/auth';
-import { useAuthStore } from '@/stores/modules/auth';
+import { completeLogin } from '@/utils/completeLogin';
+import { requiresTwoFactor, beginLoginChallenge, safeLoginRedirect } from '@/utils/loginChallenge';
 import BrandPanel from './components/BrandPanel.vue';
 import FormCard from './components/FormCard.vue';
+import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue';
 
 const route = useRoute();
 const router = useRouter();
-const authStore = useAuthStore();
+let active = true;
+onBeforeUnmount(() => { active = false; });
 const submitting = ref(false);
+const { t } = useI18n();
 
 async function handleSubmit(payload: { email: string; password: string }) {
   if (submitting.value) return;
   submitting.value = true;
   try {
     const result = await authApi.login(payload);
-    authStore.login({
-      token: result.token,
-      userInfo: {
-        id: String(result.id),
-        name: result.company_name,
-        role: result.portal,
-        agentCode: result.agent_code,
-        companyName: result.company_name,
-        email: result.email,
-        phone: result.phone,
-        status: result.status,
-        statusName: result.status_name,
-        activatedAt: result.activated_at,
-        lastLoginAt: result.last_login_at,
-      },
-    });
-    await router.replace(String(route.query.redirect || '/dashboard'));
+    if (!active) return;
+    if (requiresTwoFactor(result)) {
+      beginLoginChallenge(result, route.query.redirect);
+      await router.replace({ name: 'TwoFactor' });
+      return;
+    }
+    completeLogin(result);
+    await router.replace(safeLoginRedirect(route.query.redirect));
+  } catch (error) {
+    if (error instanceof Error && /^Invalid login (response|challenge)$/.test(error.message)) ElMessage.error(t('common.messages.requestFailed'));
   } finally {
     submitting.value = false;
   }
@@ -80,7 +80,7 @@ function handleForgotPassword() {
 }
 
 function handleContact() {
-  ElMessage.info('请联系平台客服：support@mtpay.example');
+  ElMessage.info(t('auth.contactMessage'));
 }
 </script>
 
@@ -125,15 +125,10 @@ function handleContact() {
     box-shadow: 0 6px 16px rgb(39 185 170 / 30%);
   }
 
-  &__help {
-    color: #4f647d;
-    font-size: 14px;
-    text-decoration: none;
-    transition: color 0.2s;
-
-    &:hover {
-      color: #27b9aa;
-    }
+  &__header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
   }
 
   &__form {
@@ -273,10 +268,6 @@ function handleContact() {
       width: 34px;
       height: 34px;
       font-size: 17px;
-    }
-
-    &__help {
-      font-size: 13px;
     }
 
     &__form {

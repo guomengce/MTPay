@@ -27,6 +27,11 @@ export const routes: RouteRecordRaw[] = [
     },
   },
   {
+    path: '/two-factor', name: 'TwoFactor',
+    component: () => import('@/views/auth/two-factor/index.vue'),
+    meta: { title: 'twoFactor.title', icon: '', requiresAuth: false, hidden: true },
+  },
+  {
     path: '/forgot-password',
     name: 'ForgotPassword',
     component: () => import('@/views/auth/forgot-password/index.vue'),

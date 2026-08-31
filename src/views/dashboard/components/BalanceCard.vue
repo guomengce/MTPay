@@ -11,7 +11,7 @@
     </div>
 
     <div class="balance-card__amount">
-      <strong>{{ amount }}</strong>
+      <strong>{{ formatMoney(amount) }}</strong>
     </div>
 
     <div class="balance-card__meta">
@@ -22,6 +22,8 @@
 </template>
 
 <script setup lang="ts">
+import { formatMoney } from '@/utils/formatMoney';
+
 import { computed } from 'vue';
 
 const props = defineProps<{
@@ -91,6 +93,12 @@ const codeIcon = computed(() => {
     color: rgb(255 255 255 / 92%);
     font-size: 13px;
     font-weight: 600;
+
+    > span:first-child {
+      min-width: 0;
+      overflow-wrap: anywhere;
+      line-height: 1.25;
+    }
   }
 
   &__code {
@@ -126,7 +134,7 @@ const codeIcon = computed(() => {
     strong {
       display: block;
       overflow-wrap: anywhere;
-      font-size: 32px;
+      font-size: clamp(24px, 2.25vw, 32px);
       font-weight: 800;
       letter-spacing: 0;
       line-height: 1.1;
@@ -152,6 +160,8 @@ const codeIcon = computed(() => {
 
   &__frozen {
     color: rgb(255 255 255 / 85%);
+    overflow-wrap: anywhere;
+    line-height: 1.35;
   }
 
   &.is-teal {

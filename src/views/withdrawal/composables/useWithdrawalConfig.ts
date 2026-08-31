@@ -24,13 +24,12 @@ export function useWithdrawalConfig() {
     }
   }
 
-  /** 配置加载完成后自动更新的 USD 余额。 */
-  const balance = computed(() => config.value?.balance);
+  const currencyOptions = computed(() => withdrawalApi.normalizeWithdrawalCurrencyOptions(config.value));
 
   return {
     loading,
     config,
     loadConfig,
-    balance,
+    currencyOptions,
   };
 }

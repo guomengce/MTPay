@@ -6,7 +6,6 @@
       </span>
       <div>
         <h1>{{ title }}</h1>
-        <p v-if="description">{{ description }}</p>
       </div>
     </div>
     <div v-if="$slots.extra" class="admin-hero__extra">
@@ -18,7 +17,6 @@
 <script setup lang="ts">
 defineProps<{
   title: string;
-  description?: string;
   icon: string;
 }>();
 </script>
@@ -30,7 +28,7 @@ defineProps<{
   min-width: 0;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 16px;
   overflow: hidden;
 
   &__main {
@@ -38,7 +36,7 @@ defineProps<{
     flex: 1 1 auto;
     min-width: 0;
     align-items: center;
-    gap: 16px;
+    gap: 13px;
   }
 
   &__extra {
@@ -53,16 +51,16 @@ defineProps<{
 
   &__icon {
     display: inline-flex;
-    width: 56px;
-    height: 56px;
-    flex: 0 0 56px;
+    width: 48px;
+    height: 48px;
+    flex: 0 0 48px;
     align-items: center;
     justify-content: center;
-    border-radius: 14px;
+    border-radius: 13px;
     color: #126df0;
     background: linear-gradient(135deg, #dff3ff, #eef0ff);
     // box-shadow: 0 20px 38px rgb(27 98 198 / 12%);
-    font-size: 27px;
+    font-size: 24px;
 
     i {
       font-weight: 400;
@@ -73,16 +71,9 @@ defineProps<{
   h1 {
     margin: 0;
     color: #071833;
-    font-size: clamp(28px, 2.25vw, 34px);
+    font-size: clamp(24px, 1.8vw, 28px);
     font-weight: 850;
     line-height: 1.15;
-  }
-
-  p {
-    margin: 5px 0 0;
-    color: #64748b;
-    font-size: 14px;
-    font-weight: 600;
   }
 
   @include narrow {
@@ -94,14 +85,14 @@ defineProps<{
     }
 
     &__icon {
-      width: 50px;
-      height: 50px;
-      flex-basis: 50px;
-      font-size: 24px;
+      width: 44px;
+      height: 44px;
+      flex-basis: 44px;
+      font-size: 22px;
     }
 
     h1 {
-      font-size: 28px;
+      font-size: 25px;
     }
 
     &__extra {
@@ -131,11 +122,7 @@ defineProps<{
     }
 
     h1 {
-      font-size: 24px;
-    }
-
-    p {
-      font-size: 14px;
+      font-size: 22px;
     }
   }
 }

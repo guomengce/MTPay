@@ -1,42 +1,34 @@
 <template>
   <div class="transaction-filters filter-bar">
-    <el-select v-model="businessType" placeholder="业务类型" clearable>
-      <el-option label="入金" value="deposit" />
-      <el-option label="兑换" value="exchange" />
-      <el-option label="出金" value="withdrawal" />
+    <el-select v-model="businessType" :placeholder="t('records.businessType')" clearable>
+      <el-option :label="t('records.deposit')" value="deposit" /><el-option :label="t('records.fiat_deposit')" value="fiat_deposit" /><el-option :label="t('records.exchange')" value="exchange" /><el-option :label="t('records.withdrawal')" value="withdrawal" /><el-option :label="t('records.manual_increase')" value="manual_increase" /><el-option :label="t('records.manual_decrease')" value="manual_decrease" />
     </el-select>
-    <el-select v-model="statusGroup" placeholder="状态组" clearable>
-      <el-option label="待审核" value="pending" />
-      <el-option label="待补充文件" value="needs_supplement" />
-      <el-option label="处理中" value="processing" />
-      <el-option label="已完成" value="completed" />
-      <el-option label="已驳回" value="rejected" />
-      <el-option label="失败" value="failed" />
+    <el-select v-model="statusGroup" :placeholder="t('records.statusGroup')" clearable>
+      <el-option :label="t('records.pending')" value="pending" /><el-option :label="t('records.supplement')" value="needs_supplement" /><el-option :label="t('records.processing')" value="processing" /><el-option :label="t('records.completed')" value="completed" /><el-option :label="t('records.rejected')" value="rejected" /><el-option :label="t('records.failed')" value="failed" />
     </el-select>
-    <el-input v-model="orderNo" placeholder="订单号" clearable />
+    <el-input v-model="orderNo" :placeholder="t('records.orderNo')" clearable />
     <el-date-picker
       v-model="dateRange"
       type="daterange"
-      range-separator="至"
-      start-placeholder="開始日期"
-      end-placeholder="結束日期"
+      :range-separator="t('deposit.dateTo')" :start-placeholder="t('deposit.startDate')" :end-placeholder="t('deposit.endDate')"
       value-format="YYYY-MM-DD"
       unlink-panels
     />
     <div class="filter-actions">
-      <el-button type="primary" :loading="loading" @click="emit('search')">查询</el-button>
-      <el-button @click="emit('reset')">重置</el-button>
+      <el-button type="primary" :loading="loading" @click="emit('search')">{{ t('common.actions.search') }}</el-button><el-button @click="emit('reset')">{{ t('common.actions.reset') }}</el-button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import type { TransactionBusinessType } from '@/api/modules/transaction';
 import type { TransactionQuery } from '../composables/useTransactionList';
 
 const props = defineProps<{ query: TransactionQuery; loading?: boolean }>();
+const { t } = useI18n();
 const emit = defineEmits<{
   (e: 'update', patch: Partial<TransactionQuery>): void;
   (e: 'search' | 'reset'): void;
@@ -79,5 +71,4 @@ const dateRange = computed<string[]>({
     min-width: max-content;
   }
 }
-
 </style>

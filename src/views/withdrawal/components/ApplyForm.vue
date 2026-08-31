@@ -3,6 +3,7 @@
 
     <el-form
       ref="formRef"
+      :disabled="locked || configLoading"
       :model="formState"
       :rules="rules"
       label-position="top"
@@ -14,16 +15,18 @@
           <section class="apply-form__section">
             <header class="apply-form__section-header">
               <span>01</span>
-              <div>
-                <h4>选择交易主体</h4>
-                <p>付款人和收款人均来自审核通过的白名单</p>
-              </div>
+              <h4>{{ t('withdrawal.fillWithdrawalInfo') }}</h4>
             </header>
+            <el-form-item :label="t('withdrawal.currency')" prop="currency_id" class="apply-form__currency-field">
+              <el-select v-model="formState.currency_id" :placeholder="t('withdrawal.selectCurrency')" :loading="configLoading">
+                <el-option v-for="item in currencyOptions" :key="item.currency.id" :value="item.currency.id" :label="`${item.currency.code} · ${item.currency.name}`" />
+              </el-select>
+            </el-form-item>
             <div class="apply-form__party-fields">
-              <el-form-item label="付款人" prop="payer_whitelist_id">
+              <el-form-item :label="t('withdrawal.payer')" prop="payer_whitelist_id">
                 <el-select
                   v-model="formState.payer_whitelist_id"
-                  placeholder="请选择付款人"
+                  :placeholder="t('withdrawal.selectPayer')"
                   :loading="configLoading"
                   filterable
                 >
@@ -31,22 +34,19 @@
                     v-for="item in payers"
                     :key="item.id"
                     :value="item.id"
-                    :label="`${item.subject_name} · ${item.whitelist_no}`"
+                    :label="`${item.subject_name}`"
                   />
                 </el-select>
-                <p v-if="payers.length === 0 && !configLoading" class="apply-form__notice warning">
-                  暂无可用付款人，请先提交并通过白名单审核。
-                </p>
               </el-form-item>
 
               <span class="apply-form__direction" aria-hidden="true">
                 <el-icon><Right /></el-icon>
               </span>
 
-              <el-form-item label="收款人" prop="payee_whitelist_id">
+              <el-form-item :label="t('withdrawal.payee')" prop="payee_whitelist_id">
                 <el-select
                   v-model="formState.payee_whitelist_id"
-                  placeholder="请选择收款人"
+                  :placeholder="t('withdrawal.selectPayee')"
                   :loading="configLoading"
                   filterable
                 >
@@ -54,25 +54,12 @@
                     v-for="item in payees"
                     :key="item.id"
                     :value="item.id"
-                    :label="`${item.subject_name} · ${item.whitelist_no}`"
+                    :label="`${item.subject_name}`"
                   />
                 </el-select>
-                <p v-if="payees.length === 0 && !configLoading" class="apply-form__notice warning">
-                  暂无可用收款人，请先提交并通过白名单审核。
-                </p>
               </el-form-item>
             </div>
-          </section>
-
-          <section class="apply-form__section">
-            <header class="apply-form__section-header">
-              <span>02</span>
-              <div>
-                <h4>填写出金金额</h4>
-                <p>手续费将与出金金额一并从 USD 可用余额中冻结</p>
-              </div>
-            </header>
-            <el-form-item label="出金金额" prop="amount" class="apply-form__amount-field">
+            <el-form-item :label="t('withdrawal.amount')" prop="amount" class="apply-form__amount-field">
               <el-input
                 v-model="formState.amount"
                 placeholder="0.00"
@@ -80,13 +67,13 @@
                 inputmode="decimal"
               >
                 <template #append>
-                  <span class="apply-form__unit">USD</span>
+                  <span class="apply-form__unit">{{ currencyCode }}</span>
                 </template>
               </el-input>
               <div class="apply-form__balance-tip">
                 <span class="apply-form__maximum">
-                  最高可出 <strong>{{ maximumAmount }} USD</strong>
-                  <small>（已预留手续费 {{ formatFixedFee(feeAmount) || '—' }} USD）</small>
+                  {{ t('withdrawal.maximum') }} <strong>{{ formatMoney(maximumAmount) }} {{ currencyCode }}</strong>
+                  <small>（{{ t('withdrawal.feeReserved', { fee: formatMoney(formatFixedFee(feeAmount) || '—'), currency: currencyCode }) }}）</small>
                 </span>
                 <el-button
                   link
@@ -94,7 +81,7 @@
                   :disabled="maximumAmount === '—'"
                   @click="fillMaximum"
                 >
-                  全部出金
+                  {{ t('withdrawal.withdrawAll') }}
                 </el-button>
               </div>
             </el-form-item>
@@ -102,11 +89,8 @@
 
           <section class="apply-form__section is-files">
             <header class="apply-form__section-header">
-              <span>03</span>
-              <div>
-                <h4>添加证明材料 <small>选填</small></h4>
-                <p>初次申请无需强制上传；如有合同、账单等材料可在此附上</p>
-              </div>
+              <span>02</span>
+              <h4>{{ t('withdrawal.addProof') }} <small>{{ t('withdrawal.optional') }}</small></h4>
             </header>
             <el-upload
               v-model:file-list="fileList"
@@ -116,58 +100,40 @@
               :accept="acceptedExtensions"
               @change="handleFileChange"
             >
-              <el-button plain :icon="Upload">选择文件</el-button>
+              <el-button plain :icon="Upload">{{ t('withdrawal.chooseFile') }}</el-button>
               <template #tip>
                 <p class="apply-form__file-tip">
-                  最多 {{ fileRules.max_files_per_round }} 个，每个不超过
-                  {{ fileRules.max_file_size_mb }} MB；支持
-                  {{ fileRules.allowed_extensions.join(' / ').toUpperCase() }}
+                  {{ t('withdrawal.uploadRules', { count: fileRules.max_files_per_round, size: fileRules.max_file_size_mb, types: fileRules.allowed_extensions.join(' / ').toUpperCase() }) }}
                 </p>
               </template>
             </el-upload>
           </section>
         </div>
 
-        <aside class="apply-form__summary">
+        <aside class="apply-form__summary" :class="{ 'is-english': locale === 'en-US' }">
           <header>
-            <div>
-              <small>资金核对</small>
-              <h4>本次扣款明细</h4>
-            </div>
-            <span>USD</span>
+            <h4>{{ t('withdrawal.deductionDetails') }}</h4>
           </header>
 
           <div class="apply-form__available">
-            <small>当前可用余额</small>
-            <strong>{{ balance?.available_balance || '—' }} <span>USD</span></strong>
+            <small>{{ t('withdrawal.availableBalance') }}</small>
+            <strong>{{ formatMoney(balance?.available_balance || '—') }} <span>{{ currencyCode }}</span></strong>
           </div>
 
           <dl class="apply-form__summary-rows">
             <div>
-              <dt>出金金额</dt>
-              <dd>{{ amountPreview }}<span v-if="amountPreview !== '—'"> USD</span></dd>
+              <dt>{{ t('withdrawal.amount') }}</dt>
+              <dd>{{ formatMoney(amountPreview) }}<span v-if="amountPreview !== '—'"> {{ currencyCode }}</span></dd>
             </div>
             <div>
-              <dt>固定手续费</dt>
-              <dd>{{ formatFixedFee(feeAmount) || '—' }}<span v-if="feeAmount"> USD</span></dd>
+              <dt>{{ t('withdrawal.fixedFee') }}</dt>
+              <dd>{{ formatMoney(formatFixedFee(feeAmount) || '—') }}<span v-if="feeAmount"> {{ currencyCode }}</span></dd>
             </div>
             <div class="is-total">
-              <dt>预计总扣款</dt>
-              <dd>{{ totalPreview }}<span v-if="totalPreview !== '—'"> USD</span></dd>
-            </div>
-            <div>
-              <dt>扣款后可用</dt>
-              <dd :class="{ 'is-warning': insufficientBalance }">
-                {{ remainingPreview
-                }}<span v-if="remainingPreview !== '—' && !insufficientBalance"> USD</span>
-              </dd>
+              <dt>{{ t('withdrawal.estimatedDeduction') }}</dt>
+              <dd>{{ formatMoney(totalPreview) }}<span v-if="totalPreview !== '—'"> {{ currencyCode }}</span></dd>
             </div>
           </dl>
-
-          <p class="apply-form__server-note">
-            <el-icon><InfoFilled /></el-icon>
-            最终手续费和冻结金额以订单创建时的服务端计算结果为准。
-          </p>
 
           <el-button
             type="primary"
@@ -176,7 +142,7 @@
             :loading="submitting || uploading"
             :disabled="configLoading || insufficientBalance"
           >
-            确认并提交出金
+            {{ t('withdrawal.confirmSubmit') }}
           </el-button>
         </aside>
       </div>
@@ -185,6 +151,8 @@
 </template>
 
 <script setup lang="ts">
+import { formatMoney } from '@/utils/formatMoney';
+
 /**
  * 出金申请表单组件
  * - 只负责表单 UI 与事件；
@@ -195,23 +163,26 @@ import { computed, reactive, ref as refHook, watch } from 'vue';
 import type { FormInstance, FormRules } from 'element-plus';
 import type { UploadFile, UploadFiles, UploadUserFile } from 'element-plus';
 import { InfoFilled, Money, Right, Upload } from '@element-plus/icons-vue';
+import { useI18n } from 'vue-i18n';
 import { formatFixedFee } from '@/utils/decimal';
 
 import type {
-  WithdrawalBalance,
+  WithdrawalCurrencyOption,
   WithdrawalFileRules,
   WithdrawalFile,
   WithdrawalWhitelistOption,
 } from '@/api/modules/withdrawal';
 
+const { t, locale } = useI18n();
+
 const props = defineProps<{
-  balance?: WithdrawalBalance;
+  currencyOptions?: WithdrawalCurrencyOption[];
   payers?: WithdrawalWhitelistOption[];
   payees?: WithdrawalWhitelistOption[];
-  feeAmount?: string;
   fileRules?: WithdrawalFileRules;
   configLoading?: boolean;
   submitting?: boolean;
+  locked?: boolean;
   uploading?: boolean;
   uploadFile?: (file: File) => Promise<WithdrawalFile>;
 }>();
@@ -222,6 +193,7 @@ const emit = defineEmits<{
     payload: {
       payer_whitelist_id: number;
       payee_whitelist_id: number;
+      currency_id: number;
       amount: string;
       file_ids: number[];
     },
@@ -231,6 +203,7 @@ const emit = defineEmits<{
 const formRef = refHook<FormInstance>();
 
 const formState = reactive({
+  currency_id: null as number | null,
   payer_whitelist_id: null as number | null,
   payee_whitelist_id: null as number | null,
   amount: '',
@@ -250,36 +223,55 @@ const fileRules = computed<WithdrawalFileRules>(
 );
 const payers = computed(() => props.payers ?? []);
 const payees = computed(() => props.payees ?? []);
+const currencyOptions = computed(() => props.currencyOptions ?? []);
+const selectedCurrency = computed(() => currencyOptions.value.find((item) => item.currency.id === formState.currency_id));
+const balance = computed(() => selectedCurrency.value?.balance);
+const feeAmount = computed(() => selectedCurrency.value?.fee_amount);
+const currencyCode = computed(() => selectedCurrency.value?.currency.code ?? '—');
+const currencyScale = computed(() => selectedCurrency.value?.currency.decimal_places ?? 2);
 const acceptedExtensions = computed(() =>
   fileRules.value.allowed_extensions.map((item) => `.${item}`).join(','),
 );
 const totalPreview = computed(() => {
-  if (!props.feeAmount) return '—';
-  return addDecimalStrings(formState.amount, props.feeAmount, 2);
+  if (!feeAmount.value) return '—';
+  return addDecimalStrings(formState.amount, feeAmount.value, currencyScale.value);
 });
-const amountPreview = computed(() => addDecimalStrings(formState.amount, '0.00', 2));
+const amountPreview = computed(() => addDecimalStrings(formState.amount, '0', currencyScale.value));
 const maximumAmount = computed(() =>
-  subtractDecimalStrings(props.balance?.available_balance, props.feeAmount, 2),
+  subtractDecimalStrings(balance.value?.available_balance, feeAmount.value, currencyScale.value),
 );
 const remainingPreview = computed(() => {
   if (totalPreview.value === '—') return '—';
-  const value = subtractDecimalStrings(props.balance?.available_balance, totalPreview.value, 2);
-  return value === '—' ? '余额不足' : value;
+  const value = subtractDecimalStrings(balance.value?.available_balance, totalPreview.value, currencyScale.value);
+  return value === '—' ? t('withdrawal.insufficientBalance') : value;
 });
-const insufficientBalance = computed(() => remainingPreview.value === '余额不足');
+const insufficientBalance = computed(() => remainingPreview.value === t('withdrawal.insufficientBalance'));
 
 const rules: FormRules = {
-  payer_whitelist_id: [{ required: true, message: '请选择付款人', trigger: 'change' }],
-  payee_whitelist_id: [{ required: true, message: '请选择收款人', trigger: 'change' }],
+  currency_id: [{ required: true, message: t('withdrawal.selectCurrency'), trigger: 'change' }],
+  payer_whitelist_id: [{ required: true, message: t('withdrawal.selectPayer'), trigger: 'change' }],
+  payee_whitelist_id: [{ required: true, message: t('withdrawal.selectPayee'), trigger: 'change' }],
   amount: [
-    { required: true, message: '请输入金额', trigger: 'blur' },
+    { required: true, message: t('withdrawal.amountRequired'), trigger: 'blur' },
     {
-      pattern: /^(?!0+(?:\.0+)?$)\d{1,20}(?:\.\d{1,2})?$/,
-      message: '请输入大于 0 的金额，整数最多 20 位、小数最多 2 位',
+      validator: (_rule, value: string, callback) => {
+        const pattern = new RegExp(`^(?!0+(?:\\.0+)?$)\\d{1,20}(?:\\.\\d{1,${currencyScale.value}})?$`);
+        callback(pattern.test(value) ? undefined : new Error(t('withdrawal.amountInvalid', { scale: currencyScale.value })));
+      },
       trigger: 'blur',
     },
   ],
 };
+
+watch(
+  currencyOptions,
+  (options) => {
+    if (!options.some((item) => item.currency.id === formState.currency_id)) {
+      formState.currency_id = options[0]?.currency.id ?? null;
+    }
+  },
+  { immediate: true },
+);
 
 watch(
   () => props.fileRules?.max_files_per_round,
@@ -289,6 +281,7 @@ watch(
 );
 
 async function handleFileChange(file: UploadFile, files: UploadFiles) {
+  if (props.locked) return;
   fileList.value = files;
   if (!file.raw || file.status === 'success' || !props.uploadFile) return;
   try {
@@ -379,15 +372,18 @@ function subtractDecimalStrings(
 }
 
 function fillMaximum() {
+  if (props.locked) return;
   if (maximumAmount.value !== '—') formState.amount = maximumAmount.value;
 }
 
 async function handleSubmit() {
+  if (props.locked || props.configLoading || props.submitting) return;
   if (!(await formRef.value?.validate().catch(() => false))) return;
-  if (formState.payer_whitelist_id == null || formState.payee_whitelist_id == null) return;
+  if (formState.currency_id == null || formState.payer_whitelist_id == null || formState.payee_whitelist_id == null) return;
   if (fileList.value.some((item) => item.status === 'uploading' || item.status === 'ready')) return;
   const fileIds = fileList.value.map((item) => (item.response as WithdrawalFile | undefined)?.file_id).filter((id): id is number => typeof id === 'number');
   emit('submit', {
+    currency_id: formState.currency_id,
     payer_whitelist_id: formState.payer_whitelist_id,
     payee_whitelist_id: formState.payee_whitelist_id,
     amount: formState.amount.trim(),
@@ -633,8 +629,8 @@ defineExpose({ reset });
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
-      padding: 11px 0;
+      gap: 20px;
+      padding: 20px 0;
       border-bottom: 1px dashed #dce6eb;
     }
 
@@ -662,7 +658,7 @@ defineExpose({ reset });
     }
 
     .is-total {
-      margin: 6px 0;
+      margin: 20px 0;
       padding: 14px;
       border: 1px solid #83d2cc;
       border-radius: 11px;
@@ -688,6 +684,11 @@ defineExpose({ reset });
           font-weight: 700;
         }
       }
+    }
+
+    .is-english & .is-total dt {
+      font-size: 12px;
+      white-space: nowrap;
     }
   }
 

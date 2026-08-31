@@ -5,12 +5,8 @@
       <div class="entry-card__heading">
         <h3>{{ item.subject_name }}</h3>
         <div class="entry-card__meta">
-          <StatusBadge :label="item.role_name" :type="item.role === 1 ? 'primary' : 'mt'" />
-          <StatusBadge
-            :label="item.entity_type_name"
-            :type="item.entity_type === 1 ? 'warning' : 'success'"
-          />
-          <span>{{ countryName }}</span>
+          <IdentityBadge :role="item.role" :entity-type="item.entity_type" />
+          <span class="entry-card__country">{{ countryName }}</span>
         </div>
       </div>
     </header>
@@ -28,7 +24,7 @@
     </dl>
 
     <footer class="entry-card__footer">
-      <StatusBadge :label="item.status_name" :type="statusMeta.type" :effect="statusMeta.effect" />
+      <StatusBadge :label="statusLabel" :type="statusMeta.type" :effect="statusMeta.effect" />
       <div class="entry-card__actions">
         <el-button
           v-if="item.status === 1"
@@ -38,10 +34,10 @@
           :icon="Upload"
           @click="emit('supplement', item)"
         >
-          补充文件
+          {{ t('whitelist.supplement') }}
         </el-button>
         <el-button size="small" type="primary" plain :icon="ArrowRight" @click="emit('view', item)">
-          查看详情
+          {{ t('whitelist.viewDetails') }}
         </el-button>
       </div>
     </footer>
@@ -50,22 +46,26 @@
 
 <script setup lang="ts">
 import { computed, type Component } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { ArrowRight, Calendar, Document, Files, Upload } from '@element-plus/icons-vue';
 
 import StatusBadge from '@/components/admin/StatusBadge.vue';
+import IdentityBadge from '@/components/admin/IdentityBadge.vue';
 import { getCountryLabel } from '@/constants/countries';
 
 import type { WhitelistItem } from '@/api/modules/whitelist';
 import { WHITELIST_STATUS_MAP, type WhitelistStatus } from '../composables/useWhitelistList';
 
 const props = defineProps<{ item: WhitelistItem }>();
+const { t, locale } = useI18n();
 const emit = defineEmits<{
   (event: 'view', item: WhitelistItem): void;
   (event: 'supplement', item: WhitelistItem): void;
 }>();
 
 const statusMeta = computed(() => WHITELIST_STATUS_MAP[props.item.status as WhitelistStatus]);
-const countryName = computed(() => getCountryLabel(props.item.country));
+const statusLabel = computed(() => [t('whitelistStatus.pending'), t('whitelistStatus.filesRequired'), t('whitelistStatus.approved'), t('whitelistStatus.rejected')][props.item.status] || props.item.status_name);
+const countryName = computed(() => getCountryLabel(props.item.country, locale.value));
 
 interface InfoRow {
   label: string;
@@ -76,9 +76,9 @@ interface InfoRow {
 
 /** 卡片只展示识别与追踪所需信息，完整业务资料统一进入详情页查看。 */
 const infoRows = computed<InfoRow[]>(() => [
-  { label: '白名单编号', value: props.item.whitelist_no, icon: Document, code: true },
-  { label: '附件数量', value: `${props.item.file_count} 个`, icon: Files },
-  { label: '提交时间', value: props.item.submitted_at || '—', icon: Calendar },
+  { label: t('whitelist.number'), value: props.item.whitelist_no, icon: Document, code: true },
+  { label: t('whitelist.fileCount'), value: `${props.item.file_count} ${t('whitelist.filesUnit')}`, icon: Files },
+  { label: t('whitelist.submittedAt'), value: props.item.submitted_at || '—', icon: Calendar },
 ]);
 
 const avatarText = computed(() => {
@@ -156,8 +156,8 @@ const avatarText = computed(() => {
         font-size: 11px;
       }
 
-      > span {
-      color: #718298;
+      .entry-card__country {
+        color: #718298;
         font-size: 12px;
       }
     }

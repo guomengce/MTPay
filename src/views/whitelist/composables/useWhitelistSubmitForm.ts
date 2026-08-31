@@ -7,8 +7,9 @@
  * - 校验并提取 Element Plus 上传组件中的原始 File；
  * - 不调用接口，真实上传与提交仍由 useWhitelistForm 负责。
  */
-import { computed, reactive, ref, watch } from 'vue';
+import { computed, nextTick, reactive, ref, watch } from 'vue';
 import { ElMessage } from 'element-plus';
+import { useI18n } from 'vue-i18n';
 import type { FormInstance, FormRules, UploadFile, UploadFiles, UploadUserFile } from 'element-plus';
 
 import type { SubmitWhitelistPayload, WhitelistFile } from '@/api/modules/whitelist';
@@ -74,9 +75,11 @@ function createInitialState(): WhitelistSubmitFormState {
 }
 
 export function useWhitelistSubmitForm() {
+  const { t } = useI18n();
   const formRef = ref<FormInstance>();
   const fileList = ref<UploadUserFile[]>([]);
   const formState = reactive<WhitelistSubmitFormState>(createInitialState());
+  const validationEnabled = ref(false);
 
   /** -------------------- 页面展示状态 -------------------- */
   const hasSubjectSelection = computed(
@@ -84,80 +87,53 @@ export function useWhitelistSubmitForm() {
   );
 
   const formSectionTitle = computed(() => {
-    const roleName = formState.role === 1 ? '付款人' : '收款人';
-    const entityName = formState.entity_type === 1 ? '公司' : '个人';
-    return `${roleName} · ${entityName}资料`;
+    const roleName = t(formState.role === 1 ? 'whitelist.payer' : 'whitelist.payee');
+    const entityName = t(formState.entity_type === 1 ? 'whitelist.company' : 'whitelist.individual');
+    return `${roleName} · ${entityName}`;
   });
 
   /** -------------------- 动态校验规则 -------------------- */
   const rules = computed<FormRules>(() => {
+    if (!validationEnabled.value) return {};
     const role = formState.role;
     const entityType = formState.entity_type;
     const result: FormRules = {
-      role: [{ required: true, message: '请选择主体角色', trigger: 'change' }],
-      entity_type: [{ required: true, message: '请选择主体类型', trigger: 'change' }],
+      role: [{ required: true, message: t('common.messages.selectField', { field: t('whitelist.role') }), trigger: 'change' }],
+      entity_type: [{ required: true, message: t('common.messages.selectField', { field: t('whitelist.entityType') }), trigger: 'change' }],
     };
 
     // 付款人 · 公司
     if (role === 1 && entityType === 1) {
       Object.assign(result, {
-        company_name: [{ required: true, message: '请输入公司名称', trigger: 'blur' }],
-        company_type: [{ required: true, message: '请选择公司类型', trigger: 'change' }],
-        registration_country: [{ required: true, message: '请选择注册国家', trigger: 'change' }],
-        operating_country: [{ required: true, message: '请选择经营国家', trigger: 'change' }],
-        registration_date: [{ required: true, message: '请选择注册日期', trigger: 'change' }],
-        document_no: [{ required: true, message: '请输入公司編號', trigger: 'blur' }],
-        city: [{ required: true, message: '请输入城市', trigger: 'blur' }],
-        address: [{ required: true, message: '请输入地址', trigger: 'blur' }],
+        company_name: [inputRule('whitelist.companyName')], company_type: [selectRule('whitelist.companyType')], registration_country: [selectRule('whitelist.registrationCountry')], operating_country: [selectRule('whitelist.operatingCountry')], registration_date: [selectRule('whitelist.registrationDate')], document_no: [inputRule('whitelist.companyNo')], city: [inputRule('whitelist.city')], address: [inputRule('whitelist.address')],
       });
     }
 
     // 付款人 · 个人
     if (role === 1 && entityType === 2) {
       Object.assign(result, {
-        given_name: [{ required: true, message: '请输入名', trigger: 'blur' }],
-        surname: [{ required: true, message: '请输入姓', trigger: 'blur' }],
-        nationality: [{ required: true, message: '请选择国籍', trigger: 'change' }],
-        residence_country: [{ required: true, message: '请选择居住国家', trigger: 'change' }],
-        birth_date: [{ required: true, message: '请选择出生日期', trigger: 'change' }],
-        document_type: [{ required: true, message: '请选择证件类型', trigger: 'change' }],
-        document_no: [{ required: true, message: '请输入证件编号', trigger: 'blur' }],
-        city: [{ required: true, message: '请输入城市', trigger: 'blur' }],
-        address: [{ required: true, message: '请输入地址', trigger: 'blur' }],
+        given_name: [inputRule('whitelist.givenName')], surname: [inputRule('whitelist.surname')], nationality: [selectRule('whitelist.nationality')], residence_country: [selectRule('whitelist.residenceCountry')], birth_date: [selectRule('whitelist.birthDate')], document_type: [selectRule('whitelist.documentType')], document_no: [inputRule('whitelist.documentNo')], city: [inputRule('whitelist.city')], address: [inputRule('whitelist.address')],
       });
     }
 
     // 收款人 · 公司
     if (role === 2 && entityType === 1) {
       Object.assign(result, {
-        company_name: [{ required: true, message: '请输入公司名称', trigger: 'blur' }],
-        operating_country: [{ required: true, message: '请选择经营国家', trigger: 'change' }],
-        city: [{ required: true, message: '请输入城市', trigger: 'blur' }],
-        address: [{ required: true, message: '请输入地址', trigger: 'blur' }],
-        bank_name: [{ required: true, message: '请输入银行名称', trigger: 'blur' }],
-        bank_account: [{ required: true, message: '请输入银行账号', trigger: 'blur' }],
-        swift: [{ required: true, message: '请输入 SWIFT', trigger: 'blur' }],
-        remittance_purpose: [{ required: true, message: '请选择汇款目的', trigger: 'change' }],
+        company_name: [inputRule('whitelist.companyName')], operating_country: [selectRule('whitelist.operatingCountry')], city: [inputRule('whitelist.city')], address: [inputRule('whitelist.address')], bank_name: [inputRule('whitelist.bankName')], bank_account: [inputRule('whitelist.bankAccount')], swift: [inputRule('SWIFT')], remittance_purpose: [selectRule('whitelist.remittancePurpose')],
       });
     }
 
     // 收款人 · 个人
     if (role === 2 && entityType === 2) {
       Object.assign(result, {
-        given_name: [{ required: true, message: '请输入名', trigger: 'blur' }],
-        surname: [{ required: true, message: '请输入姓', trigger: 'blur' }],
-        nationality: [{ required: true, message: '请选择国籍', trigger: 'change' }],
-        residence_country: [{ required: true, message: '请选择居住国家', trigger: 'change' }],
-        city: [{ required: true, message: '请输入城市', trigger: 'blur' }],
-        address: [{ required: true, message: '请输入地址', trigger: 'blur' }],
-        bank_name: [{ required: true, message: '请输入银行名称', trigger: 'blur' }],
-        bank_account: [{ required: true, message: '请输入银行账号', trigger: 'blur' }],
-        swift: [{ required: true, message: '请输入 SWIFT', trigger: 'blur' }],
-        remittance_purpose: [{ required: true, message: '请选择汇款目的', trigger: 'change' }],
+        given_name: [inputRule('whitelist.givenName')], surname: [inputRule('whitelist.surname')], nationality: [selectRule('whitelist.nationality')], residence_country: [selectRule('whitelist.residenceCountry')], city: [inputRule('whitelist.city')], address: [inputRule('whitelist.address')], bank_name: [inputRule('whitelist.bankName')], bank_account: [inputRule('whitelist.bankAccount')], swift: [inputRule('SWIFT')], remittance_purpose: [selectRule('whitelist.remittancePurpose')],
       });
     }
     return result;
   });
+  function fieldLabel(key: string) { return key === 'SWIFT' ? key : t(key); }
+  function inputRule(key: string) { return { required: true, message: t('common.messages.enterField', { field: fieldLabel(key) }), trigger: 'blur' }; }
+  function selectRule(key: string) { return { required: true, message: t('common.messages.selectField', { field: fieldLabel(key) }), trigger: 'change' }; }
 
   /** -------------------- 接口参数组装 -------------------- */
   function buildPayload(): SubmitWhitelistPayload | null {
@@ -232,17 +208,19 @@ export function useWhitelistSubmitForm() {
   async function handleFileChange(file: UploadFile, currentFiles: UploadFiles, uploadFile: (file: File) => Promise<WhitelistFile>) {
     fileList.value=currentFiles;
     if(!file.raw||file.status==='success')return;
-    if(file.raw.size>MAX_FILE_SIZE||!ALLOWED_FILE_EXTENSIONS.has(file.raw.name.split('.').pop()?.toLowerCase()||'')){ElMessage.warning('仅支持 10 MB 内的 PDF、PNG、JPG、JPEG 文件');fileList.value=fileList.value.filter(item=>item.uid!==file.uid);return;}
+    if(file.raw.size>MAX_FILE_SIZE||!ALLOWED_FILE_EXTENSIONS.has(file.raw.name.split('.').pop()?.toLowerCase()||'')){ElMessage.warning(t('whitelist.uploadHint'));fileList.value=fileList.value.filter(item=>item.uid!==file.uid);return;}
     try{file.status='uploading';file.response=await uploadFile(file.raw);file.status='success';}catch{file.status='fail';fileList.value=fileList.value.filter(item=>item.uid!==file.uid);}
   }
 
   function handleExceed() {
-    ElMessage.warning('最多上传 5 个文件');
+    ElMessage.warning(t('whitelist.maxFiles'));
   }
 
   /** -------------------- 表单提交与重置 -------------------- */
   async function validateAndBuild(): Promise<WhitelistSubmitData | null> {
     if (!formRef.value) return null;
+    validationEnabled.value = true;
+    await nextTick();
     if (!(await formRef.value.validate().catch(() => false))) return null;
     const business = buildPayload();
     if (!business) return null;
@@ -255,12 +233,15 @@ export function useWhitelistSubmitForm() {
   function resetForm() {
     Object.assign(formState, createInitialState());
     fileList.value = [];
+    validationEnabled.value = false;
     formRef.value?.clearValidate();
   }
 
   watch(
     () => [formState.role, formState.entity_type],
-    () => formRef.value?.clearValidate(),
+    () => {
+      if (!validationEnabled.value) formRef.value?.clearValidate();
+    },
     { flush: 'post' },
   );
 

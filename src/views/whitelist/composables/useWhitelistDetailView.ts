@@ -5,6 +5,7 @@
  * 重复处理字段映射、空值和枚举文案。
  */
 import { computed, type Ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import type { WhitelistItemDetail } from '@/api/modules/whitelist';
 import { getCountryLabel } from '@/constants/countries';
@@ -20,8 +21,6 @@ export interface WhitelistDetailField {
   missing?: boolean;
 }
 
-const COMPANY_TYPES: Record<number, string> = { 1: '非金融机构', 2: '金融机构' };
-const DOCUMENT_TYPES: Record<number, string> = { 1: '身份证件', 2: '护照' };
 const COUNTRY_FIELDS = new Set([
   'registration_country',
   'operating_country',
@@ -30,6 +29,7 @@ const COUNTRY_FIELDS = new Set([
 ]);
 
 export function useWhitelistDetailView(detail: Ref<WhitelistItemDetail | null>) {
+  const { t, locale } = useI18n();
   function field(
     key: string,
     label: string,
@@ -40,77 +40,77 @@ export function useWhitelistDetailView(detail: Ref<WhitelistItemDetail | null>) 
       return {
         key,
         label,
-        value: options.optional ? '未填写' : '接口未返回',
+        value: options.optional ? t('whitelistReview.notProvided') : t('whitelistReview.notReturned'),
         missing: true,
         ...options,
       };
     }
 
     let value = String(raw);
-    if (COUNTRY_FIELDS.has(key)) value = getCountryLabel(raw);
-    if (key === 'company_type') value = COMPANY_TYPES[Number(raw)] || value;
-    if (key === 'document_type') value = DOCUMENT_TYPES[Number(raw)] || value;
+    if (COUNTRY_FIELDS.has(key)) value = getCountryLabel(raw, locale.value);
+    if (key === 'company_type') value = Number(raw) === 1 ? t('whitelist.nonFinancial') : Number(raw) === 2 ? t('whitelist.financial') : value;
+    if (key === 'document_type') value = Number(raw) === 1 ? t('whitelist.identityDocument') : Number(raw) === 2 ? t('whitelist.passport') : value;
     if (key === 'remittance_purpose') value = getRemittancePurposeLabel(raw);
     return { key, label, value, ...options };
   }
 
   /* ---------- 付款人 / 公司 ---------- */
   const companyIdentityFields = computed(() => [
-    field('company_name', '公司名称'),
-    field('company_type', '公司类型'),
-    field('document_no', '公司編號', { mono: true }),
-    field('registration_date', '注册日期'),
+    field('company_name', t('whitelist.companyName')),
+    field('company_type', t('whitelist.companyType')),
+    field('document_no', t('whitelist.companyNo'), { mono: true }),
+    field('registration_date', t('whitelist.registrationDate')),
   ]);
   const registrationFields = computed(() => [
-    field('registration_country', '注册国家／地区'),
-    field('operating_country', '经营国家／地区'),
-    field('city', '所在城市'),
-    field('address', '详细地址', { wide: true }),
+    field('registration_country', t('whitelist.registrationCountry')),
+    field('operating_country', t('whitelist.operatingCountry')),
+    field('city', t('whitelist.city')),
+    field('address', t('whitelist.address'), { wide: true }),
   ]);
 
   /* ---------- 付款人 / 个人 ---------- */
   const payerIndividualIdentityFields = computed(() => [
-    field('given_name', '名'),
-    field('surname', '姓'),
-    field('nationality', '国籍'),
-    field('birth_date', '出生日期'),
-    field('document_type', '证件类型'),
-    field('document_no', '证件编号', { mono: true }),
+    field('given_name', t('whitelist.givenName')),
+    field('surname', t('whitelist.surname')),
+    field('nationality', t('whitelist.nationality')),
+    field('birth_date', t('whitelist.birthDate')),
+    field('document_type', t('whitelist.documentType')),
+    field('document_no', t('whitelist.documentNo'), { mono: true }),
   ]);
   const payerIndividualResidenceFields = computed(() => [
-    field('residence_country', '居住国家／地区'),
-    field('city', '所在城市'),
-    field('address', '详细地址', { wide: true }),
+    field('residence_country', t('whitelist.residenceCountry')),
+    field('city', t('whitelist.city')),
+    field('address', t('whitelist.address'), { wide: true }),
   ]);
 
   /* ---------- 收款人 / 公司 ---------- */
-  const payeeCompanyFields = computed(() => [field('company_name', '公司名称')]);
+  const payeeCompanyFields = computed(() => [field('company_name', t('whitelist.companyName'))]);
   const payeeCompanyLocationFields = computed(() => [
-    field('operating_country', '经营国家／地区'),
-    field('city', '所在城市'),
-    field('address', '详细地址', { wide: true }),
+    field('operating_country', t('whitelist.operatingCountry')),
+    field('city', t('whitelist.city')),
+    field('address', t('whitelist.address'), { wide: true }),
   ]);
 
   /* ---------- 收款人 / 个人 ---------- */
   const payeeIndividualIdentityFields = computed(() => [
-    field('given_name', '名'),
-    field('surname', '姓'),
-    field('nationality', '国籍'),
+    field('given_name', t('whitelist.givenName')),
+    field('surname', t('whitelist.surname')),
+    field('nationality', t('whitelist.nationality')),
   ]);
   const payeeIndividualResidenceFields = computed(() => [
-    field('residence_country', '居住国家／地区'),
-    field('city', '所在城市'),
-    field('address', '详细地址', { wide: true }),
+    field('residence_country', t('whitelist.residenceCountry')),
+    field('city', t('whitelist.city')),
+    field('address', t('whitelist.address'), { wide: true }),
   ]);
 
   /* ---------- 收款账户信息（收款人公司、个人共用） ---------- */
   const payeeBankFields = computed(() => [
-    field('bank_name', '银行名称'),
-    field('bank_account', '银行账号', { mono: true }),
+    field('bank_name', t('whitelist.bankName')),
+    field('bank_account', t('whitelist.bankAccount'), { mono: true }),
     field('swift', 'SWIFT', { mono: true }),
-    field('intermediary_swift', '中间行 SWIFT（可选）', { mono: true, optional: true }),
-    field('remittance_purpose', '汇款目的', { wide: true }),
-    field('remark', '备注（可选）', { wide: true, optional: true }),
+    field('intermediary_swift', t('whitelist.intermediarySwift'), { mono: true, optional: true }),
+    field('remittance_purpose', t('whitelist.remittancePurpose'), { wide: true }),
+    field('remark', t('whitelist.remark'), { wide: true, optional: true }),
   ]);
 
   return {

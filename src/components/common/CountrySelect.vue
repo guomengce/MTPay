@@ -2,7 +2,7 @@
   <el-select
     v-model="model"
     class="country-select"
-    :placeholder="placeholder"
+    :placeholder="selectPlaceholder"
     :disabled="disabled"
     :clearable="clearable"
     filterable
@@ -13,11 +13,11 @@
     <el-option
       v-for="country in visibleCountries"
       :key="country.code"
-      :label="country.label"
+      :label="country.displayLabel"
       :value="country.label"
     >
       <span class="country-option">
-        <span>{{ country.label }}</span>
+        <span>{{ country.displayLabel }}</span>
         <small>{{ country.code }}</small>
       </span>
     </el-option>
@@ -31,39 +31,46 @@
  * - v-model 统一返回繁体中文名称，禁止业务表单提交 ISO 两位码；
  * - 支持按中文名称或两位代码搜索。
  */
-import { ref } from 'vue';
+import { computed, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 
-import { COUNTRY_OPTIONS } from '@/constants/countries';
+import { getLocalizedCountryOptions } from '@/constants/countries';
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     placeholder?: string;
     disabled?: boolean;
     clearable?: boolean;
   }>(),
   {
-    placeholder: '請選擇國家／地區',
+    placeholder: '',
     disabled: false,
     clearable: true,
   },
 );
 
 const model = defineModel<string>({ default: '' });
-const visibleCountries = ref(COUNTRY_OPTIONS);
+const { locale, t } = useI18n();
+const localizedCountries = computed(() => getLocalizedCountryOptions(locale.value));
+const visibleCountries = ref(localizedCountries.value);
+const selectPlaceholder = computed(() => props.placeholder || t('country.placeholder'));
 
 function filterCountries(keyword: string) {
   const query = keyword.trim().toLocaleLowerCase('zh-Hant');
   visibleCountries.value = query
-    ? COUNTRY_OPTIONS.filter(
-        ({ code, label }) =>
-          code.toLowerCase().includes(query) || label.toLocaleLowerCase('zh-Hant').includes(query),
+    ? localizedCountries.value.filter(
+        ({ code, label, displayLabel }) =>
+          code.toLowerCase().includes(query) ||
+          label.toLocaleLowerCase().includes(query) ||
+          displayLabel.toLocaleLowerCase().includes(query),
       )
-    : COUNTRY_OPTIONS;
+    : localizedCountries.value;
 }
 
 function resetFilter() {
-  visibleCountries.value = COUNTRY_OPTIONS;
+  visibleCountries.value = localizedCountries.value;
 }
+watch(localizedCountries, resetFilter);
 </script>
 
 <style scoped lang="scss">

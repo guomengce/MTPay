@@ -2,33 +2,33 @@
   <div class="whitelist-filters">
     <el-select
       v-model="role"
-      placeholder="白名單角色"
+      :placeholder="t('whitelist.role')"
       clearable
       :disabled="loading"
       @change="emit('change')"
     >
-      <el-option label="付款人" :value="1" />
-      <el-option label="收款人" :value="2" />
+      <el-option :label="t('whitelist.payer')" :value="1" /><el-option :label="t('whitelist.payee')" :value="2" />
     </el-select>
 
     <el-select
       v-model="entityType"
-      placeholder="主體類型"
+      :placeholder="t('whitelist.entityType')"
       clearable
       :disabled="loading"
       @change="emit('change')"
     >
-      <el-option label="公司" :value="1" />
-      <el-option label="個人" :value="2" />
+      <el-option :label="t('whitelist.company')" :value="1" /><el-option :label="t('whitelist.individual')" :value="2" />
     </el-select>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
 defineProps<{ loading?: boolean }>();
 const role = defineModel<1 | 2>('role');
 const entityType = defineModel<1 | 2>('entityType');
 const emit = defineEmits<{ (event: 'change'): void }>();
+const { t } = useI18n();
 </script>
 
 <style scoped lang="scss">

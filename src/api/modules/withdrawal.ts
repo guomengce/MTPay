@@ -40,9 +40,14 @@ export interface WithdrawalFileRules {
 }
 
 export interface WithdrawalConfig {
-  currency: WithdrawalCurrency;
-  balance: WithdrawalBalance;
-  fee_amount: string;
+  /** 新版接口返回多币种配置；兼容旧版单币种字段。 */
+  currencies?: Array<
+    | (WithdrawalCurrency & { balance?: WithdrawalBalance; fee_amount?: string })
+    | { currency: WithdrawalCurrency; balance: WithdrawalBalance; fee_amount: string }
+  >;
+  currency?: WithdrawalCurrency;
+  balance?: WithdrawalBalance;
+  fee_amount?: string;
   payers: WithdrawalWhitelistOption[];
   payees: WithdrawalWhitelistOption[];
   file_rules: WithdrawalFileRules;
@@ -67,6 +72,8 @@ export interface WithdrawalPartySummary {
   whitelist_no: string;
   entity_type: 1 | 2;
   name: string;
+  /** 新版详情可能直接携带主体资料。 */
+  data?: Record<string, unknown>;
   snapshot?: Record<string, unknown>;
 }
 
@@ -144,11 +151,32 @@ export interface WithdrawalListParams {
   limit?: number;
 }
 
-export interface SubmitWithdrawalPayload {
+export interface WithdrawalDraft {
+  currency_id: number;
   amount: string;
   payer_whitelist_id: number;
   payee_whitelist_id: number;
-  file_ids?: number[];
+  file_ids: number[];
+}
+
+export interface SubmitWithdrawalPayload extends WithdrawalDraft { security_challenge: string }
+export interface WithdrawalSecurityChallenge { security_challenge: string; expires_at: string; email: string }
+
+// FRONTEND_AI_API_DOCUMENT(2).md §8.7: every verification uses the unchanged draft.
+export function createWithdrawalSecurityChallenge(payload: WithdrawalDraft) {
+  return request.post<unknown, WithdrawalSecurityChallenge>('/web/createWithdrawalSecurityChallenge', payload);
+}
+export function sendWithdrawalEmailCode(payload: SubmitWithdrawalPayload) {
+  return request.post<unknown, { expires_in: number }>('/web/sendWithdrawalEmailCode', payload);
+}
+export function verifyWithdrawalEmailCode(payload: SubmitWithdrawalPayload & { email_code: string }) {
+  return request.post<unknown, { email_verified: boolean }>('/web/verifyWithdrawalEmailCode', payload);
+}
+export function verifyWithdrawalTwoFactor(payload: SubmitWithdrawalPayload & { code: string }) {
+  return request.post<unknown, { two_factor_verified: boolean }>('/web/verifyWithdrawalTwoFactor', payload);
+}
+export function cancelWithdrawalSecurityChallenge(security_challenge: string) {
+  return request.post<unknown, []>('/web/cancelWithdrawalSecurityChallenge', { security_challenge });
 }
 
 export interface SupplementWithdrawalPayload {
@@ -162,6 +190,25 @@ export interface SupplementWithdrawalPayload {
 /** 获取 USD 余额、固定手续费、付款人/收款人选项及文件规则。 */
 export function fetchWithdrawalConfig() {
   return request.get<unknown, WithdrawalConfig>('/web/getWithdrawalConfig');
+}
+
+export interface WithdrawalCurrencyOption {
+  currency: WithdrawalCurrency;
+  balance: WithdrawalBalance;
+  fee_amount: string;
+}
+
+/** 将新版多币种配置与旧版单币种配置统一为表单选项。 */
+export function normalizeWithdrawalCurrencyOptions(config: WithdrawalConfig | null | undefined) {
+  if (!config) return [] as WithdrawalCurrencyOption[];
+  const options = (config.currencies ?? []).map((entry) => {
+    if ('currency' in entry) return entry;
+    return { currency: entry, balance: entry.balance, fee_amount: entry.fee_amount };
+  }).filter((entry): entry is WithdrawalCurrencyOption => Boolean(entry.balance && entry.fee_amount !== undefined));
+  if (options.length) return options;
+  return config.currency && config.balance && config.fee_amount !== undefined
+    ? [{ currency: config.currency, balance: config.balance, fee_amount: config.fee_amount }]
+    : [];
 }
 
 /** 上传未绑定的出金证明文件，后续提交时传返回的 file_id。 */

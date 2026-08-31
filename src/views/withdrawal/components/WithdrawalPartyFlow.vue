@@ -1,16 +1,12 @@
 <template>
   <div class="withdrawal-party-flow">
     <div class="withdrawal-party-flow__party">
-      <span class="withdrawal-party-flow__type is-payer">
-        付款人<template v-if="payerType"> · {{ payerType }}</template>
-      </span>
+      <IdentityBadge v-if="payerType" :role="1" :entity-type="payerType" />
       <strong :title="payerName || undefined">{{ payerName || '—' }}</strong>
     </div>
     <FlowArrow class="withdrawal-party-flow__arrow" />
     <div class="withdrawal-party-flow__party">
-      <span class="withdrawal-party-flow__type is-payee">
-        收款人<template v-if="payeeType"> · {{ payeeType }}</template>
-      </span>
+      <IdentityBadge v-if="payeeType" :role="2" :entity-type="payeeType" />
       <strong :title="payeeName || undefined">{{ payeeName || '—' }}</strong>
     </div>
   </div>
@@ -18,6 +14,7 @@
 
 <script setup lang="ts">
 import FlowArrow from '@/components/common/FlowArrow.vue';
+import IdentityBadge from '@/components/admin/IdentityBadge.vue';
 
 defineProps<{
   payerName?: string | null;
@@ -65,20 +62,7 @@ defineProps<{
     &:last-child strong { text-align: left; }
   }
 
-  &__type {
-    display: inline-flex;
-    width: fit-content;
-    height: 24px;
-    flex: none;
-    align-items: center;
-    padding: 0 9px;
-    border-radius: 7px;
-    font-size: 11px;
-    font-weight: 700;
-
-    &.is-payer { color: #087f79; background: #e8f7f5; }
-    &.is-payee { color: #3469a5; background: #edf4fb; }
-  }
+  :deep(.status-badge) { height: 24px; padding: 0 9px; font-size: 11px; }
 
   &__arrow { align-self: center; justify-self: center; }
 }

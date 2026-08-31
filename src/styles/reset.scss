@@ -15,16 +15,43 @@ body,
 body {
   min-width: 320px;
   color: var(--app-text);
-  font-family:
-    "Microsoft YaHei",
-    "PingFang SC",
-    "Hiragino Sans GB",
-    sans-serif;
+  font-family: "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", sans-serif;;
   background: var(--app-bg);
   overflow: hidden;
+}
+
+/* 英文界面降低自定义组件中过重的字重，保持表格和状态信息清晰疏朗。 */
+html[lang='en-US'] body {
+  font-weight: 400;
+  letter-spacing: 0.005em;
+}
+
+html[lang='en-US'] :is(.el-button, .el-form-item__label, .status-badge) {
+  font-weight: 600 !important;
+}
+
+html[lang='en-US'] :is(strong, b) {
+  font-weight: 600;
+}
+
+html[lang='en-US'] :is(h1, h2, h3, h4, h5, h6) {
+  font-weight: 700;
+  letter-spacing: -0.015em;
 }
 
 a {
   color: inherit;
   text-decoration: none;
+}
+
+/* 仅登录页校验提示使用暗色浮层，其他 ElMessage 保持默认样式。 */
+.el-message.login-message--dark {
+  --el-message-bg-color: #172235;
+  --el-message-border-color: #26354b;
+  --el-message-text-color: #f8fafc;
+  border-color: var(--el-message-border-color);
+  background: var(--el-message-bg-color);
+  box-shadow: 0 12px 28px rgb(5 15 30 / 24%);
+  .el-message__content { color: var(--el-message-text-color); }
+  .el-message__icon { color: #f6b84a; }
 }

@@ -1,32 +1,26 @@
 <template>
   <DetailCard
     class="subject-info"
-    title="主体信息"
+    :title="t('whitelist.subjectInfo')"
     icon="ri-profile-line"
   >
     <div class="subject-info__tags">
-      <span><i class="ri-id-card-line" />{{ roleName }}</span>
-      <span class="is-entity">
-        <i :class="entityType === 1 ? 'ri-building-2-line' : 'ri-user-3-line'" />
-        {{ entityTypeName }}（{{ entityType === 1 ? 'B' : 'C' }}）
-      </span>
+      <IdentityBadge :role="role" :entity-type="entityType" />
     </div>
 
     <div class="subject-info__sections whitelist-subject-info">
-      <!-- 聚合层只判断角色与主体类型，五个资料组件在不同组合间复用。 -->
-      <template v-if="entityType === 1">
-        <CompanyInfo :fields="role === 1 ? companyIdentityFields : payeeCompanyFields" />
-        <CompanyAddress :fields="role === 1 ? registrationFields : payeeCompanyLocationFields" />
-      </template>
-
-      <template v-else>
-        <PersonalInfo
-          :fields="role === 1 ? payerIndividualIdentityFields : payeeIndividualIdentityFields"
-        />
-        <ResidenceInfo
-          :fields="role === 1 ? payerIndividualResidenceFields : payeeIndividualResidenceFields"
-        />
-      </template>
+      <section class="subject-section">
+        <header class="subject-section__header">
+          <span class="subject-section__icon"><i :class="subjectIcon" /></span>
+          <div><h3>{{ subjectTitle }}</h3></div>
+        </header>
+        <dl class="subject-section__grid">
+          <div v-for="field in subjectFields" :key="field.key" :class="fieldClass(field)">
+            <dt>{{ field.label }}</dt>
+            <dd :class="{ 'is-mono': field.mono }">{{ field.value }}</dd>
+          </div>
+        </dl>
+      </section>
 
       <BankInfo v-if="role === 2" :fields="payeeBankFields" />
     </div>
@@ -34,17 +28,16 @@
 </template>
 
 <script setup lang="ts">
-/** 主体资料聚合层：仅组合五个可复用资料组件，不处理接口字段。 */
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+/** 公司/个人的基础资料与地址资料合并展示，银行资料保持独立区块。 */
 import DetailCard from '@/components/detail/DetailCard.vue';
+import IdentityBadge from '@/components/admin/IdentityBadge.vue';
 import type { WhitelistDetailField } from '../../composables/useWhitelistDetailView';
 
 import BankInfo from './subject/BankInfo.vue';
-import CompanyAddress from './subject/CompanyAddress.vue';
-import CompanyInfo from './subject/CompanyInfo.vue';
-import PersonalInfo from './subject/PersonalInfo.vue';
-import ResidenceInfo from './subject/ResidenceInfo.vue';
 
-defineProps<{
+const props = defineProps<{
   role: 1 | 2;
   entityType: 1 | 2;
   roleName: string;
@@ -59,6 +52,22 @@ defineProps<{
   payeeIndividualResidenceFields: WhitelistDetailField[];
   payeeBankFields: WhitelistDetailField[];
 }>();
+const { t } = useI18n();
+const subjectFields = computed(() => {
+  if (props.entityType === 1) {
+    return props.role === 1
+      ? [...props.companyIdentityFields, ...props.registrationFields]
+      : [...props.payeeCompanyFields, ...props.payeeCompanyLocationFields];
+  }
+  return props.role === 1
+    ? [...props.payerIndividualIdentityFields, ...props.payerIndividualResidenceFields]
+    : [...props.payeeIndividualIdentityFields, ...props.payeeIndividualResidenceFields];
+});
+const subjectTitle = computed(() => t(props.entityType === 1 ? 'whitelist.companyInfo' : 'whitelist.personalInfo'));
+const subjectIcon = computed(() => props.entityType === 1 ? 'ri-building-2-line' : 'ri-id-card-line');
+function fieldClass(field: WhitelistDetailField) {
+  return { 'is-wide': field.wide, 'is-missing': field.missing };
+}
 </script>
 
 <style scoped lang="scss">
@@ -68,20 +77,6 @@ defineProps<{
   gap: 8px;
   margin: -4px 0 14px;
 
-  span {
-    display: inline-flex;
-    height: 28px;
-    align-items: center;
-    gap: 6px;
-    padding: 0 11px;
-    border-radius: 8px;
-    color: #087f79;
-    background: #e7f7f4;
-    font-size: 12px;
-    font-weight: 650;
-  }
-
-  .is-entity { color: #3469a5; background: #edf4fb; }
 }
 
 .subject-info__sections { display: grid; gap: 12px; }

@@ -1,9 +1,8 @@
 /**
  * 代理端数字货币入金模块
- * 字段与状态枚举以 `接口文档参数-代理端.md` 第 5.5 节和 7.3 节为准。
- * - 状态：0 待审核 / 1 已入账 / 2 已驳回；
- * - 同一个币种和网络下的 txid 不能重复提交；
- * - 提交成功并不代表已入账，需要管理员审核通过；
+ * - 自动入金：仅查询通道、入金列表和详情，不再手动提交入金；
+ * - 通道字段按实际 getDepositChannelList 响应定义；
+ * - 列表和详情暂保留已有响应类型，新增文档截图未提供字段明细；
  * - 所有接口都基于请求 Token 识别代理身份，不传 user_id。
  */
 import request from '../request';
@@ -33,13 +32,14 @@ export interface DepositReceivingAddress {
 
 /** 入金通道项。 */
 export interface DepositChannelItem {
-  currency_network_id: number;
+  wallet_address_id: number;
+  coin_key: string;
   currency: DepositCurrency;
   network: DepositNetwork;
   receiving_address: DepositReceivingAddress;
 }
 
-/** 入金提交/详情公共字段。 */
+/** 入金列表/详情公共字段。 */
 export interface DepositOrder {
   id: number;
   order_no: string;
@@ -55,7 +55,7 @@ export interface DepositOrder {
   updated_at: string | null;
 }
 
-/** 详情/审核成功响应在公共字段上额外返回 review / credited_at / timeline。 */
+/** 入金详情响应。 */
 export interface DepositOrderDetail extends DepositOrder {
   review: {
     admin_id: number | null;
@@ -84,13 +84,6 @@ export interface DepositListParams {
   limit?: number;
 }
 
-/** 入金提交参数。amount 必须为十进制字符串，且业务上 >0。 */
-export interface SubmitDepositPayload {
-  currency_network_id: number;
-  amount: string;
-  txid: string;
-}
-
 /* ---------- 接口 ---------- */
 
 /**
@@ -99,14 +92,6 @@ export interface SubmitDepositPayload {
  */
 export function fetchDepositChannels() {
   return request.get<unknown, DepositChannelItem[]>('/web/getDepositChannelList');
-}
-
-/**
- * 提交入金订单。
- * 后端会重新校验币种/网络、收款地址以及 txid 唯一性；成功后冻结不进入余额。
- */
-export function submitDeposit(payload: SubmitDepositPayload) {
-  return request.post<unknown, DepositOrderDetail>('/web/submitDeposit', payload);
 }
 
 /**

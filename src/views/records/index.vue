@@ -1,8 +1,7 @@
 <template>
   <section class="records-page">
     <AdminHero
-      title="交易记录"
-      description="统一查看入金、兑换与 USD 出金订单，本页仅只读"
+      :title="t('records.title')"
       icon="ri-file-list-3-line"
     />
 
@@ -16,7 +15,7 @@
       />
       <TransactionTable :data="list" :loading="loading" @view="openDetail" />
       <TransactionCardList :data="list" @view="openDetail" />
-      <el-empty v-if="!loading && list.length === 0" description="暂无交易记录" />
+      <el-empty v-if="!loading && list.length === 0" :description="t('records.empty')" />
       <footer class="records-page__pager">
         <el-pagination
           layout="prev, pager, next, total"
@@ -35,6 +34,7 @@
 /** 代理端交易记录列表：真实筛选与分页，详情只读跳转。 */
 import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
 import AdminHero from '@/components/admin/AdminHero.vue';
 import type { TransactionItem } from '@/api/modules/transaction';
@@ -44,10 +44,12 @@ import TransactionTable from './components/TransactionTable.vue';
 import { useTransactionList } from './composables/useTransactionList';
 
 const router = useRouter();
+const { t } = useI18n();
 const { loading, list, total, page, limit, query, loadList, search, reset, setPage } =
   useTransactionList();
 
 function openDetail(row: TransactionItem) {
+  if (row.detail_type === 'fiat_deposit') { void router.push({ name: 'FiatDepositDetail', params: { id: row.detail_id } }); return; }
   void router.push({
     name: 'TransactionDetail',
     params: { businessType: row.detail_type, businessId: row.detail_id },
@@ -76,9 +78,8 @@ onMounted(loadList);
     }
 
     .transaction-filters {
-      margin: 0;
+      margin: 0 0 10px;
       padding: 20px 24px;
-      margin-bottom:10px;
       border-bottom: 1px solid #e2e9f2;
     }
   }

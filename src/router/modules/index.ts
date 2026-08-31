@@ -6,7 +6,7 @@ export const featureRoutes: RouteRecordRaw[] = [
     name: 'Dashboard',
     component: () => import('@/views/dashboard/index.vue'),
     meta: {
-      title: '業務總覽',
+      title: 'menu.dashboard',
       icon: 'Grid',
       requiresAuth: true,
       hidden: false,
@@ -17,18 +17,20 @@ export const featureRoutes: RouteRecordRaw[] = [
     name: 'Deposit',
     component: () => import('@/views/deposit/index.vue'),
     meta: {
-      title: '數字貨幣入金',
+      title: 'menu.deposit',
       icon: 'Wallet',
       requiresAuth: true,
       hidden: false,
     },
   },
+  { path:'/fiat-deposit',name:'FiatDeposit',component:()=>import('@/views/fiat-deposit/index.vue'),meta:{title:'menu.fiatDeposit',icon:'Upload',requiresAuth:true,hidden:false}},
+  { path:'/fiat-deposit/detail/:id',name:'FiatDepositDetail',component:()=>import('@/views/fiat-deposit/detail/index.vue'),meta:{title:'menu.fiatDepositDetail',icon:'',requiresAuth:true,hidden:true}},
   {
     path: '/exchange',
     name: 'Exchange',
     component: () => import('@/views/exchange/index.vue'),
     meta: {
-      title: '兌換USD',
+      title: 'menu.exchange',
       icon: 'Switch',
       requiresAuth: true,
       hidden: false,
@@ -38,20 +40,20 @@ export const featureRoutes: RouteRecordRaw[] = [
     path: '/deposit/detail/:id',
     name: 'DepositDetail',
     component: () => import('@/views/deposit/detail/index.vue'),
-    meta: { title: '入金详情', icon: '', requiresAuth: true, hidden: true },
+    meta: { title: 'menu.depositDetail', icon: '', requiresAuth: true, hidden: true },
   },
   {
     path: '/exchange/detail/:id',
     name: 'ExchangeDetail',
     component: () => import('@/views/exchange/detail/index.vue'),
-    meta: { title: '兑换详情', icon: '', requiresAuth: true, hidden: true },
+    meta: { title: 'menu.exchangeDetail', icon: '', requiresAuth: true, hidden: true },
   },
   {
     path: '/whitelist',
     name: 'Whitelist',
     component: () => import('@/views/whitelist/index.vue'),
     meta: {
-      title: '白名單管理',
+      title: 'menu.whitelist',
       icon: 'List',
       requiresAuth: true,
       hidden: false,
@@ -62,7 +64,7 @@ export const featureRoutes: RouteRecordRaw[] = [
     name: 'WhitelistDetail',
     component: () => import('@/views/whitelist/detail/index.vue'),
     meta: {
-      title: '白名单详情',
+      title: 'menu.whitelistDetail',
       icon: '',
       requiresAuth: true,
       hidden: true,
@@ -73,7 +75,7 @@ export const featureRoutes: RouteRecordRaw[] = [
     name: 'Withdrawal',
     component: () => import('@/views/withdrawal/index.vue'),
     meta: {
-      title: 'USD出金',
+      title: 'menu.withdrawal',
       icon: 'Upload',
       requiresAuth: true,
       hidden: false,
@@ -84,7 +86,7 @@ export const featureRoutes: RouteRecordRaw[] = [
     name: 'WithdrawalDetail',
     component: () => import('@/views/withdrawal/detail/index.vue'),
     meta: {
-      title: '出金详情',
+      title: 'menu.withdrawalDetail',
       icon: '',
       requiresAuth: true,
       hidden: true,
@@ -95,7 +97,7 @@ export const featureRoutes: RouteRecordRaw[] = [
     name: 'Records',
     component: () => import('@/views/records/index.vue'),
     meta: {
-      title: '交易記錄',
+      title: 'menu.records',
       icon: 'Tickets',
       requiresAuth: true,
       hidden: false,
@@ -106,7 +108,7 @@ export const featureRoutes: RouteRecordRaw[] = [
     name: 'TransactionDetail',
     component: () => import('@/views/records/detail/index.vue'),
     meta: {
-      title: '交易详情',
+      title: 'menu.transactionDetail',
       icon: '',
       requiresAuth: true,
       hidden: true,
@@ -117,10 +119,14 @@ export const featureRoutes: RouteRecordRaw[] = [
     name: 'Account',
     component: () => import('@/views/account/index.vue'),
     meta: {
-      title: '帳戶與安全',
+      title: 'menu.account',
       icon: 'User',
       requiresAuth: true,
       hidden: false,
     },
+  },
+  {
+    path: '/notifications', name: 'Notifications', component: () => import('@/views/notifications/index.vue'),
+    meta: { title: 'notifications.title', icon: '', requiresAuth: true, hidden: true },
   },
 ];

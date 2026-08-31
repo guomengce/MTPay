@@ -31,14 +31,17 @@ withDefaults(
   justify-self: start;
   flex: 0 0 auto;
   width: fit-content;
+  min-width: 0;
   max-width: 100%;
-  height: 28px;
+  min-height: 28px;
   align-items: center;
   gap: 7px;
   padding: 0 12px;
   border-radius: 999px;
   font-size: 13px;
   font-weight: 850;
+  line-height: 1.25;
+  text-align: center;
   white-space: nowrap;
 
   &__indicator {

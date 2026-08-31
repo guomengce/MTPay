@@ -42,10 +42,10 @@ const request = axios.create({
   },
 });
 
-/** 仅凭证失效才清理登录态；402/403/422 等业务状态不能误退出。 */
-const AUTH_EXPIRED_STATUS = 401;
+/** 仅凭证失效才清理登录态；兼容 HTTP 401 与后端业务失效状态。 */
+const AUTH_EXPIRED_STATUSES = new Set([401, 50013, 50039]);
 const PUBLIC_AUTH_PATHS = new Set([
-  '/api/getPubKey',
+  '/api/getPubKey', '/web/verifyTwoFactorLogin',
   '/web/agentLogin',
   '/web/activateAgent',
   '/web/forgotAgentPassword',
@@ -58,7 +58,7 @@ let sessionExpiredHandled = false;
 request.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const authStore = useAuthStore();
-    if (authStore.token) {
+    if (authStore.token && !isPublicAuthRequest(config.url)) {
       sessionExpiredHandled = false;
       config.headers.Authorization = `Bearer ${authStore.token}`;
     }
@@ -77,7 +77,7 @@ request.interceptors.request.use(
 request.interceptors.response.use(
   async (response: AxiosResponse<ApiEnvelope<unknown>>) => {
     const refreshedToken = response.headers.authorization;
-    if (refreshedToken) {
+    if (refreshedToken && !isPublicAuthRequest(response.config.url)) {
       useAuthStore().setToken(refreshedToken.replace(/^Bearer\s+/i, ''));
     }
     const payload = response.data;
@@ -90,7 +90,7 @@ request.interceptors.response.use(
       return payload.data as unknown as AxiosResponse;
     }
     if (
-      businessStatus === AUTH_EXPIRED_STATUS &&
+      AUTH_EXPIRED_STATUSES.has(businessStatus) &&
       !isPublicAuthRequest(response.config.url)
     ) {
       await handleSessionExpired();
@@ -105,7 +105,7 @@ request.interceptors.response.use(
     const status = error.response?.status;
     const message = error.response?.data?.message || error.message || '请求失败';
 
-    if (status === AUTH_EXPIRED_STATUS && !isPublicAuthRequest(error.config?.url)) {
+    if (status && AUTH_EXPIRED_STATUSES.has(status) && !isPublicAuthRequest(error.config?.url)) {
       await handleSessionExpired();
       return Promise.reject(error);
     }
@@ -131,7 +131,7 @@ async function handleSessionExpired() {
   const redirect = currentRoute.name === 'Login' ? undefined : currentRoute.fullPath;
 
   authStore.clearAuth();
-  ElMessage.error('登录状态已失效，请重新登录');
+  ElMessage.error('登錄狀態已失效，請重新登錄');
   await router
     .replace({ name: 'Login', query: redirect ? { redirect } : undefined })
     .catch(() => undefined);

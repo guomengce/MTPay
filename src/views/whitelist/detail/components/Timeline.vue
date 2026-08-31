@@ -1,5 +1,5 @@
 <template>
-  <DetailCard class="whitelist-timeline" title="处理时间线" icon="ri-time-line">
+  <DetailCard class="whitelist-timeline" :title="t('whitelist.timeline')" icon="ri-time-line">
     <ol class="timeline-list">
       <li v-for="record in records" :key="record.id">
         <span class="timeline-list__dot" />
@@ -8,8 +8,8 @@
           <p>{{ record.actor_name || record.actor_type_name }}</p>
           <blockquote v-if="record.message">{{ record.message }}</blockquote>
           <div v-if="record.actor_type === 1" class="timeline-files">
-            <p v-if="record.files.length" class="timeline-files__count">本次关联 {{ record.files.length }} 个文件</p>
-            <p v-else class="timeline-files__empty">本次未提交证明文件</p>
+            <p v-if="record.files.length" class="timeline-files__count">{{ t('whitelist.associatedFiles', { count: record.files.length }) }}</p>
+            <p v-else class="timeline-files__empty">{{ t('whitelist.noProofFiles') }}</p>
             <div v-if="record.files.length" class="file-list">
               <article v-for="file in record.files" :key="file.file_id">
                 <span class="file-list__type">{{ file.extension?.toUpperCase() || 'FILE' }}</span>
@@ -18,8 +18,8 @@
                   <p>{{ formatFileSize(file.size) }} · {{ file.uploaded_at || '—' }}</p>
                 </div>
                 <div class="file-list__actions">
-                  <el-button circle size="small" type="primary" plain :icon="View" :loading="loading" title="预览文件" aria-label="预览文件" @click="emit('preview', file.file_id)" />
-                  <el-button circle size="small" plain :icon="Download" :loading="loading" title="下载文件" aria-label="下载文件" @click="emit('download', file.file_id)" />
+                  <el-button circle size="small" type="primary" plain :icon="View" :loading="loading" :title="t('whitelist.preview')" :aria-label="t('whitelist.preview')" @click="emit('preview', file.file_id)" />
+                  <el-button circle size="small" plain :icon="Download" :loading="loading" :title="t('whitelist.download')" :aria-label="t('whitelist.download')" @click="emit('download', file.file_id)" />
                 </div>
               </article>
             </div>
@@ -31,6 +31,7 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
 import { Download, View } from '@element-plus/icons-vue';
 
 import type { WhitelistReviewRecord } from '@/api/modules/whitelist';
@@ -38,6 +39,7 @@ import DetailCard from '@/components/detail/DetailCard.vue';
 
 defineProps<{ records: WhitelistReviewRecord[]; loading?: boolean }>();
 const emit = defineEmits<{ (event: 'preview', fileId: number): void; (event: 'download', fileId: number): void }>();
+const { t } = useI18n();
 
 function formatFileSize(size: number) {
   if (!Number.isFinite(size) || size <= 0) return '—';

@@ -1,13 +1,12 @@
 <template>
   <section class="dashboard-page">
     <AdminHero
-      title="MTPay 营运总览"
-      description="管理代理、资金与审核流程"
+      :title="t('dashboard.title')"
       icon="ri-dashboard-3-line"
     >
     </AdminHero>
 
-    <div v-if="loading" class="dashboard-page__skeleton" aria-label="正在載入首頁資料">
+    <div v-if="loading" class="dashboard-page__skeleton" :aria-label="t('dashboard.loading')">
       <div class="dashboard-page__skeleton-metrics">
         <el-skeleton-item v-for="index in 4" :key="index" variant="rect" />
       </div>
@@ -27,18 +26,24 @@
       <div class="dashboard-page__todo">
         <div class="dashboard-page__todo-head">
           <el-icon class="dashboard-page__todo-icon"><BellFilled /></el-icon>
-          <strong>待处理事项</strong>
+          <strong>{{ t('dashboard.pendingItems') }}</strong>
         </div>
         <div class="dashboard-page__todo-count">
           <span>{{ pendingCount }}</span>
-          <em>待处理</em>
+          <em>{{ t('dashboard.pending') }}</em>
         </div>
-        <p>入金、兑换、白名单及出金</p>
+        <p>{{ t('dashboard.pendingScope') }}</p>
       </div>
     </div>
 
     <div class="dashboard-page__actions">
-      <QuickActionCard v-for="item in quickActions" :key="item.title" v-bind="item" />
+      <QuickActionCard
+        v-for="item in quickActions"
+        :key="item.title"
+        :icon="item.icon"
+        :title="item.title"
+        @click="openQuickAction(item.route)"
+      />
     </div>
 
     <div class="dashboard-page__content">
@@ -51,6 +56,8 @@
 
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRouter, type RouteLocationRaw } from 'vue-router';
 import { usePageLoading } from '@/composables/usePageLoading';
 import { ArrowDown, BellFilled, Switch, Upload, UserFilled } from '@element-plus/icons-vue';
 import BalanceCard from './components/BalanceCard.vue';
@@ -63,24 +70,33 @@ const {
   loading,
   balances,
   pendingCount,
-  feeAmount,
   companyName,
   recentTransactions,
   rateItems,
   loadOverview,
 } = useDashboard();
 usePageLoading(loading);
+const router = useRouter();
+const { t } = useI18n();
 
 const quickActions = computed(() => [
-  { icon: ArrowDown, title: '入金 USDT', description: '获取链上地址' },
-  { icon: Switch, title: '兑换 USD', description: '查看实时汇率' },
-  { icon: UserFilled, title: '新增白名单', description: '付款人或收款人' },
+  { icon: ArrowDown, title: t('dashboard.deposit'), route: { name: 'Deposit' } },
+  { icon: Switch, title: t('dashboard.exchange'), route: { name: 'Exchange' } },
+  {
+    icon: UserFilled,
+    title: t('dashboard.addWhitelist'),
+    route: { name: 'Whitelist', query: { action: 'create' } },
+  },
   {
     icon: Upload,
-    title: '申请 USD 提现',
-    description: feeAmount.value ? `固定费 ${feeAmount.value} USD` : '提交出金申请',
+    title: t('dashboard.withdraw'),
+    route: { name: 'Withdrawal' },
   },
 ]);
+
+function openQuickAction(route: RouteLocationRaw) {
+  void router.push(route);
+}
 
 onMounted(loadOverview);
 </script>

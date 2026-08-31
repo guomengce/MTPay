@@ -1,11 +1,17 @@
 <template>
-  <div class="quick-action-card" tabindex="0" role="button">
+  <div
+    class="quick-action-card"
+    tabindex="0"
+    role="button"
+    @click="emit('click')"
+    @keydown.enter="emit('click')"
+    @keydown.space.prevent="emit('click')"
+  >
     <div class="quick-action-card__icon">
       <el-icon><component :is="icon" /></el-icon>
     </div>
     <div class="quick-action-card__text">
       <strong>{{ title }}</strong>
-      <span>{{ description }}</span>
     </div>
     <el-icon class="quick-action-card__arrow"><ArrowRight /></el-icon>
   </div>
@@ -18,8 +24,9 @@ import type { Component } from 'vue';
 defineProps<{
   icon: Component;
   title: string;
-  description: string;
 }>();
+
+const emit = defineEmits<{ click: [] }>();
 </script>
 
 <style scoped lang="scss">
@@ -67,22 +74,13 @@ defineProps<{
     gap: 4px;
 
     strong {
-      overflow: hidden;
       color: #0d1a32;
       font-size: 15px;
       font-weight: 700;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      overflow-wrap: anywhere;
+      line-height: 1.3;
     }
 
-    span {
-      overflow: hidden;
-      color: #75859a;
-      font-size: 12px;
-      font-weight: 600;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
   }
 
   &__arrow {
@@ -108,20 +106,11 @@ defineProps<{
       gap: 5px;
       padding-top: 1px;
 
-      strong,
-      span {
+      strong {
         overflow: visible;
         text-overflow: clip;
         white-space: normal;
         overflow-wrap: anywhere;
-      }
-
-      span {
-        display: -webkit-box;
-        line-height: 1.45;
-        -webkit-box-orient: vertical;
-        -webkit-line-clamp: 2;
-        overflow: hidden;
       }
     }
 

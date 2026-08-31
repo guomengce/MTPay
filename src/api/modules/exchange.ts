@@ -73,7 +73,7 @@ export interface ExchangeListParams {
 
 /** 兑换提交参数。source_currency_code 限定 USDT/USDC；amount 为十进制字符串且 >0。 */
 export interface SubmitExchangePayload {
-  source_currency_code: 'USDT' | 'USDC';
+  source_currency_code: string;
   amount: string;
 }
 
@@ -90,10 +90,7 @@ export function fetchExchangeConfig() {
 /** 兑换配置响应结构。 */
 export interface ExchangeConfig {
   balances: ExchangeBalance[];
-  rates: {
-    USDT?: ExchangeEffectiveRate;
-    USDC?: ExchangeEffectiveRate;
-  };
+  rates: Partial<Record<string, ExchangeEffectiveRate>>;
 }
 
 /**

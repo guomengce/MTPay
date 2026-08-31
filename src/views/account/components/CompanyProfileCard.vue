@@ -4,28 +4,22 @@
       <div class="profile-card__identity">
         <span class="profile-card__avatar">{{ companyInitial }}</span>
         <div>
-          <small>企业代理账户</small>
           <h2>{{ profile?.company_name || '—' }}</h2>
-          <p>{{ profile?.agent_code || '资料加载中' }}</p>
+          <p>{{ profile?.email || t('account.loading') }}</p>
         </div>
       </div>
       <StatusBadge
-        :label="profile?.status_name || '未知状态'"
+        :label="profile?.status_name || t('account.unknownStatus')"
         :type="profile?.status === 1 ? 'success' : 'warning'"
       />
     </header>
 
-    <div class="profile-card__section-title">
-      <span>账户资料</span>
-      <small>资料由 MTPay 管理端维护</small>
-    </div>
-
     <div class="profile-card__details">
-      <section v-for="item in details" :key="item.label" class="profile-card__detail">
+      <section v-for="item in details" :key="item.label" class="profile-card__detail" :class="{ 'is-wide': item.wide }">
         <span><el-icon><component :is="item.icon" /></el-icon></span>
         <div>
           <small>{{ item.label }}</small>
-          <strong>{{ item.value }}</strong>
+          <strong :class="{ 'is-key': item.wide }">{{ item.value }}</strong>
         </div>
       </section>
     </div>
@@ -33,25 +27,28 @@
 </template>
 
 <script setup lang="ts">
-import { Clock, Message, Phone, Postcard } from '@element-plus/icons-vue';
+import { Clock, Key, Message, Phone } from '@element-plus/icons-vue';
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import type { AgentProfile } from '@/api/modules/auth';
 import StatusBadge from '@/components/admin/StatusBadge.vue';
 
 const props = defineProps<{ profile: AgentProfile | null }>();
+const { t } = useI18n();
 
 const companyInitial = computed(() => props.profile?.company_name?.trim().charAt(0).toUpperCase() || 'M');
 const details = computed(() => [
-  { label: '联系 Email', value: props.profile?.email || '—', icon: Message },
-  { label: '联系电话', value: props.profile?.phone || '未设置', icon: Phone },
-  { label: '代理编号', value: props.profile?.agent_code || '—', icon: Postcard },
-  { label: '账户激活时间', value: props.profile?.activated_at || '—', icon: Clock },
+  { label: t('account.email'), value: props.profile?.email || '—', icon: Message },
+  { label: t('account.phone'), value: props.profile?.phone || t('account.unset'), icon: Phone },
+  { label: t('account.activatedAt'), value: props.profile?.activated_at || '—', icon: Clock },
+  { label: t('account.safeheronAccountKey'), value: props.profile?.safeheron_account_key || t('account.unset'), icon: Key, wide: true },
 ]);
 </script>
 
 <style scoped lang="scss">
 .profile-card {
+  height: 100%;
   min-width: 0;
   overflow: hidden;
   border: 1px solid rgb(192 211 227 / 70%);
@@ -155,6 +152,9 @@ const details = computed(() => [
     div { min-width: 0; }
     small { display: block; margin-bottom: 5px; color: #8494a8; font-size: 12px; }
     strong { display: block; overflow: hidden; color: #172942; font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
+
+    &.is-wide { grid-column: 1 / -1; }
+    strong.is-key { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; overflow: visible; overflow-wrap: anywhere; text-overflow: clip; white-space: normal; }
   }
 
   @include mobile {

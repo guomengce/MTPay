@@ -2,11 +2,11 @@
   <main class="whitelist-detail">
     <header class="whitelist-detail__topbar">
       <button class="whitelist-detail__back" type="button" @click="goBack">
-        <i class="ri-arrow-left-line" />返回白名单列表
+        <i class="ri-arrow-left-line" />{{ t('whitelist.back') }}
       </button>
       <StatusBadge
         v-if="detail"
-        :label="detail.status_name"
+        :label="statusLabel"
         :type="statusMeta.type"
         :effect="statusMeta.effect"
       />
@@ -36,12 +36,12 @@
           <aside class="whitelist-detail__aside">
             <DetailCard
               v-if="reviewItems.length || detail.status === 1"
-              :title="detail.status === 3 ? '驳回信息' : '审核信息'"
+              :title="detail.status === 3 ? t('whitelistReview.rejectionInfo') : t('whitelistReview.reviewInfo')"
               :icon="detail.status === 3 ? 'ri-close-circle-line' : 'ri-shield-check-line'"
             >
               <template v-if="detail.status === 1" #extra>
                 <el-button size="small" type="warning" plain @click="supplementDialogVisible = true">
-                  补充文件
+                  {{ t('whitelist.supplement') }}
                 </el-button>
               </template>
               <DetailFieldGrid :items="reviewItems" />
@@ -58,8 +58,8 @@
         </div>
       </template>
 
-      <el-empty v-else-if="!loading" description="未找到该白名单记录">
-        <el-button type="primary" @click="goBack">返回白名单列表</el-button>
+      <el-empty v-else-if="!loading" :description="t('whitelist.notFound')">
+        <el-button type="primary" @click="goBack">{{ t('whitelist.back') }}</el-button>
       </el-empty>
     </div>
 
@@ -80,6 +80,7 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { ElMessage } from 'element-plus';
 import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
 import StatusBadge from '@/components/admin/StatusBadge.vue';
 import { usePageLoading } from '@/composables/usePageLoading';
@@ -100,6 +101,7 @@ import {
 
 const route = useRoute();
 const router = useRouter();
+const { t } = useI18n();
 const id = computed(() => Number(route.params.id));
 const { loading, detail, fetchDetail } = useWhitelistDetail();
 usePageLoading(loading);
@@ -130,27 +132,28 @@ const supplementDialogVisible = ref(false);
 const statusMeta = computed(
   () => WHITELIST_STATUS_MAP[(detail.value?.status ?? 0) as WhitelistStatus],
 );
+const statusLabel = computed(() => [t('whitelistStatus.pending'), t('whitelistStatus.filesRequired'), t('whitelistStatus.approved'), t('whitelistStatus.rejected')][detail.value?.status ?? 0] || detail.value?.status_name || '—');
 
 const reviewItems = computed<DetailFieldItem[]>(() => {
   if (!detail.value || detail.value.status === 0) return [];
   const review = detail.value.review;
   const items: DetailFieldItem[] = [];
-  if (review.admin_name) items.push({ label: '处理人', value: review.admin_name });
-  if (review.reviewed_at) items.push({ label: '处理时间', value: review.reviewed_at });
+  if (review.admin_name) items.push({ label: t('whitelistReview.handler'), value: review.admin_name });
+  if (review.reviewed_at) items.push({ label: t('whitelistReview.handledAt'), value: review.reviewed_at });
   if (review.note) {
     items.push({
       label:
         detail.value.status === 3
-          ? '驳回原因'
+          ? t('whitelistReview.rejectionReason')
           : detail.value.status === 1
-            ? '补件要求'
-            : '审核备注',
+            ? t('whitelistReview.supplementRequirement')
+            : t('whitelistReview.reviewNote'),
       value: review.note,
       wide: true,
     });
   }
   if (detail.value.status === 1 && !review.note) {
-    items.push({ label: '补件要求', value: '平台要求补充证明文件', wide: true });
+    items.push({ label: t('whitelistReview.supplementRequirement'), value: t('whitelistReview.defaultSupplementRequirement'), wide: true });
   }
   return items;
 });
@@ -169,7 +172,7 @@ async function handleSupplement(payload: { file_ids: number[]; message?: string 
   try {
     detail.value = await submitSupplement(detail.value.id, payload.file_ids, payload.message);
     supplementDialogVisible.value = false;
-    ElMessage.success('补件已提交，白名单已重新进入审核');
+    ElMessage.success(t('whitelist.supplemented'));
   } catch {
     /* 请求层已显示后端错误 */
   }

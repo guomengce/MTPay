@@ -4,11 +4,6 @@
     <div class="activate-page__glow activate-page__glow--two" />
 
     <section class="activate-card">
-      <header class="activate-card__brand">
-        <span>M</span>
-        <div><strong>MTPay</strong><small>AGENT PORTAL</small></div>
-      </header>
-
       <template v-if="activatedProfile">
         <div class="activate-card__result">
           <span class="activate-card__success"
@@ -88,10 +83,6 @@
           </el-button>
         </el-form>
       </template>
-
-      <footer class="activate-card__footer">
-        <el-icon><CircleCheck /></el-icon><span>企业级安全保护 · 交易全程可追溯</span>
-      </footer>
     </section>
   </main>
 </template>
@@ -210,37 +201,6 @@ function goLogin() {
   background: rgb(255 255 255 / 96%);
   box-shadow: 0 28px 80px rgb(36 91 127 / 16%);
   backdrop-filter: blur(18px);
-  &__brand {
-    display: flex;
-    align-items: center;
-    gap: 11px;
-    margin-bottom: 30px;
-  }
-  &__brand > span {
-    display: grid;
-    width: 42px;
-    height: 42px;
-    place-items: center;
-    border-radius: 11px;
-    color: #fff;
-    background: linear-gradient(135deg, #28d4c2, #158eb9);
-    font-size: 20px;
-    font-weight: 900;
-  }
-  &__brand div {
-    display: grid;
-    gap: 2px;
-  }
-  &__brand strong {
-    color: #071b38;
-    font-size: 20px;
-  }
-  &__brand small {
-    color: #8292a8;
-    font-size: 9px;
-    font-weight: 800;
-    letter-spacing: 1.5px;
-  }
   &__heading {
     display: flex;
     align-items: center;

@@ -5,6 +5,7 @@ import { ref } from 'vue';
 export const usePageLoadingStore = defineStore('pageLoading', () => {
   const active = ref(false);
   let pending = 0;
+  let routePending = false;
   let startedAt = 0;
   let closeTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -17,7 +18,23 @@ export const usePageLoadingStore = defineStore('pageLoading', () => {
 
   function finish() {
     pending = Math.max(0, pending - 1);
-    if (pending > 0) return;
+    scheduleFinish();
+  }
+
+  function startRoute() {
+    if (closeTimer) clearTimeout(closeTimer);
+    if (!active.value) startedAt = Date.now();
+    routePending = true;
+    active.value = true;
+  }
+
+  function finishRoute() {
+    routePending = false;
+    scheduleFinish();
+  }
+
+  function scheduleFinish() {
+    if (pending > 0 || routePending) return;
     const delay = Math.max(0, 260 - (Date.now() - startedAt));
     if (closeTimer) clearTimeout(closeTimer);
     closeTimer = setTimeout(() => {
@@ -26,5 +43,5 @@ export const usePageLoadingStore = defineStore('pageLoading', () => {
     }, delay);
   }
 
-  return { active, start, finish };
+  return { active, start, finish, startRoute, finishRoute };
 });

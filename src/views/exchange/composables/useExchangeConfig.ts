@@ -31,7 +31,7 @@ export function useExchangeConfig() {
   }
 
   /** 查找某个来源币种的有效汇率；后端未返回时为空对象。 */
-  function findRate(currencyCode: 'USDT' | 'USDC') {
+  function findRate(currencyCode: string) {
     return config.value?.rates?.[currencyCode];
   }
 

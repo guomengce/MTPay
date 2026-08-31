@@ -1,33 +1,28 @@
 <template>
   <section class="account-page">
-    <AdminHero title="账户与安全" description="查看代理资料，管理登录密码与当前会话" icon="ri-shield-user-line" />
+    <AdminHero :title="t('account.title')" icon="ri-shield-user-line" />
 
     <div class="account-page__grid">
       <CompanyProfileCard :profile="profile" />
-      <LoginSecurityCard
-        :profile="profile"
-        @change-password="passwordDialogVisible = true"
-      />
+      <LoginSecurityCard :submitting="submitting" @submit="changePassword" />
     </div>
 
-    <ChangePasswordDialog
-      v-model="passwordDialogVisible"
-      :submitting="submitting"
-      @submit="changePassword"
-    />
+    <TwoFactorCard />
+
   </section>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import AdminHero from '@/components/admin/AdminHero.vue';
 import { usePageLoading } from '@/composables/usePageLoading';
-import ChangePasswordDialog from './components/ChangePasswordDialog.vue';
 import CompanyProfileCard from './components/CompanyProfileCard.vue';
 import LoginSecurityCard from './components/LoginSecurityCard.vue';
+import TwoFactorCard from './components/TwoFactorCard.vue';
 import { useAccount } from './composables/useAccount';
 
-const passwordDialogVisible = ref(false);
+const { t } = useI18n();
 const { loading, submitting, profile, fetchProfile, changePassword } = useAccount();
 usePageLoading(loading);
 
@@ -42,6 +37,7 @@ onMounted(fetchProfile);
 
   &__grid {
     display: grid;
+    align-items: stretch;
     grid-template-columns: minmax(460px, 1.12fr) minmax(390px, 0.88fr);
     gap: 24px;
   }

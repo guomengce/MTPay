@@ -1,18 +1,18 @@
 <template>
   <section class="order-header">
     <div class="order-header__identity">
-      <small>USD 出金订单</small>
+      <small>{{ t('withdrawal.orderEyebrow') }}</small>
       <div>
         <h1>{{ detail.order_no }}</h1>
-        <button type="button" title="复制订单号" aria-label="复制订单号" @click="copyOrderNo">
+        <button type="button" :title="t('withdrawal.copyOrder')" :aria-label="t('withdrawal.copyOrder')" @click="copyOrderNo">
           <i class="ri-file-copy-line" />
         </button>
       </div>
     </div>
 
     <div class="order-header__meta">
-      <span><small>提交时间</small><strong>{{ detail.submitted_at || '—' }}</strong></span>
-      <span><small>最后更新</small><strong>{{ detail.updated_at || '—' }}</strong></span>
+      <span><small>{{ t('withdrawal.submittedAt') }}</small><strong>{{ detail.submitted_at || '—' }}</strong></span>
+      <span><small>{{ t('withdrawal.updatedAt') }}</small><strong>{{ detail.updated_at || '—' }}</strong></span>
     </div>
 
     <StatusBadge :label="detail.status_name" :type="statusType" :effect="statusEffect" />
@@ -22,6 +22,7 @@
 <script setup lang="ts">
 /** 出金订单顶部信息栏：只展示订单标识、时间和状态。 */
 import { ElMessage } from 'element-plus';
+import { useI18n } from 'vue-i18n';
 
 import type { WithdrawalOrderDetail } from '@/api/modules/withdrawal';
 import StatusBadge from '@/components/admin/StatusBadge.vue';
@@ -36,11 +37,12 @@ const props = defineProps<{
 async function copyOrderNo() {
   try {
     await navigator.clipboard.writeText(props.detail.order_no);
-    ElMessage.success('订单号已复制');
+    ElMessage.success(t('withdrawal.orderCopied'));
   } catch {
-    ElMessage.error('复制失败，请手动复制');
+    ElMessage.error(t('withdrawal.copyFailed'));
   }
 }
+const { t } = useI18n();
 </script>
 
 <style scoped lang="scss">

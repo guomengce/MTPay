@@ -1,13 +1,8 @@
 <template>
-  <section class="record-list">
-    <header class="record-list__header">
-      <div>
-        <h3 class="record-list__title">出金记录</h3>
-        <p class="record-list__subtitle">按筛选条件展示当前代理的出金订单</p>
-      </div>
-    </header>
-    <div class="record-list__filters filter-bar">
-      <el-select v-model="statusFilter" placeholder="订单状态" clearable>
+  <AdminPanel class="record-list" :title="t('withdrawal.records')">
+    <template #extra>
+      <div class="filter-bar">
+      <el-select v-model="statusFilter" :placeholder="t('withdrawal.orderStatus')" clearable>
         <el-option
           v-for="item in statusOptions"
           :key="item.value"
@@ -15,30 +10,33 @@
           :label="item.label"
         />
       </el-select>
-      <el-input v-model="orderNoFilter" placeholder="订单号" clearable />
+      <el-input v-model="orderNoFilter" :placeholder="t('withdrawal.orderNo')" clearable />
       <el-date-picker
         v-model="dateRange"
         type="daterange"
-        range-separator="至"
-        start-placeholder="開始日期"
-        end-placeholder="結束日期"
+        :range-separator="t('withdrawal.dateTo')"
+        :start-placeholder="t('withdrawal.startDate')"
+        :end-placeholder="t('withdrawal.endDate')"
         value-format="YYYY-MM-DD"
         unlink-panels
       />
       <div class="filter-actions">
-        <el-button type="primary" :loading="loading" @click="onSearch">查询</el-button>
-        <el-button @click="onReset">重置</el-button>
+        <el-button type="primary" :loading="loading" @click="onSearch">{{ t('common.actions.search') }}</el-button>
+        <el-button @click="onReset">{{ t('common.actions.reset') }}</el-button>
       </div>
-    </div>
+      </div>
+    </template>
+
+    <div class="record-list__body">
 
     <el-table
       v-loading="loading"
       :data="list"
-      :empty-text="loading ? '加载中…' : '暂无出金记录'"
+      :empty-text="loading ? t('withdrawal.loading') : t('withdrawal.empty')"
       stripe
       class="record-list__table"
     >
-      <el-table-column prop="order_no" label="订单号" min-width="180">
+      <el-table-column prop="order_no" :label="t('withdrawal.orderNo')" min-width="180">
         <template #default="{ row }">
           <strong
             class="record-list__link"
@@ -50,7 +48,7 @@
           <small>{{ formatTime(row.submitted_at) }}</small>
         </template>
       </el-table-column>
-      <el-table-column label="交易主体" min-width="380" align="center" header-align="center">
+      <el-table-column :label="t('withdrawal.transactionParties')" min-width="380" align="center" header-align="center">
         <template #default="{ row }">
           <WithdrawalPartyFlow
             :payer-name="row.payer.name"
@@ -60,32 +58,32 @@
           />
         </template>
       </el-table-column>
-      <el-table-column label="出金金额" min-width="250" align="left">
+      <el-table-column :label="t('withdrawal.amount')" min-width="250" align="left">
         <template #default="{ row }">
           <div class="record-list__amount-block">
             <strong class="record-list__amount">
-              {{ row.amount }} <span>{{ row.currency.code }}</span>
+              {{ formatMoney(row.amount) }} <span>{{ row.currency.code }}</span>
             </strong>
             <div class="record-list__deduction">
-              <span>总扣款 {{ row.total_amount }}</span>
+              <span>{{ t('withdrawal.totalDeduction') }} {{ formatMoney(row.total_amount) }}</span>
             </div>
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="状态" min-width="100">
+      <el-table-column :label="t('withdrawal.status')" min-width="150">
         <template #default="{ row }">
           <StatusBadge
-            :label="row.status_name"
+            :label="statusLabel(row.status, row.status_name)"
             :type="statusMap[row.status as WithdrawalStatus]?.type"
             :effect="statusMap[row.status as WithdrawalStatus]?.effect"
           />
         </template>
       </el-table-column>
-      <el-table-column label="操作" min-width="180" fixed="right" align="center">
+      <el-table-column :label="t('withdrawal.actions')" min-width="180" fixed="right" align="center">
         <template #default="{ row }">
           <div class="record-list__actions">
             <el-button type="primary" plain size="small" :icon="View" @click="emit('detail', row.id)">
-              详情
+              {{ t('withdrawal.details') }}
             </el-button>
             <el-button
               v-if="row.status === 1"
@@ -94,7 +92,7 @@
               size="small"
               :icon="Upload"
               @click="emit('supplement', row)"
-              >补件</el-button
+              >{{ t('withdrawal.supplement') }}</el-button
             >
           </div>
         </template>
@@ -113,19 +111,24 @@
         @current-change="onPage"
       />
     </footer>
-  </section>
+    </div>
+  </AdminPanel>
 </template>
 
 <script setup lang="ts">
+import { formatMoney } from '@/utils/formatMoney';
+
 /**
  * 出金列表组件
  * - 只负责 UI；业务由 useWithdrawalList 处理；
  * - 字段保留字符串展示，不做数值换算。
  */
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { Refresh, Upload, View } from '@element-plus/icons-vue';
 import type { WithdrawalListParams, WithdrawalOrder } from '@/api/modules/withdrawal';
 import StatusBadge from '@/components/admin/StatusBadge.vue';
+import AdminPanel from '@/components/admin/AdminPanel.vue';
 import ResponsiveCardList, { type ResponsiveCardItem } from '@/components/common/ResponsiveCardList.vue';
 import WithdrawalPartyFlow from './WithdrawalPartyFlow.vue';
 
@@ -159,27 +162,24 @@ const emit = defineEmits<{
 }>();
 
 const statusMap = WITHDRAWAL_STATUS_MAP;
-const statusOptions = [
-  { value: 0, label: '待审核' },
-  { value: 1, label: '待补充文件' },
-  { value: 2, label: '付款处理中' },
-  { value: 3, label: '已完成' },
-  { value: 4, label: '已驳回' },
-  { value: 5, label: '付款失败' },
-];
+const statusOptions = computed(() => [
+  { value: 0, label: t('withdrawal.pending') }, { value: 1, label: t('withdrawal.filesRequired') },
+  { value: 2, label: t('withdrawal.processing') }, { value: 3, label: t('withdrawal.completed') },
+  { value: 4, label: t('withdrawal.rejected') }, { value: 5, label: t('withdrawal.failed') },
+]);
 
 const cardItems = computed<ResponsiveCardItem[]>(() => props.list.map((row) => ({
   key: String(row.id), title: row.order_no, subtitle: formatTime(row.submitted_at),
-  status: { label: row.status_name, type: statusMap[row.status]?.type, effect: statusMap[row.status]?.effect },
+  status: { label: statusLabel(row.status, row.status_name), type: statusMap[row.status]?.type, effect: statusMap[row.status]?.effect },
   pending: statusMap[row.status]?.effect === 'pending', accent: row.status === 4 || row.status === 5 ? 'danger' : 'primary',
   fields: [
-    { label: '付款方', value: `${entityTypeName(row.payer.entity_type)} · ${row.payer.name}`, strong: true },
-    { label: '收款方', value: `${entityTypeName(row.payee.entity_type)} · ${row.payee.name}`, strong: true },
-    { label: '出金金额', value: `${row.amount} ${row.currency.code}`, subValue: `总扣款 ${row.total_amount} ${row.currency.code}`, strong: true },
+    { label: t('withdrawal.payer'), value: `${entityTypeName(row.payer.entity_type)} · ${row.payer.name}`, strong: true },
+    { label: t('withdrawal.payee'), value: `${entityTypeName(row.payee.entity_type)} · ${row.payee.name}`, strong: true },
+    { label: t('withdrawal.amount'), value: `${formatMoney(row.amount)} ${row.currency.code}`, subValue: `${t('withdrawal.totalDeduction')} ${formatMoney(row.total_amount)} ${row.currency.code}`, strong: true },
   ],
   actions: [
-    { key: 'detail', label: '查看详情', icon: View, type: 'primary', plain: true },
-    { key: 'supplement', label: '补件', icon: Upload, type: 'warning', plain: true, visible: row.status === 1 },
+    { key: 'detail', label: t('withdrawal.viewDetails'), icon: View, type: 'primary', plain: true },
+    { key: 'supplement', label: t('withdrawal.supplement'), icon: Upload, type: 'warning', plain: true, visible: row.status === 1 },
   ],
 })));
 
@@ -224,7 +224,10 @@ function formatTime(value: string | null) {
 
 /** 接口 entity_type：1 公司，2 个人。 */
 function entityTypeName(value: 1 | 2) {
-  return value === 1 ? '公司' : '个人';
+  return value === 1 ? t('withdrawal.company') : t('withdrawal.individual');
+}
+function statusLabel(value: number, fallback = '') {
+  return [t('withdrawal.pending'), t('withdrawal.filesRequired'), t('withdrawal.processing'), t('withdrawal.completed'), t('withdrawal.rejected'), t('withdrawal.failed')][value] || fallback;
 }
 function handleCardAction(actionKey: string, itemKey: string) {
   const row = props.list.find((item) => item.id === Number(itemKey));
@@ -232,47 +235,11 @@ function handleCardAction(actionKey: string, itemKey: string) {
   if (actionKey === 'detail') emit('detail', row.id);
   if (actionKey === 'supplement') emit('supplement', row);
 }
+const { t } = useI18n();
 </script>
 
 <style scoped lang="scss">
-.record-list {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 16px;
-  padding: 24px;
-  border: 1px solid #e5edf3;
-  border-radius: 16px;
-  background: #ffffff;
-  box-shadow: 0 16px 40px rgb(22 34 51 / 5%);
-}
-.record-list__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.record-list__title {
-  margin: 0;
-  color: #071833;
-  font-size: 18px;
-}
-.record-list__subtitle {
-  margin: 4px 0 0;
-  color: #718197;
-  font-size: 13px;
-}
-.record-list__filters {
-  display: grid;
-  gap: 10px;
-
-  > * {
-    min-width: 0;
-  }
-
-  .filter-actions {
-    min-width: max-content;
-  }
-}
+.record-list__body { display:flex; min-width:0; flex-direction:column; gap:16px;  }
 .record-list__amount-block {
   display: flex;
   flex-direction: column;
@@ -330,18 +297,7 @@ function handleCardAction(actionKey: string, itemKey: string) {
   justify-content: flex-end;
 }
 @include mobile {
-  .record-list {
-    padding: 18px 16px;
-    border-radius: 14px;
-  }
-  .record-list__header {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .record-list__header .el-button {
-    width: 100%;
-  }
+  .record-list__body { padding:16px; }
   .record-list__table { display: none; }
   .record-list__pager {
     justify-content: flex-end;

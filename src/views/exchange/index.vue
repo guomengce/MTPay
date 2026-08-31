@@ -1,8 +1,7 @@
 <template>
   <main class="exchange-page">
     <AdminHero
-      title="数字货币兑换"
-      description="使用 USDT 或 USDC 兑换 USD，提交后冻结来源资产，审核通过后自动到账"
+      :title="t('exchange.title')"
       icon="ri-swap-2-line"
     />
 
@@ -45,6 +44,7 @@
 import { onMounted, ref } from 'vue';
 import { ElMessage } from 'element-plus';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
 import type { ExchangeListParams } from '@/api/modules/exchange';
 import AdminHero from '@/components/admin/AdminHero.vue';
@@ -70,11 +70,12 @@ const {
 } = useExchangeManagement();
 const convertFormRef = ref<InstanceType<typeof ConvertForm>>();
 const router = useRouter();
+const { t } = useI18n();
 
-async function handleSubmit(payload: { source_currency_code: 'USDT' | 'USDC'; amount: string }) {
+async function handleSubmit(payload: { source_currency_code: string; amount: string }) {
   try {
     const result = await submitExchange(payload);
-    ElMessage.success(`兑换订单 ${result.order_no} 已提交，等待审核`);
+    ElMessage.success(t('exchange.submitted', { orderNo: result.order_no }));
     convertFormRef.value?.reset();
     await Promise.all([loadConfig(true), fetchList()]);
   } catch {

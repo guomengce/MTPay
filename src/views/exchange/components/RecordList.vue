@@ -1,23 +1,8 @@
 <template>
-  <section class="record-list">
-    <header class="record-list__header">
-      <div>
-        <h3 class="record-list__title">兑换记录</h3>
-        <p class="record-list__subtitle">按筛选条件展示当前代理的兑换订单</p>
-      </div>
-      <!-- <el-button :icon="Refresh" :loading="loading" @click="refresh">刷新</el-button> -->
-    </header>
-
-    <div class="record-list__filters filter-bar">
-      <el-select v-model="sourceCurrencyFilter" placeholder="来源币种" clearable>
-        <el-option
-          v-for="item in sourceCurrencies"
-          :key="item.currency.id"
-          :value="item.currency.id"
-          :label="item.currency.code"
-        />
-      </el-select>
-      <el-select v-model="statusFilter" placeholder="订单状态" clearable>
+  <AdminPanel class="record-list" :title="t('exchange.records')">
+    <template #extra>
+      <div class="filter-bar">
+      <el-select v-model="statusFilter" :placeholder="t('exchange.orderStatus')" clearable>
         <el-option
           v-for="item in statusOptions"
           :key="item.value"
@@ -25,30 +10,30 @@
           :label="item.label"
         />
       </el-select>
-      <el-input v-model="orderNoFilter" placeholder="订单号" clearable />
+      <el-input v-model="orderNoFilter" :placeholder="t('exchange.orderNo')" clearable />
       <el-date-picker
         v-model="dateRange"
         type="daterange"
-        range-separator="至"
-        start-placeholder="開始日期"
-        end-placeholder="結束日期"
+        :range-separator="t('deposit.dateTo')" :start-placeholder="t('deposit.startDate')" :end-placeholder="t('deposit.endDate')"
         value-format="YYYY-MM-DD"
         unlink-panels
       />
       <div class="filter-actions">
-        <el-button type="primary" :loading="loading" @click="onSearch">查询</el-button>
-        <el-button @click="onReset">重置</el-button>
+        <el-button type="primary" :loading="loading" @click="onSearch">{{ t('common.actions.search') }}</el-button><el-button @click="onReset">{{ t('common.actions.reset') }}</el-button>
       </div>
-    </div>
+      </div>
+    </template>
+
+    <div class="record-list__body">
 
     <el-table
       v-loading="loading"
       :data="list"
-      :empty-text="loading ? '加载中…' : '暂无兑换记录'"
+      :empty-text="loading ? t('exchange.loading') : t('exchange.empty')"
       stripe
       class="record-list__table"
     >
-      <el-table-column prop="order_no" label="订单号" min-width="170">
+      <el-table-column prop="order_no" :label="t('exchange.orderNo')" min-width="170">
         <template #default="{ row }">
           <strong
             class="record-list__link"
@@ -60,39 +45,39 @@
           <small>{{ formatTime(row.submitted_at) }}</small>
         </template>
       </el-table-column>
-      <el-table-column label="支付资产" min-width="170">
+      <el-table-column :label="t('exchange.sourceAsset')" min-width="170">
         <template #default="{ row }">
           <span class="record-list__path"
-            >{{ row.source_amount }} </span
+            >{{ formatMoney(row.source_amount) }} </span
           ><br/>
           <small>{{ row.source_currency.code }}</small>
         </template>
       </el-table-column>
-      <el-table-column label="比例" min-width="170">
+      <el-table-column :label="t('exchange.rate')" min-width="170">
         <template #default="{ row }">{{ formatExchangeRate(row.exchange_rate) || '—' }}</template>
       </el-table-column>
-      <el-table-column label="获得USD" min-width="170">
+      <el-table-column :label="t('exchange.receivedUsd')" min-width="170">
         <template #default="{ row }">
           <span class="record-list__path"
-            >{{ row.target_amount }}  </span
+            >{{ formatMoney(row.target_amount) }}  </span
           ><br/>
           <small>{{ row.target_currency.code }}</small>
         </template>
       </el-table-column>
       
-      <el-table-column label="状态" min-width="120">
+      <el-table-column :label="t('exchange.status')" min-width="120">
         <template #default="{ row }">
           <StatusBadge
-            :label="row.status_name"
+            :label="statusOptions.find((item) => item.value === row.status)?.label || row.status_name"
             :type="statusMap[row.status as ExchangeStatus]?.type"
             :effect="statusMap[row.status as ExchangeStatus]?.effect"
           />
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="110" fixed="right" align="center">
+      <el-table-column :label="t('exchange.actions')" width="110" fixed="right" align="center">
         <template #default="{ row }">
           <el-button plain type="primary" size="small" :icon="View" @click="emit('detail', row.id)">
-            详情
+            {{ t('exchange.details') }}
           </el-button>
         </template>
       </el-table-column>
@@ -110,19 +95,24 @@
         @current-change="onPage"
       />
     </footer>
-  </section>
+    </div>
+  </AdminPanel>
 </template>
 
 <script setup lang="ts">
+import { formatMoney } from '@/utils/formatMoney';
+
 /**
  * 兑换列表组件
  * - 只负责 UI；业务由 useExchangeList 提供；
  * - 字段保留字符串展示，避免精度丢失。
  */
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { View } from '@element-plus/icons-vue';
 import type { ExchangeBalance, ExchangeListParams, ExchangeOrder } from '@/api/modules/exchange';
 import StatusBadge from '@/components/admin/StatusBadge.vue';
+import AdminPanel from '@/components/admin/AdminPanel.vue';
 import ResponsiveCardList, { type ResponsiveCardItem } from '@/components/common/ResponsiveCardList.vue';
 import { formatExchangeRate } from '@/utils/decimal';
 
@@ -157,21 +147,18 @@ const emit = defineEmits<{
 }>();
 
 const statusMap = EXCHANGE_STATUS_MAP;
-const statusOptions = [
-  { value: 0, label: '待审核' },
-  { value: 1, label: '已完成' },
-  { value: 2, label: '已驳回' },
-];
+const { t } = useI18n();
+const statusOptions = computed(() => [{ value: 0, label: t('exchange.pending') }, { value: 1, label: t('exchange.completed') }, { value: 2, label: t('exchange.rejected') }]);
 const sourceCurrencies = computed(() => props.sourceCurrencies ?? []);
 const cardItems = computed<ResponsiveCardItem[]>(() => props.list.map((row) => ({
   key: String(row.id), title: row.order_no, subtitle: formatTime(row.submitted_at),
-  status: { label: row.status_name, type: statusMap[row.status]?.type, effect: statusMap[row.status]?.effect },
+  status: { label: statusOptions.value.find((item) => item.value === row.status)?.label || row.status_name, type: statusMap[row.status]?.type, effect: statusMap[row.status]?.effect },
   pending: statusMap[row.status]?.effect === 'pending', accent: 'warning',
   fields: [
-    { label: '支付资产', value: `${row.source_amount} ${row.source_currency.code}`, strong: true },
-    { label: '兑换比例', value: formatExchangeRate(row.exchange_rate), strong: true },
-    { label: '获得资产', value: `${row.target_amount} ${row.target_currency.code}`, strong: true },
-  ], actions: [{ key: 'detail', label: '查看详情', icon: View, type: 'primary', plain: true }],
+    { label: t('exchange.sourceAsset'), value: `${formatMoney(row.source_amount)} ${row.source_currency.code}`, strong: true },
+    { label: t('records.exchangeRate'), value: formatExchangeRate(row.exchange_rate), strong: true },
+    { label: t('exchange.receivedAsset'), value: `${formatMoney(row.target_amount)} ${row.target_currency.code}`, strong: true },
+  ], actions: [{ key: 'detail', label: t('exchange.viewDetails'), icon: View, type: 'primary', plain: true }],
 })));
 
 const sourceCurrencyFilter = computed<number | undefined>({
@@ -220,44 +207,7 @@ function handleCardAction(actionKey: string, itemKey: string) {
 </script>
 
 <style scoped lang="scss">
-.record-list {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 16px;
-  padding: 24px;
-  border: 1px solid #e5edf3;
-  border-radius: 16px;
-  background: #ffffff;
-  box-shadow: 0 16px 40px rgb(22 34 51 / 5%);
-}
-.record-list__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.record-list__title {
-  margin: 0;
-  color: #071833;
-  font-size: 18px;
-}
-.record-list__subtitle {
-  margin: 4px 0 0;
-  color: #718197;
-  font-size: 13px;
-}
-.record-list__filters {
-  display: grid;
-  gap: 10px;
-
-  > * {
-    min-width: 0;
-  }
-
-  .filter-actions {
-    min-width: max-content;
-  }
-}
+.record-list__body { display:flex; min-width:0; flex-direction:column; gap:16px; }
 .record-list__path {
   color: #4f647d;
   font-weight: 700;
@@ -294,18 +244,7 @@ function handleCardAction(actionKey: string, itemKey: string) {
   justify-content: flex-end;
 }
 @include mobile {
-  .record-list {
-    padding: 18px 16px;
-    border-radius: 14px;
-  }
-  .record-list__header {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .record-list__header .el-button {
-    width: 100%;
-  }
+  .record-list__body { padding:16px; }
   .record-list__table { display: none; }
   .record-list__pager {
     justify-content: flex-end;

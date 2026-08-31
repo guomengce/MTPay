@@ -39,7 +39,7 @@
             <span class="app-aside__menu-icon">
               <i :class="resolveIcon(menu.icon)" aria-hidden="true" />
             </span>
-            <span v-if="!isCollapsed" class="app-aside__menu-label">{{ menu.title }}</span>
+            <span v-if="!isCollapsed" class="app-aside__menu-label">{{ t(menu.title) }}</span>
           </RouterLink>
         </li>
       </ul>
@@ -62,6 +62,7 @@
 <script setup lang="ts">
 import { Check } from '@element-plus/icons-vue';
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { RouterLink, useRoute } from 'vue-router';
 
 import { useAppStore } from '@/stores/modules/app';
@@ -70,6 +71,7 @@ import { useRouteStore } from '@/stores/modules/route';
 const route = useRoute();
 const appStore = useAppStore();
 const routeStore = useRouteStore();
+const { t } = useI18n();
 
 const isMobile = computed(() => appStore.device === 'mobile');
 const isCollapsed = computed(() => appStore.sidebarCollapsed && !isMobile.value);

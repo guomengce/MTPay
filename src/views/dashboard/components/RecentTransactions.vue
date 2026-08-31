@@ -1,9 +1,9 @@
 <template>
   <section class="transactions-card">
     <header class="transactions-card__header">
-      <h2>近期交易</h2>
+      <h2>{{ t('dashboard.recent') }}</h2>
       <RouterLink class="transactions-card__all" to="/records">
-        查看全部 <i class="ri-arrow-right-s-line" />
+        {{ t('dashboard.viewAll') }} <i class="ri-arrow-right-s-line" />
       </RouterLink>
     </header>
 
@@ -14,12 +14,14 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import type { TransactionItem } from '@/api/modules/transaction';
 import TransactionTable from '@/views/records/components/TransactionTable.vue';
 import TransactionCardList from '@/views/records/components/TransactionCardList.vue';
 defineProps<{ transactions: TransactionItem[] }>();
 const router=useRouter();
-function openDetail(row:TransactionItem){void router.push({name:'TransactionDetail',params:{businessType:row.detail_type,businessId:row.detail_id}})}
+const { t }=useI18n();
+function openDetail(row:TransactionItem){if(row.detail_type==='fiat_deposit'){void router.push({name:'FiatDepositDetail',params:{id:row.detail_id}});return}void router.push({name:'TransactionDetail',params:{businessType:row.detail_type,businessId:row.detail_id}})}
 </script>
 
 <style scoped lang="scss">

@@ -1,8 +1,7 @@
 <template>
   <DetailCard
     class="withdrawal-timeline"
-    title="处理时间线"
-    description="订单处理节点及各轮关联文件"
+    :title="t('withdrawal.timeline')"
     icon="ri-time-line"
   >
     <ol class="timeline-list">
@@ -13,19 +12,19 @@
             <strong>{{ record.action_name }}</strong>
             <time>{{ record.created_at || '—' }}</time>
           </header>
-          <p>{{ record.actor_name || '系统' }}</p>
+          <p>{{ record.actor_name || t('withdrawal.system') }}</p>
           <blockquote v-if="record.message">{{ record.message }}</blockquote>
 
           <!-- 文件只在产生它的时间线节点展示，避免与汇总字段重复。 -->
           <div v-if="record.files.length" class="timeline-files">
-            <p class="timeline-files__count">本次关联 {{ record.files.length }} 个文件</p>
+            <p class="timeline-files__count">{{ t('withdrawal.associatedFiles', { count: record.files.length }) }}</p>
             <div class="file-list">
               <article v-for="file in record.files" :key="file.file_id">
                 <span class="file-list__type">{{ file.extension?.toUpperCase() || 'FILE' }}</span>
                 <div class="file-list__info">
                   <strong :title="file.original_name">{{ file.original_name }}</strong>
                   <p>
-                    {{ file.file_type_name || '证明文件' }} · {{ formatFileSize(file.size) }} ·
+                    {{ file.file_type_name || t('withdrawal.proofFile') }} · {{ formatFileSize(file.size) }} ·
                     {{ file.uploaded_at || '—' }}
                   </p>
                 </div>
@@ -37,8 +36,8 @@
                     plain
                     :icon="View"
                     :loading="loading"
-                    title="预览文件"
-                    aria-label="预览文件"
+                    :title="t('withdrawal.preview')"
+                    :aria-label="t('withdrawal.preview')"
                     @click="emit('preview', file.file_id)"
                   />
                   <el-button
@@ -47,8 +46,8 @@
                     plain
                     :icon="Download"
                     :loading="loading"
-                    title="下载文件"
-                    aria-label="下载文件"
+                    :title="t('withdrawal.download')"
+                    :aria-label="t('withdrawal.download')"
                     @click="emit('download', file.file_id)"
                   />
                 </div>
@@ -64,6 +63,7 @@
 <script setup lang="ts">
 /** 出金详情时间线：按 records 原始顺序展示流程与对应轮次附件。 */
 import { Download, View } from '@element-plus/icons-vue';
+import { useI18n } from 'vue-i18n';
 
 import type { WithdrawalRecord } from '@/api/modules/withdrawal';
 import DetailCard from '@/components/detail/DetailCard.vue';
@@ -80,6 +80,7 @@ function formatFileSize(size: number) {
   if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`;
   return `${(size / 1024 / 1024).toFixed(1)} MB`;
 }
+const { t } = useI18n();
 </script>
 
 <style scoped lang="scss">

@@ -1,47 +1,33 @@
 <template>
-  <section class="record-list">
-    <header class="record-list__header">
-      <div>
-        <h3 class="record-list__title">入金记录</h3>
-        <p class="record-list__subtitle">按筛选条件展示当前代理的入金订单</p>
-      </div>
-      <!-- <el-button :icon="Refresh" :loading="loading" @click="refresh">刷新</el-button> -->
-    </header>
-
-    <div class="record-list__filters filter-bar">
-      <el-select v-model="statusFilter" placeholder="订单状态" clearable>
-        <el-option
-          v-for="item in statusOptions"
-          :key="item.value"
-          :value="item.value"
-          :label="item.label"
-        />
-      </el-select>
-      <el-input v-model="orderNoFilter" placeholder="订单号" clearable />
-      <el-input v-model="txidFilter" show-overflow-tooltip placeholder="Txid" clearable />
-      <el-date-picker
+  <AdminPanel class="record-list" :title="t('deposit.recordTitle')">
+    <template #extra>
+      <div class="filter-bar">
+        <el-input v-model="orderNoFilter" :placeholder="t('deposit.orderNo')" clearable />
+        <el-date-picker
         v-model="dateRange"
         type="daterange"
-        range-separator="至"
-        start-placeholder="開始日期"
-        end-placeholder="結束日期"
+        :range-separator="t('deposit.dateTo')"
+        :start-placeholder="t('deposit.startDate')"
+        :end-placeholder="t('deposit.endDate')"
         value-format="YYYY-MM-DD"
         unlink-panels
-      />
-      <div class="filter-actions">
-        <el-button type="primary" :loading="loading" @click="onSearch">查询</el-button>
-        <el-button @click="onReset">重置</el-button>
+        />
+        <div class="filter-actions">
+          <el-button type="primary" :loading="loading" @click="onSearch">{{ t('common.actions.search') }}</el-button>
+          <el-button @click="onReset">{{ t('common.actions.reset') }}</el-button>
+        </div>
       </div>
-    </div>
+    </template>
 
-    <el-table
+    <div class="record-list__body">
+      <el-table
       v-loading="loading"
       :data="list"
-      :empty-text="loading ? '加载中…' : '暂无入金记录'"
+      :empty-text="loading ? t('deposit.loading') : t('deposit.empty')"
       stripe
       class="record-list__table"
     >
-      <el-table-column prop="order_no" label="订单号" min-width="170">
+      <el-table-column prop="order_no" :label="t('deposit.orderNo')" min-width="170">
          <template #default="{ row }">
           <strong
             class="record-list__link"
@@ -53,60 +39,66 @@
           <small>{{ formatTime(row.submitted_at) }}</small>
         </template>
       </el-table-column>
-      <el-table-column label="币种 / 网络" min-width="160">
+      <el-table-column :label="t('deposit.currencyNetwork')" min-width="160">
         <template #default="{ row }">{{ row.currency.code }} · {{ row.network.code }}</template>
       </el-table-column>
-      <el-table-column label="转账金额" min-width="140" align="right">
+      <el-table-column :label="t('deposit.amount')" min-width="140" align="right">
         <template #default="{ row }">
-          <span class="record-list__amount">{{ row.amount }} </span>
+          <span class="record-list__amount">{{ formatMoney(row.amount) }} </span>
           <br/>
           <small style="color:#1D8FB4;font-weight:700;">{{ row.currency.code }}</small>
         </template>
       </el-table-column>
-      <el-table-column prop="txid" label="Txid" min-width="160" show-overflow-tooltip />
-      <el-table-column label="状态" min-width="120">
+      <el-table-column label="Txid" min-width="220"><template #default="{row}"><span class="mono">{{ formatLongIdentifier(row.txid) }}</span></template></el-table-column>
+      <el-table-column :label="t('deposit.status')" min-width="120">
         <template #default="{ row }">
           <StatusBadge
-            :label="row.status_name"
+            :label="statusOptions.find((item) => item.value === row.status)?.label || row.status_name"
             :type="statusMap[row.status as DepositStatus]?.type"
             :effect="statusMap[row.status as DepositStatus]?.effect"
           />
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="110" fixed="right" align="center">
+      <el-table-column :label="t('deposit.actions')" width="110" fixed="right" align="center">
         <template #default="{ row }">
           <el-button plain type="primary" size="small" :icon="View" @click="emit('detail', row.id)">
-            详情
+            {{ t('deposit.details') }}
           </el-button>
         </template>
       </el-table-column>
-    </el-table>
+      </el-table>
 
-    <ResponsiveCardList :items="cardItems" @action="handleCardAction" />
+      <ResponsiveCardList :items="cardItems" @action="handleCardAction" />
 
-    <footer class="record-list__pager">
-      <el-pagination
+      <footer class="record-list__pager">
+        <el-pagination
         layout="prev, pager, next, total"
         :current-page="page"
         :page-size="limit"
         :total="total"
         :hide-on-single-page="total <= limit"
         @current-change="onPage"
-      />
-    </footer>
-  </section>
+        />
+      </footer>
+    </div>
+  </AdminPanel>
 </template>
 
 <script setup lang="ts">
+import { formatMoney } from '@/utils/formatMoney';
+
 /**
  * 入金列表组件
  * - 只负责渲染列表/分页/筛选 UI，业务由 useDepositList 处理；
  * - 筛选条件变更后必须 `resetQuery` 再 `fetchList`，避免在第二页漏请求。
  */
 import { computed } from 'vue';
+import { formatLongIdentifier } from '@/utils/text';
 import { View } from '@element-plus/icons-vue';
+import { useI18n } from 'vue-i18n';
 import type { DepositListParams, DepositOrder } from '@/api/modules/deposit';
 import StatusBadge from '@/components/admin/StatusBadge.vue';
+import AdminPanel from '@/components/admin/AdminPanel.vue';
 import ResponsiveCardList, { type ResponsiveCardItem } from '@/components/common/ResponsiveCardList.vue';
 
 import { DEPOSIT_STATUS_MAP, type DepositStatus } from '@/views/deposit/composables/useDepositList';
@@ -136,21 +128,22 @@ const emit = defineEmits<{
 }>();
 
 const statusMap = DEPOSIT_STATUS_MAP;
-const statusOptions = [
-  { value: 0, label: '待审核' },
-  { value: 1, label: '已入账' },
-  { value: 2, label: '已驳回' },
-];
+const { t } = useI18n();
+const statusOptions = computed(() => [
+  { value: 0, label: t('deposit.statusPending') },
+  { value: 1, label: t('deposit.statusCredited') },
+  { value: 2, label: t('deposit.statusRejected') },
+]);
 
 const cardItems = computed<ResponsiveCardItem[]>(() => props.list.map((row) => ({
   key: String(row.id), title: row.order_no, subtitle: formatTime(row.submitted_at),
-  status: { label: row.status_name, type: statusMap[row.status]?.type, effect: statusMap[row.status]?.effect },
+  status: { label: statusOptions.value.find((item) => item.value === row.status)?.label || row.status_name, type: statusMap[row.status]?.type, effect: statusMap[row.status]?.effect },
   pending: statusMap[row.status]?.effect === 'pending', accent: 'success',
   fields: [
-    { label: '币种 / 网络', value: `${row.currency.code} · ${row.network.code}`, strong: true },
-    { label: '转账金额', value: `${row.amount} ${row.currency.code}`, strong: true },
-    { label: 'Txid', value: row.txid, mono: true },
-  ], actions: [{ key: 'detail', label: '查看详情', icon: View, type: 'primary', plain: true }],
+    { label: t('deposit.currencyNetwork'), value: `${row.currency.code} · ${row.network.code}`, strong: true },
+    { label: t('deposit.amount'), value: `${formatMoney(row.amount)} ${row.currency.code}`, strong: true },
+    { label: 'Txid', value: formatLongIdentifier(row.txid), mono: true },
+  ], actions: [{ key: 'detail', label: t('deposit.viewDetails'), icon: View, type: 'primary', plain: true }],
 })));
 
 const statusFilter = computed<DepositStatus | undefined>({
@@ -205,41 +198,11 @@ function handleCardAction(actionKey: string, itemKey: string) {
 
 <style scoped lang="scss">
 .record-list {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 16px;
-  padding: 24px;
-  border: 1px solid #e5edf3;
-  border-radius: 16px;
-  background: #ffffff;
-  box-shadow: 0 16px 40px rgb(22 34 51 / 5%);
-  &__header {
+  &__body {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  &__title {
-    margin: 0;
-    color: #071833;
-    font-size: 18px;
-  }
-  &__subtitle {
-    margin: 4px 0 0;
-    color: #718197;
-    font-size: 13px;
-  }
-  &__filters {
-    display: grid;
-    gap: 10px;
-
-    > * {
-      min-width: 0;
-    }
-
-    .filter-actions {
-      min-width: max-content;
-    }
+    min-width: 0;
+    flex-direction: column;
+    gap: 16px;
   }
   &__link {
     color: #27b9aa;
@@ -261,18 +224,7 @@ function handleCardAction(actionKey: string, itemKey: string) {
 }
 @include mobile {
   .record-list {
-    padding: 18px 16px;
-    border-radius: 14px;
-  }
-
-  .record-list__header {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .record-list__header .el-button {
-    width: 100%;
+    &__body { padding: 16px; }
   }
 
   .record-list__table { display: none; }
