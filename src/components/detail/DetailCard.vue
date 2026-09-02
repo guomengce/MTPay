@@ -2,10 +2,7 @@
   <section class="detail-card">
     <header class="detail-card__header">
       <span v-if="icon" class="detail-card__icon"><i :class="icon" /></span>
-      <div>
-        <h2>{{ title }}</h2>
-        <p v-if="description">{{ description }}</p>
-      </div>
+      <div><h2>{{ title }}</h2></div>
       <slot name="extra" />
     </header>
     <div class="detail-card__body"><slot /></div>

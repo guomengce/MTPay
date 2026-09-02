@@ -18,22 +18,22 @@ import IdentityBadge from '@/components/admin/IdentityBadge.vue';
 
 defineProps<{
   payerName?: string | null;
-  payerType?: string | null;
+  payerType?: number | string | null;
   payeeName?: string | null;
-  payeeType?: string | null;
+  payeeType?: number | string | null;
 }>();
 </script>
 
 <style scoped lang="scss">
 .withdrawal-party-flow {
   display: grid;
-  width: min(100%, 320px);
+  width: min(100%, 280px);
   min-width: 0;
   align-items: stretch;
   margin: 0 auto;
   padding: 8px 0;
   grid-template-columns: minmax(0, 1fr) 40px minmax(0, 1fr);
-  gap: 8px;
+  gap: 4px;
 
   &__party {
     display: flex;
@@ -63,6 +63,8 @@ defineProps<{
   }
 
   :deep(.status-badge) { height: 24px; padding: 0 9px; font-size: 11px; }
+  &__party:first-child :deep(.status-badge) { transform: translateX(4px); }
+  &__party:last-child :deep(.status-badge) { transform: translateX(-4px); }
 
   &__arrow { align-self: center; justify-self: center; }
 }

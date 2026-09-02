@@ -27,14 +27,18 @@
       </el-form-item>
       <el-form-item :label="t(step === 'email' ? 'withdrawalSecurity.emailCode' : 'withdrawalSecurity.authenticatorCode')" :error="invalid ? t('withdrawalSecurity.codeInvalid') : ''">
         <el-input v-model="code" maxlength="6" inputmode="numeric" autocomplete="one-time-code" :disabled="busy || expired || uncertain">
-          <template v-if="step === 'email'" #append><el-button :disabled="busy || expired || uncertain || resendSeconds > 0" @click="emit('send-email-code')">{{ resendSeconds > 0 ? t('withdrawalSecurity.resendAfter', { seconds: resendSeconds }) : t('withdrawalSecurity.sendCode') }}</el-button></template>
+          <template v-if="step === 'email'" #append><el-button text type="primary" :disabled="busy || expired || uncertain || resendSeconds > 0" @click="emit('send-email-code')">{{ resendSeconds > 0 ? t('withdrawalSecurity.resendAfter', { seconds: resendSeconds }) : t('withdrawalSecurity.sendCode') }}</el-button></template>
         </el-input>
       </el-form-item>
-      <el-button class="security-dialog__step-submit" type="primary" native-type="submit" :loading="busy" :disabled="busy || expired || uncertain">{{ t(step === 'email' ? 'withdrawalSecurity.completeEmail' : 'withdrawalSecurity.completeTwoFactor') }}</el-button>
     </el-form>
     <template #footer>
-      <el-button :disabled="busy" @click="requestClose">{{ t('common.actions.cancel') }}</el-button>
-      <el-button v-if="step === 'overview'" type="primary" :disabled="!ready || busy" :loading="busy" @click="emit('confirm')">{{ t('withdrawalSecurity.submitWithdrawal') }}</el-button>
+      <div class="security-dialog__footer-actions">
+        <el-button :disabled="busy" @click="requestClose">{{ t('common.actions.cancel') }}</el-button>
+        <el-button v-if="step === 'overview'" type="primary" :disabled="!ready || busy" :loading="busy" @click="emit('confirm')">{{ t('withdrawalSecurity.submitWithdrawal') }}</el-button>
+        <el-button v-else type="primary" :loading="busy" :disabled="busy || expired || uncertain" @click="verify">
+          {{ t(step === 'email' ? 'withdrawalSecurity.completeEmail' : 'withdrawalSecurity.completeTwoFactor') }}
+        </el-button>
+      </div>
     </template>
   </el-dialog>
 </template>
@@ -168,9 +172,17 @@ function verify() {
 
 
 
-.security-dialog__step-submit {
+.security-dialog__footer-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
   width: 100%;
-  margin-top: 4px
+}
+
+.security-dialog__footer-actions .el-button {
+  width: 100%;
+  min-height: 40px;
+  margin: 0;
 }
 
 :global(.security-dialog .el-dialog__body) {

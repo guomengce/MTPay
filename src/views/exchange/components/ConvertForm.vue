@@ -4,9 +4,10 @@
       ref="formRef"
       :model="form"
       :rules="rules"
+      :validate-on-rule-change="false"
       label-position="top"
       class="convert-form__form"
-      @submit.prevent
+      @submit.prevent="handleSubmit"
     >
       <section class="convert-form__workspace">
         <article class="convert-form__asset-card is-source">
@@ -71,9 +72,9 @@
       <footer class="convert-form__submit-row">
         <el-button
           type="primary"
+          native-type="submit"
           class="convert-form__action"
           :loading="submitting"
-          @click="handleSubmit"
         >
           {{ t('exchange.confirm') }}
         </el-button>
@@ -111,7 +112,10 @@ const emit = defineEmits<{
 
 const formRef = refHook<FormInstance>();
 const { t } = useI18n();
-const sourceOptions = computed(() => (props.balances ?? []).map((item) => item.currency.code));
+const EXCHANGE_SOURCE_CURRENCIES = new Set(['USDT', 'USDC']);
+const sourceOptions = computed(() => (props.balances ?? [])
+  .map((item) => item.currency.code.toUpperCase())
+  .filter((code) => EXCHANGE_SOURCE_CURRENCIES.has(code)));
 const targetOptions = computed(() => {
   const values = Object.values(props.rates ?? {});
   return [...new Set(values.map((item) => item?.target_currency.code).filter(Boolean))] as string[];

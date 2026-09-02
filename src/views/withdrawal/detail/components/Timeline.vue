@@ -61,7 +61,7 @@
 </template>
 
 <script setup lang="ts">
-/** 出金详情时间线：按 records 原始顺序展示流程与对应轮次附件。 */
+/** 法币出金详情时间线：按 records 原始顺序展示流程与对应轮次附件。 */
 import { Download, View } from '@element-plus/icons-vue';
 import { useI18n } from 'vue-i18n';
 

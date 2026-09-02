@@ -6,6 +6,7 @@
       :disabled="locked || configLoading"
       :model="formState"
       :rules="rules"
+      :validate-on-rule-change="false"
       label-position="top"
       class="apply-form__form"
       @submit.prevent="handleSubmit"
@@ -70,21 +71,21 @@
                   <span class="apply-form__unit">{{ currencyCode }}</span>
                 </template>
               </el-input>
-              <div class="apply-form__balance-tip">
-                <span class="apply-form__maximum">
-                  {{ t('withdrawal.maximum') }} <strong>{{ formatMoney(maximumAmount) }} {{ currencyCode }}</strong>
-                  <small>（{{ t('withdrawal.feeReserved', { fee: formatMoney(formatFixedFee(feeAmount) || '—'), currency: currencyCode }) }}）</small>
-                </span>
-                <el-button
-                  link
-                  type="primary"
-                  :disabled="maximumAmount === '—'"
-                  @click="fillMaximum"
-                >
-                  {{ t('withdrawal.withdrawAll') }}
-                </el-button>
-              </div>
             </el-form-item>
+            <div class="apply-form__balance-tip">
+              <span class="apply-form__maximum">
+                {{ t('withdrawal.maximum') }} <strong>{{ formatMoney(maximumAmount) }} {{ currencyCode }}</strong>
+                <small>（{{ t('withdrawal.feeReserved', { fee: formatMoney(formatFixedFee(feeAmount) || '—'), currency: currencyCode }) }}）</small>
+              </span>
+              <el-button
+                link
+                type="primary"
+                :disabled="maximumAmount === '—'"
+                @click="fillMaximum"
+              >
+                {{ t('withdrawal.withdrawAll') }}
+              </el-button>
+            </div>
           </section>
 
           <section class="apply-form__section is-files">
@@ -140,7 +141,7 @@
             native-type="submit"
             class="apply-form__action"
             :loading="submitting || uploading"
-            :disabled="configLoading || insufficientBalance"
+            :disabled="locked || configLoading || insufficientBalance"
           >
             {{ t('withdrawal.confirmSubmit') }}
           </el-button>
@@ -154,7 +155,7 @@
 import { formatMoney } from '@/utils/formatMoney';
 
 /**
- * 出金申请表单组件
+ * 法币出金申请表单组件
  * - 只负责表单 UI 与事件；
  * - 白名单 / 费率 / 文件规则由父组件传入；
  * - 上传和提交在父组件 useWithdrawalForm 中执行；这里仅做本地收集。
@@ -184,7 +185,7 @@ const props = defineProps<{
   submitting?: boolean;
   locked?: boolean;
   uploading?: boolean;
-  uploadFile?: (file: File) => Promise<WithdrawalFile>;
+  uploadFile?: (file: File, currencyId: number) => Promise<WithdrawalFile>;
 }>();
 
 const emit = defineEmits<{
@@ -252,7 +253,7 @@ const rules: FormRules = {
   payer_whitelist_id: [{ required: true, message: t('withdrawal.selectPayer'), trigger: 'change' }],
   payee_whitelist_id: [{ required: true, message: t('withdrawal.selectPayee'), trigger: 'change' }],
   amount: [
-    { required: true, message: t('withdrawal.amountRequired'), trigger: 'blur' },
+    { required: true, message: t('withdrawal.amountRequired'), trigger: 'change' },
     {
       validator: (_rule, value: string, callback) => {
         const pattern = new RegExp(`^(?!0+(?:\\.0+)?$)\\d{1,20}(?:\\.\\d{1,${currencyScale.value}})?$`);
@@ -286,7 +287,8 @@ async function handleFileChange(file: UploadFile, files: UploadFiles) {
   if (!file.raw || file.status === 'success' || !props.uploadFile) return;
   try {
     file.status = 'uploading';
-    file.response = await props.uploadFile(file.raw);
+    if (formState.currency_id === null) throw new Error('Currency is required');
+    file.response = await props.uploadFile(file.raw, formState.currency_id);
     file.status = 'success';
   } catch {
     file.status = 'fail';
@@ -485,7 +487,7 @@ defineExpose({ reset });
     gap: 10px;
 
     :deep(.el-form-item) {
-      margin-bottom: 0;
+      margin-bottom: 18px;
     }
   }
 
@@ -504,7 +506,7 @@ defineExpose({ reset });
   }
 
   &__amount-field {
-    margin-bottom: 0;
+    margin-bottom: 18px;
   }
 
   &__unit {
@@ -518,7 +520,7 @@ defineExpose({ reset });
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    margin-top: 10px;
+    margin-top: -4px;
     color: #42677a;
     font-size: 14px;
   }
@@ -711,6 +713,16 @@ defineExpose({ reset });
   &__action {
     width: calc(100% - 36px);
     margin: 0 18px 18px;
+
+    &.is-disabled,
+    &.is-disabled:hover,
+    &.is-disabled:focus {
+      border-color: #cbd3dc;
+      color: #fff;
+      background: #aeb8c4;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
   }
 }
 

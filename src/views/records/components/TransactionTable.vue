@@ -1,7 +1,7 @@
 <template>
   <div class="transaction-table">
     <el-table v-loading="loading" :data="data" class="transaction-table__table" stripe>
-      <el-table-column :label="t('records.submittedAt')" min-width="180">
+      <el-table-column :label="t('records.orderNo')" min-width="250" class-name="transaction-order-cell">
         <template #default="{ row }">
           <a class="transaction-table__link" href="javascript:void(0)" @click.prevent="emit('view', row)">
             {{ row.order_no }}
@@ -21,9 +21,9 @@
           <WithdrawalPartyFlow
             v-if="row.business_type === 'withdrawal'"
             :payer-name="row.payer_name"
-            :payer-type="entityTypeLabel(row.payer_entity_type_name, row.payer_entity_type)"
+            :payer-type="row.payer_entity_type ?? entityTypeLabel(row.payer_entity_type_name)"
             :payee-name="row.payee_name"
-            :payee-type="entityTypeLabel(row.payee_entity_type_name, row.payee_entity_type)"
+            :payee-type="row.payee_entity_type ?? entityTypeLabel(row.payee_entity_type_name)"
           />
           <div v-else-if="row.business_type === 'exchange'" class="transaction-table__content is-exchange">
             <div class="transaction-table__exchange-flow">
@@ -58,7 +58,7 @@
           />
         </template>
       </el-table-column>
-      <el-table-column :label="t('records.actions')" min-width="140" fixed="right" align="center">
+      <el-table-column :label="t('records.actions')" min-width="100" fixed="right" align="center">
         <template #default="{ row }">
           <el-button type="primary" plain size="small" :icon="View" @click="emit('view', row)">
             {{ t('records.details') }}
@@ -89,6 +89,7 @@ function businessLabel(type: TransactionItem['business_type']) { return transact
 function statusLabel(row: TransactionItem) { const key = row.status_group === 'needs_supplement' ? 'supplement' : row.status_group; return t(`records.${key}`); }
 
 function contentLabel(row: TransactionItem) {
+  if (row.business_type === 'manual_increase' || row.business_type === 'manual_decrease') return '—';
   if (row.business_type === 'deposit') {
     return [row.currency_code, row.network_code].filter(Boolean).join(' · ');
   }
@@ -101,8 +102,8 @@ function contentLabel(row: TransactionItem) {
   return [row.payer_name, row.payee_name].filter(Boolean).join(' → ');
 }
 
-function entityTypeLabel(name?: string | null, type?: 1 | 2 | null) {
-  return name || (type === 1 ? t('records.company') : type === 2 ? t('records.individual') : undefined);
+function entityTypeLabel(name?: string | null) {
+  return name || undefined;
 }
 
 function amountLabel(row: TransactionItem) {
@@ -112,7 +113,7 @@ function amountLabel(row: TransactionItem) {
 function statusType(row: TransactionItem): StatusBadgeType {
   const group = row.status_group;
   if (group === 'completed') return 'success';
-  if (group === 'rejected') return 'danger';
+  if (group === 'rejected' || group === 'cancelled') return 'danger';
   if (group === 'failed') return 'gray';
   if (group === 'processing') return 'primary';
   return 'warning';
@@ -124,6 +125,11 @@ function statusEffect(row: TransactionItem) {
     : undefined;
 }
 </script>
+
+<style scoped lang="scss">
+:deep(.transaction-order-cell .cell) { white-space: nowrap; }
+.transaction-table__link { display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;vertical-align:bottom;white-space:nowrap }
+</style>
 
 <style scoped lang="scss">
 .transaction-table {

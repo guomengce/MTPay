@@ -1,7 +1,7 @@
 <template>
   <main class="transaction-detail">
     <el-button plain :icon="Back" @click="goBack">{{ t('records.back') }}</el-button>
-    <div class="transaction-detail__content">
+    <div v-loading="loading" class="transaction-detail__content">
       <DepositDetailContent v-if="depositDetail" :detail="depositDetail" />
       <ExchangeDetailContent v-else-if="exchangeDetail" :detail="exchangeDetail" />
       <WithdrawalDetailContent v-else-if="withdrawalDetail" :detail="withdrawalDetail" :file-loading="fileLoading" @preview="openPreview" @download="triggerDownload" />

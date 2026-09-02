@@ -2,9 +2,12 @@ import { getLoginChallenge, clearLoginChallenge } from '@/utils/loginChallenge';
 import router from '@/router';
 import { useAuthStore } from '@/stores/modules/auth';
 import { usePageLoadingStore } from '@/stores/modules/pageLoading';
+import { fetchAgentProfile } from '@/api/modules/auth';
 
-router.beforeEach((to) => {
-  usePageLoadingStore().startRoute();
+let initialNavigation = true;
+
+router.beforeEach(async (to) => {
+  if (initialNavigation) usePageLoadingStore().startRoute();
   const authStore = useAuthStore();
   if ((to.name === 'Login' || to.name === 'TwoFactor') && authStore.isLoggedIn) {
     return { path: '/dashboard', replace: true };
@@ -19,11 +22,21 @@ router.beforeEach((to) => {
       replace: true,
     };
   }
+  if(to.meta?.requiresAuth&&authStore.isLoggedIn&&!authStore.profileReady){const result=await fetchAgentProfile();authStore.setUserInfo({id:String(result.id),name:result.company_name,role:'agent',agentCode:result.agent_code,companyName:result.company_name,email:result.email,phone:result.phone,status:result.status,statusName:result.status_name,activatedAt:result.activated_at,lastLoginAt:result.last_login_at,cryptoEnabled:Boolean(result.crypto_enabled)});}
+  if(to.meta?.cryptoOnly&&!authStore.cryptoEnabled)return{path:'/dashboard',replace:true};
 
   if (to.name === 'TwoFactor' && !getLoginChallenge()) return { name: 'Login', replace: true };
   if (to.name !== 'TwoFactor') clearLoginChallenge();
   return true;
 });
 
-router.afterEach(() => usePageLoadingStore().finishRoute());
-router.onError(() => usePageLoadingStore().finishRoute());
+router.afterEach(() => {
+  if (!initialNavigation) return;
+  initialNavigation = false;
+  usePageLoadingStore().finishRoute();
+});
+router.onError(() => {
+  if (!initialNavigation) return;
+  initialNavigation = false;
+  usePageLoadingStore().finishRoute();
+});

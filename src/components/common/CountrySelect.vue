@@ -50,8 +50,8 @@ const props = withDefaults(
 );
 
 const model = defineModel<string>({ default: '' });
-const { locale, t } = useI18n();
-const localizedCountries = computed(() => getLocalizedCountryOptions(locale.value));
+const { t } = useI18n();
+const localizedCountries = computed(() => getLocalizedCountryOptions());
 const visibleCountries = ref(localizedCountries.value);
 const selectPlaceholder = computed(() => props.placeholder || t('country.placeholder'));
 

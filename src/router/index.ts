@@ -9,7 +9,7 @@ export const routes: RouteRecordRaw[] = [
     name: 'Login',
     component: () => import('@/views/auth/login/index.vue'),
     meta: {
-      title: '登录',
+      title: 'routeTitles.login',
       icon: '',
       requiresAuth: false,
       hidden: true,
@@ -20,7 +20,7 @@ export const routes: RouteRecordRaw[] = [
     name: 'Activate',
     component: () => import('@/views/auth/activate/index.vue'),
     meta: {
-      title: '激活账户',
+      title: 'routeTitles.activate',
       icon: '',
       requiresAuth: false,
       hidden: true,
@@ -36,7 +36,7 @@ export const routes: RouteRecordRaw[] = [
     name: 'ForgotPassword',
     component: () => import('@/views/auth/forgot-password/index.vue'),
     meta: {
-      title: '找回密码',
+      title: 'routeTitles.forgotPassword',
       icon: '',
       requiresAuth: false,
       hidden: true,
@@ -47,7 +47,7 @@ export const routes: RouteRecordRaw[] = [
     name: 'ResetPassword',
     component: () => import('@/views/auth/reset-password/index.vue'),
     meta: {
-      title: '重置密码',
+      title: 'routeTitles.resetPassword',
       icon: '',
       requiresAuth: false,
       hidden: true,
@@ -70,7 +70,7 @@ export const routes: RouteRecordRaw[] = [
     name: 'Forbidden',
     component: () => import('@/views/error/403.vue'),
     meta: {
-      title: '无权限',
+      title: 'routeTitles.forbidden',
       icon: '',
       requiresAuth: false,
       hidden: true,
@@ -81,7 +81,7 @@ export const routes: RouteRecordRaw[] = [
     name: 'NotFound',
     component: () => import('@/views/error/404.vue'),
     meta: {
-      title: '页面不存在',
+      title: 'routeTitles.notFound',
       icon: '',
       requiresAuth: false,
       hidden: true,

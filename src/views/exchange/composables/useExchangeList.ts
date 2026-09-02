@@ -11,9 +11,9 @@ import type { ExchangeListParams, ExchangeOrder, ExchangePageResult } from '@/ap
 
 /** 模块外的状态映射，便于组件按 status 取 label / type。 */
 export const EXCHANGE_STATUS_MAP = {
-  0: { label: '待审核', type: 'warning' as const, effect: 'pending' as const },
-  1: { label: '已完成', type: 'success' as const, effect: undefined },
-  2: { label: '已驳回', type: 'danger' as const, effect: undefined },
+  0: { type: 'warning' as const, effect: 'pending' as const },
+  1: { type: 'success' as const, effect: undefined },
+  2: { type: 'danger' as const, effect: undefined },
 } as const;
 
 export type ExchangeStatus = 0 | 1 | 2;

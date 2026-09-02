@@ -11,10 +11,7 @@
     <template #header>
       <div class="withdrawal-supplement-dialog__header">
         <span class="withdrawal-supplement-dialog__icon"><i class="ri-file-upload-line" /></span>
-        <div>
-          <h2>{{ t('withdrawal.supplementTitle') }}</h2>
-          <p>{{ t('withdrawal.supplementDesc') }}</p>
-        </div>
+        <h2>{{ t('withdrawal.supplementTitle') }}</h2>
       </div>
     </template>
 
@@ -63,7 +60,6 @@
 
     <template #footer>
       <div class="withdrawal-supplement-dialog__footer">
-        <span><i class="ri-lock-line" /> {{ t('withdrawal.secureUpload') }}</span>
         <div>
           <el-button @click="close">{{ t('common.actions.cancel') }}</el-button>
           <el-button type="primary" :loading="submitting || uploading" @click="submit">
@@ -76,8 +72,8 @@
 </template>
 
 <script setup lang="ts">
-/** 出金补件弹框，在记录列表与详情页面共用。 */
-/** 出金补件弹框：只收集文件与说明，接口调用由页面级逻辑统一处理。 */
+/** 法币出金补件弹框，在记录列表与详情页面共用。 */
+/** 法币出金补件弹框：只收集文件与说明，接口调用由页面级逻辑统一处理。 */
 import { ref, watch } from 'vue';
 import { ElMessage } from 'element-plus';
 import type { UploadFile, UploadFiles, UploadUserFile } from 'element-plus';

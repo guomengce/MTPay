@@ -10,4 +10,5 @@ export interface UserInfo {
   statusName: string;
   activatedAt: string | null;
   lastLoginAt: string | null;
+  cryptoEnabled: boolean;
 }

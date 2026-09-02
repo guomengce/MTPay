@@ -103,11 +103,12 @@
 
     <footer class="record-list__pager">
       <el-pagination
-        layout="prev, pager, next, total"
+        class="app-pagination"
+        layout="total, prev, pager, next"
+        background
         :current-page="page"
         :page-size="limit"
         :total="total"
-        :hide-on-single-page="total <= limit"
         @current-change="onPage"
       />
     </footer>
@@ -119,7 +120,7 @@
 import { formatMoney } from '@/utils/formatMoney';
 
 /**
- * 出金列表组件
+ * 法币出金列表组件
  * - 只负责 UI；业务由 useWithdrawalList 处理；
  * - 字段保留字符串展示，不做数值换算。
  */

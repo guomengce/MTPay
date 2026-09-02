@@ -1,7 +1,8 @@
 <template>
   <main class="fiat-page">
-    <AdminHero title="法币入金" icon="ri-bank-card-line" />
+    <AdminHero :title="t('fiatDeposit.title')" icon="ri-bank-card-line" />
     <FiatDepositForm
+      ref="formComponent"
       :currencies="currencies"
       :file-rules="fileRules"
       :submitting="submitting"
@@ -28,6 +29,7 @@
 import { onMounted, ref } from 'vue';
 import { ElMessage } from 'element-plus';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import AdminHero from '@/components/admin/AdminHero.vue';
 import {
   fetchFiatConfig,
@@ -42,6 +44,8 @@ import {
 import FiatDepositForm from './components/FiatDepositForm.vue';
 import FiatDepositList from './components/FiatDepositList.vue';
 const router = useRouter();
+const { t } = useI18n();
+const formComponent = ref<InstanceType<typeof FiatDepositForm>>();
 const currencies = ref<FiatCurrency[]>([]);
 const fileRules = ref<FiatFileRules>();
 const list = ref<FiatOrder[]>([]);
@@ -88,9 +92,11 @@ function detail(id: number) {
 async function submit(payload: FiatSubmit) {
   submitting.value = true;
   try {
-    const result = await submitFiatDeposit(payload);
-    ElMessage.success('法币入金申请已提交');
-    await router.push({ name: 'FiatDepositDetail', params: { id: result.id } });
+    await submitFiatDeposit(payload);
+    ElMessage.success(t('fiatDeposit.submitted'));
+    formComponent.value?.reset();
+    page.value = 1;
+    await load();
   } finally {
     submitting.value = false;
   }

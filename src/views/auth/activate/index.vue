@@ -1,5 +1,6 @@
-﻿<template>
+<template>
   <main class="activate-page">
+    <LanguageSwitcher class="public-language" />
     <div class="activate-page__glow activate-page__glow--one" />
     <div class="activate-page__glow activate-page__glow--two" />
 
@@ -9,13 +10,13 @@
           <span class="activate-card__success"
             ><el-icon><CircleCheckFilled /></el-icon
           ></span>
-          <h1>账户激活成功</h1>
-          <p>{{ activatedProfile.company_name }}，您的账户已经可以正常使用。</p>
+          <h1>{{ t('publicAuth.activationSuccess') }}</h1>
+          <p>{{ t('publicAuth.activationSuccessDescription', { company: activatedProfile.company_name }) }}</p>
           <div class="activate-card__account">
-            <small>登录 Email</small>
+            <small>{{ t('publicAuth.loginEmail') }}</small>
             <strong>{{ activatedProfile.email }}</strong>
           </div>
-          <el-button type="primary" @click="goLogin">前往登录</el-button>
+          <el-button type="primary" @click="goLogin">{{ t('publicAuth.goToLogin') }}</el-button>
         </div>
       </template>
 
@@ -24,9 +25,9 @@
           <span class="activate-card__invalid"
             ><el-icon><WarningFilled /></el-icon
           ></span>
-          <h1>激活链接无效</h1>
-          <p>链接缺少有效 Token，请检查邮件中的完整链接，或联系平台管理员重新发送激活邮件。</p>
-          <el-button plain @click="goLogin">返回登录页</el-button>
+          <h1>{{ t('publicAuth.activationInvalid') }}</h1>
+          <p>{{ t('publicAuth.activationInvalidDescription') }}</p>
+          <el-button plain @click="goLogin">{{ t('publicAuth.backToLoginPage') }}</el-button>
         </div>
       </template>
 
@@ -35,40 +36,39 @@
           <span class="activate-card__shield"
             ><el-icon><Lock /></el-icon
           ></span>
-          <div>
-            <h1>激活代理账户</h1>
-            <p>设置登录密码，完成账户激活</p>
+
+
+            <h1>{{ t('publicAuth.activateTitle') }}</h1>
           </div>
-        </div>
 
         <el-alert class="activate-card__notice" type="info" :closable="false" show-icon>
-          激活链接仅供当前账户使用，请勿转发给其他人。
+          {{ t('publicAuth.activateNotice') }}
         </el-alert>
 
-        <el-form ref="formRef" :model="form" :rules="rules" label-position="top" @submit.prevent>
-          <el-form-item label="设置密码" prop="password">
+        <el-form ref="formRef" :model="form" :rules="rules" :validate-on-rule-change="false" label-position="top" @submit.prevent>
+          <el-form-item :label="t('publicAuth.password')" prop="password">
             <el-input
               v-model="form.password"
               type="password"
               show-password
               autocomplete="new-password"
-              placeholder="请输入 8–20 位密码"
+              :placeholder="t('publicAuth.passwordPlaceholder')"
               :prefix-icon="Lock"
             />
           </el-form-item>
           <div class="activate-card__rules">
-            <span :class="{ passed: passwordChecks.length }">8–20 位</span>
-            <span :class="{ passed: passwordChecks.upper }">大写字母</span>
-            <span :class="{ passed: passwordChecks.lower }">小写字母</span>
-            <span :class="{ passed: passwordChecks.number }">数字</span>
+            <span :class="{ passed: passwordChecks.length }">{{ t('publicAuth.passwordLength') }}</span>
+            <span :class="{ passed: passwordChecks.upper }">{{ t('publicAuth.uppercase') }}</span>
+            <span :class="{ passed: passwordChecks.lower }">{{ t('publicAuth.lowercase') }}</span>
+            <span :class="{ passed: passwordChecks.number }">{{ t('publicAuth.number') }}</span>
           </div>
-          <el-form-item label="确认密码" prop="password_confirmation">
+          <el-form-item :label="t('publicAuth.confirmPassword')" prop="password_confirmation">
             <el-input
               v-model="form.password_confirmation"
               type="password"
               show-password
               autocomplete="new-password"
-              placeholder="请再次输入密码"
+              :placeholder="t('publicAuth.confirmPasswordPlaceholder')"
               :prefix-icon="Key"
               @keyup.enter="submitActivation"
             />
@@ -79,7 +79,7 @@
             :loading="submitting"
             @click="submitActivation"
           >
-            激活账户
+            {{ t('publicAuth.activateAccount') }}
           </el-button>
         </el-form>
       </template>
@@ -90,9 +90,11 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import type { FormInstance, FormRules } from 'element-plus';
 import { CircleCheck, CircleCheckFilled, Key, Lock, WarningFilled } from '@element-plus/icons-vue';
 import { activateAgent, type AgentProfile } from '@/api/modules/auth';
+import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue';
 
 interface ActivateForm {
   password: string;
@@ -101,6 +103,7 @@ interface ActivateForm {
 
 const route = useRoute();
 const router = useRouter();
+const { t } = useI18n();
 const token = computed(() =>
   typeof route.query.token === 'string' ? route.query.token.trim() : '',
 );
@@ -118,24 +121,24 @@ const passwordChecks = computed(() => ({
   number: /\d/.test(form.password),
 }));
 
-const rules: FormRules<ActivateForm> = {
+const rules = computed<FormRules<ActivateForm>>(() => ({
   password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
+    { required: true, message: t('publicAuth.passwordRequired'), trigger: 'blur' },
     {
       pattern: passwordPattern,
-      message: '密码必须为 8–20 位，并包含大写字母、小写字母和数字',
+      message: t('publicAuth.passwordInvalid'),
       trigger: 'blur',
     },
   ],
   password_confirmation: [
-    { required: true, message: '请再次输入密码', trigger: 'blur' },
+    { required: true, message: t('publicAuth.confirmPasswordRequired'), trigger: 'blur' },
     {
       validator: (_rule, value, callback) =>
-        value === form.password ? callback() : callback(new Error('两次输入的密码不一致')),
+        value === form.password ? callback() : callback(new Error(t('publicAuth.passwordMismatch'))),
       trigger: 'blur',
     },
   ],
-};
+}));
 
 /** 使用 URL 查询参数中的 Token 调用真实激活接口，不保存登录态。 */
 async function submitActivation() {
@@ -191,6 +194,7 @@ function goLogin() {
     background: #499cf2;
   }
 }
+.public-language { position: absolute; z-index: 2; top: 22px; right: 28px; }
 .activate-card {
   position: relative;
   z-index: 1;

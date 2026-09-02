@@ -6,6 +6,17 @@
     />
 
     <section class="withdrawal-page__content">
+      <section v-if="twoFactorEnabled === false" class="withdrawal-security-gate" role="alert">
+        <span class="withdrawal-security-gate__icon"><i class="ri-shield-keyhole-line" /></span>
+        <div class="withdrawal-security-gate__copy">
+          <strong>{{ t('withdrawal.twoFactorRequiredTitle') }}</strong>
+          <p>{{ t('withdrawal.twoFactorRequiredDescription') }}</p>
+        </div>
+        <el-button type="danger" plain @click="openSecuritySettings">
+          {{ t('withdrawal.enableTwoFactor') }}
+          <i class="ri-arrow-right-line" />
+        </el-button>
+      </section>
       <el-alert v-if="securityError && !securityDialogVisible" :title="securityError" type="error" :closable="false" />
       <ApplyForm
         ref="applyFormRef"
@@ -15,7 +26,7 @@
         :file-rules="config?.file_rules"
         :config-loading="configLoading"
         :submitting="securityBusy"
-        :locked="securityLocked"
+        :locked="securityLocked || twoFactorEnabled !== true"
         :uploading="withdrawalUploading"
         :upload-file="uploadWithdrawalFile"
         @submit="handleSubmit"
@@ -58,7 +69,7 @@
 
 <script setup lang="ts">
 /**
- * 出金页面（代理端）
+ * 法币出金页面（代理端）
  * - 提交与列表通过 useWithdrawalManagement 串联；
  * - 详情与补件统一进入独立详情页处理。
  */
@@ -74,6 +85,7 @@ import type {
 } from '@/api/modules/withdrawal';
 import AdminHero from '@/components/admin/AdminHero.vue';
 import { usePageLoading } from '@/composables/usePageLoading';
+import { getTwoFactorStatus } from '@/api/modules/twoFactor';
 import ApplyForm from './components/ApplyForm.vue';
 import RecordList from './components/RecordList.vue';
 import SupplementDialog from './components/SupplementDialog.vue';
@@ -110,13 +122,13 @@ const applyFormRef = ref<InstanceType<typeof ApplyForm>>();
 const supplementDialogVisible = ref(false);
 const supplementItem = ref<WithdrawalOrder | null>(null);
 const supplementRequirement = ref('');
+const twoFactorEnabled = ref<boolean | null>(null);
 const {
   visible: securityDialogVisible, busy: securityBusy, locked: securityLocked, email: securityEmail,
   emailVerified, twoFactorVerified, expired: securityExpired, uncertain: securityUncertain,
   error: securityError, resendSeconds, ready: securityReady,
-  begin: handleSubmit, sendEmail, verify: verifySecurity, close: closeSecurity, submit: submitSecurity,
+  begin: beginSecurity, sendEmail, verify: verifySecurity, close: closeSecurity, submit: submitSecurity,
 } = useWithdrawalSecurity({
-  fee: (currencyId) => currencyOptions.value.find((item) => item.currency.id === currencyId)?.fee_amount,
   refresh: async () => { await Promise.all([loadConfig(true), fetchList()]); },
   completed: async () => {
     applyFormRef.value?.reset();
@@ -124,6 +136,15 @@ const {
     await Promise.all([loadConfig(true), fetchList()]);
   },
 });
+
+function handleSubmit(payload: Parameters<typeof beginSecurity>[0]) {
+  if (twoFactorEnabled.value !== true) return;
+  beginSecurity(payload);
+}
+
+function openSecuritySettings() {
+  void router.push({ name: 'Account', hash: '#two-factor-settings' });
+}
 
 function openDetail(id: number) {
   void router.push({ name: 'WithdrawalDetail', params: { id } });
@@ -189,7 +210,10 @@ function handleQueryChange(patch: Partial<WithdrawalListParams>) {
 }
 
 onMounted(async () => {
-  await Promise.all([loadConfig(true), fetchList()]);
+  const statusPromise = getTwoFactorStatus()
+    .then((enabled) => { twoFactorEnabled.value = enabled; })
+    .catch(() => { twoFactorEnabled.value = false; });
+  await Promise.all([loadConfig(true), fetchList(), statusPromise]);
 });
 const { t } = useI18n();
 </script>
@@ -212,6 +236,36 @@ const { t } = useI18n();
   }
 }
 
+.withdrawal-security-gate {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 17px 20px;
+  border: 1px solid #f3b8bd;
+  border-left: 4px solid #dc3d51;
+  border-radius: 15px;
+  background: linear-gradient(105deg, #fff3f4 0%, #fff 72%);
+  box-shadow: 0 10px 28px rgb(190 48 66 / 8%);
+
+  &__icon {
+    display: grid;
+    width: 46px;
+    height: 46px;
+    place-items: center;
+    border-radius: 13px;
+    color: #fff;
+    background: linear-gradient(135deg, #f06474, #c92e43);
+    font-size: 22px;
+    box-shadow: 0 8px 18px rgb(201 46 67 / 20%);
+  }
+
+  &__copy { min-width: 0; }
+  strong { color: #a92134; font-size: 15px; }
+  p { margin: 5px 0 0; color: #83535a; font-size: 13px; line-height: 1.55; }
+  .el-button { margin: 0; }
+}
+
 @include narrow {
   .withdrawal-page,
   .withdrawal-page__content {
@@ -223,6 +277,13 @@ const { t } = useI18n();
   .withdrawal-page,
   .withdrawal-page__content {
     gap: 16px;
+  }
+
+  .withdrawal-security-gate {
+    grid-template-columns: 42px minmax(0, 1fr);
+    padding: 15px;
+    &__icon { width: 40px; height: 40px; border-radius: 11px; }
+    .el-button { grid-column: 1 / -1; width: 100%; }
   }
 }
 </style>

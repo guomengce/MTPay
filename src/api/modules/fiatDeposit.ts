@@ -106,11 +106,13 @@ export function previewFiatFile(file_id: number) {
   return request.get<unknown, Blob>('/web/previewFiatDepositFile', {
     params: { file_id },
     responseType: 'blob',
+    timeout: 120_000,
   });
 }
 export function downloadFiatFile(file_id: number) {
   return request.get<unknown, Blob>('/web/downloadFiatDepositFile', {
     params: { file_id },
     responseType: 'blob',
+    timeout: 120_000,
   });
 }

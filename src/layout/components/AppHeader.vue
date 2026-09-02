@@ -10,7 +10,7 @@
         <el-icon><component :is="appStore.sidebarCollapsed ? Expand : Fold" /></el-icon>
       </button>
 
-      <nav class="app-header__crumb" aria-label="面包屑">
+      <nav class="app-header__crumb" :aria-label="t('ui.breadcrumb')">
         <template v-for="(item, index) in breadcrumbs" :key="item.path">
           <span
             v-if="index === breadcrumbs.length - 1"
@@ -74,7 +74,7 @@ import {
   SwitchButton,
   User,
 } from '@element-plus/icons-vue';
-import { computed } from 'vue';
+import { computed, onBeforeUnmount, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 
@@ -121,8 +121,17 @@ const userInitial = computed(() => {
   return name ? name.charAt(0).toUpperCase() : 'U';
 });
 
-const { unreadCount } = useNotifications();
+const { unreadCount, loadUnreadCount } = useNotifications();
 const hasUnread = computed(() => unreadCount.value > 0);
+let notificationTimer: ReturnType<typeof setInterval> | undefined;
+
+onMounted(() => {
+  void loadUnreadCount();
+  notificationTimer = setInterval(() => void loadUnreadCount(), 5_000);
+});
+onBeforeUnmount(() => {
+  if (notificationTimer) clearInterval(notificationTimer);
+});
 
 function handleAgentEntry() {
   router.push('/dashboard').catch(() => undefined);

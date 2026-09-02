@@ -35,7 +35,7 @@ defineProps<{
 .detail-order-hero {
   position: relative;
   min-width: 0;
-  padding: 24px 28px;
+  padding: 24px;
   overflow: hidden;
   border: 1px solid #dbe8f1;
   border-radius: 18px;
@@ -76,13 +76,19 @@ defineProps<{
   }
 
   &__meta {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 12px 28px;
+    display: grid;
+    min-width: 0;
+    align-items: start;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px 36px;
     margin-top: 22px;
     padding-top: 18px;
     border-top: 1px solid #e4edf3;
+
+    :deep(.meta) { min-width: 0; gap: 5px; }
+    :deep(.meta small) { color: #718399; font-size: 13px; line-height: 1.4; }
+    :deep(.meta strong) { color: #20364e; font-size: 15px; font-weight: 650; line-height: 1.5; overflow-wrap: anywhere; }
+    :deep(.meta span) { color: #718399; font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
   }
 }
 

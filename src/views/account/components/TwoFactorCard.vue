@@ -1,5 +1,5 @@
 <template>
-  <article v-loading="busy" class="two-factor-settings">
+  <article id="two-factor-settings" v-loading="busy" class="two-factor-settings">
       <header class="two-factor-settings__heading">
         <span class="two-factor-settings__icon"><el-icon><Lock /></el-icon></span>
         <h2>{{ t('twoFactorSettings.title') }}</h2>
@@ -13,6 +13,15 @@
       <template v-else-if="setup">
         <div class="two-factor-settings__setup">
           <QrcodeVue :value="setup.otpauth_uri" :size="180" level="M" :aria-label="t('twoFactorSettings.qrCode')" />
+        </div>
+        <div class="two-factor-settings__manual-key">
+          <label>{{ t('twoFactorSettings.manualKey') }}</label>
+          <div class="two-factor-settings__manual-key-row">
+            <span :title="setup.manual_key">{{ setup.manual_key }}</span>
+            <el-button type="primary" :disabled="busy" @click="copyManualKey">
+              {{ t('common.actions.copy') }}
+            </el-button>
+          </div>
         </div>
       </template>
       <el-form v-if="setup || disabling" label-position="top" @submit.prevent="submit">
@@ -37,7 +46,7 @@
 <script setup lang="ts">
 import { onMounted, onBeforeUnmount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { ElMessageBox } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import { Lock } from '@element-plus/icons-vue';
 import QrcodeVue from 'qrcode.vue';
 import { useAuthStore } from '@/stores/modules/auth';
@@ -53,6 +62,15 @@ const error = ref(false);
 const invalid = ref(false);
 const disabling = ref(false);
 let generation = 0;
+async function copyManualKey() {
+  if (!setup.value?.manual_key) return;
+  try {
+    await navigator.clipboard.writeText(setup.value.manual_key);
+    ElMessage.success(t('twoFactorSettings.manualKeyCopied'));
+  } catch {
+    ElMessage.warning(t('twoFactorSettings.manualKeyCopyFailed'));
+  }
+}
 function cancel() { setup.value = null; code.value = ''; disabling.value = false; invalid.value = false; }
 function reset() { generation++; cancel(); enabled.value = null; busy.value = false; error.value = false; }
 async function run(action: (current: () => boolean) => Promise<void>) {
@@ -119,7 +137,7 @@ onBeforeUnmount(reset);
     align-items: center;
     padding: 22px 24px;
     .el-alert { margin-bottom: 20px; }
-    .el-form { margin-top: 24px; width: 100%; max-width: 440px; }
+    .el-form { margin-top: 18px; width: 100%; max-width: 620px; }
   }
   &__heading, &__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
   &__heading {
@@ -136,6 +154,33 @@ onBeforeUnmount(reset);
   }
   &__actions { justify-content: center; margin-top: 24px; .el-button { margin: 0; height: auto; min-height: 36px; white-space: normal; } }
   &__setup { display: flex; justify-content: center; padding: 20px 0; }
-  @media (max-width: 600px) { &__body, &__heading { padding: 20px; } }
+  &__manual-key {
+    width: 100%;
+    max-width: 620px;
+    label { display: block; margin-bottom: 8px; color: #4f647d; font-size: 13px; }
+  }
+  &__manual-key-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    span {
+      min-width: 0;
+      padding: 13px 14px;
+      overflow: hidden;
+      border: 1px solid #cbd9e6;
+      border-radius: 10px;
+      background: #fff;
+      color: #24364d;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .el-button { min-height: 46px; margin: 0; padding-inline: 22px; }
+  }
+  @media (max-width: 600px) {
+    &__body, &__heading { padding: 20px; }
+    &__manual-key-row { grid-template-columns: 1fr; }
+    &__manual-key-row .el-button { width: 100%; }
+  }
 }
 </style>

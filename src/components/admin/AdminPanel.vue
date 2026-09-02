@@ -5,10 +5,7 @@
         <span v-if="icon" class="admin-panel__icon">
           <el-icon><component :is="icon" /></el-icon>
         </span>
-        <div>
-          <h2 v-if="title">{{ title }}</h2>
-          <p v-if="subtitle">{{ subtitle }}</p>
-        </div>
+        <h2 v-if="title">{{ title }}</h2>
       </div>
       <div v-if="$slots.extra" class="admin-panel__extra">
         <slot name="extra" />

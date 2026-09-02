@@ -53,7 +53,7 @@ const { t } = useI18n();
   &__item {
     display: grid;
     min-width: 0;
-    grid-template-columns: minmax(92px, 0.42fr) minmax(0, 1fr);
+    grid-template-columns: 150px minmax(0, 1fr);
     align-items: start;
     gap: 14px;
     padding: 14px 0;

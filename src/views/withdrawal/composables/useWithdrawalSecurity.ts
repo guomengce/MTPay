@@ -1,10 +1,10 @@
 import { computed, onBeforeUnmount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { ElMessage } from 'element-plus';
 import { useAuthStore } from '@/stores/modules/auth';
 import * as api from '@/api/modules/withdrawal';
 
 export function useWithdrawalSecurity(options: {
-  fee: (currencyId?: number) => string | undefined;
   refresh: () => Promise<unknown>;
   completed: (order: api.WithdrawalOrderDetail) => Promise<void>;
 }) {
@@ -22,7 +22,6 @@ export function useWithdrawalSecurity(options: {
   const locked = computed(() => visible.value || busy.value);
   const ready = computed(() => emailVerified.value && twoFactorVerified.value && !expired.value && !uncertain.value);
   let payload: api.SubmitWithdrawalPayload | null = null;
-  let originalFee: string | undefined;
   let expiresAt = 0;
   let resendAt = 0;
   let emailExpiresAt = 0;
@@ -48,7 +47,6 @@ export function useWithdrawalSecurity(options: {
     reset(); busy.value = true;
     // Copy arrays too: later form mutations must never change this challenge's draft.
     const snapshot = { ...draft, file_ids: [...draft.file_ids] };
-    originalFee = options.fee(snapshot.currency_id);
     try {
       const challenge = await api.createWithdrawalSecurityChallenge(snapshot);
       if (!current()) {
@@ -76,18 +74,6 @@ export function useWithdrawalSecurity(options: {
     catch (failure) {
       if (!current()) return;
       error.value = failure instanceof Error ? failure.message : t('withdrawalSecurity.failed');
-      // A fee change invalidates the bound challenge; refresh before allowing a new attempt.
-      try {
-        await options.refresh();
-        if (current() && options.fee(payload.currency_id) !== originalFee) {
-          expired.value = true; emailVerified.value = false; twoFactorVerified.value = false;
-          error.value = t('withdrawalSecurity.changed');
-          if (payload && !uncertain.value) {
-            await cancelChallenge(payload.security_challenge);
-            if (current()) { reset(); error.value = t('withdrawalSecurity.changed'); }
-          }
-        }
-      } catch { /* Preserve original failure; cancelling also refreshes config. */ }
     } finally { if (active) busy.value = false; }
   }
   async function sendEmail() {
@@ -95,8 +81,10 @@ export function useWithdrawalSecurity(options: {
     await run(async () => {
       const result = await api.sendWithdrawalEmailCode(requestPayload());
       if (!current()) return;
-      if (!Number.isFinite(result.expires_in) || result.expires_in <= 0) throw Error(t('withdrawalSecurity.invalidResponse'));
-      resendAt = Date.now() + 60000; emailExpiresAt = Date.now() + result.expires_in * 1000; tick();
+      const expiresIn = Number(result.expires_in);
+      if (!Number.isFinite(expiresIn) || expiresIn <= 0) throw Error(t('withdrawalSecurity.invalidResponse'));
+      resendAt = Date.now() + 60000; emailExpiresAt = Date.now() + expiresIn * 1000; tick();
+      ElMessage.success(t('withdrawalSecurity.emailCodeSent'));
     });
   }
   async function verify(kind: 'email' | 'twoFactor', code: string) {
@@ -112,24 +100,14 @@ export function useWithdrawalSecurity(options: {
       else throw Error(t('withdrawalSecurity.invalidResponse'));
     });
   }
-  async function close() {
+  function close() {
     if (busy.value || !current()) return;
-    busy.value = true;
-    try {
-      if (payload) {
-        try { await cancelChallenge(payload.security_challenge); }
-        catch (failure) { if (!uncertain.value) throw failure; }
-        payload = null;
-        emailVerified.value = false;
-        twoFactorVerified.value = false;
-        expired.value = true;
-        clearInterval(timer);
-      }
-      await options.refresh();
-      if (current()) reset();
-    } catch (failure) {
-      if (current()) error.value = failure instanceof Error ? failure.message : t('withdrawalSecurity.failed');
-    } finally { if (active) busy.value = false; }
+    const challenge = payload?.security_challenge;
+    const shouldCancel = Boolean(challenge && !uncertain.value);
+    reset();
+    if (shouldCancel && challenge && auth.userInfo?.id === owner && auth.token) {
+      void cancelChallenge(challenge).catch(() => undefined);
+    }
   }
   async function submit() {
     if (!ready.value) return;

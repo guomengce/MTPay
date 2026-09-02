@@ -189,6 +189,7 @@ export function previewWhitelistFile(fileId: number) {
   return request.get<unknown, AxiosResponse<Blob>>('/web/previewWhitelistFile', {
     params: { file_id: fileId },
     responseType: 'blob',
+    timeout: 120_000,
   });
 }
 
@@ -197,5 +198,6 @@ export function downloadWhitelistFile(fileId: number) {
   return request.get<unknown, AxiosResponse<Blob>>('/web/downloadWhitelistFile', {
     params: { file_id: fileId },
     responseType: 'blob',
+    timeout: 120_000,
   });
 }

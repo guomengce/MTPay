@@ -95,7 +95,7 @@ function recentTransaction(row: TransactionItem): RecentTransactionItem {
 }
 
 export function useDashboard() {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   const loading = ref(false);
   const overview = ref<AssetOverview | null>(null);
 
@@ -109,7 +109,7 @@ export function useDashboard() {
   }
 
   const balances = computed<BalanceItem[]>(() =>
-    (overview.value?.assets ?? []).map((asset) => ({
+    (overview.value?.assets ?? []).slice(0, 3).map((asset) => ({
       code: asset.currency.code,
       title: t('dashboard.availableBalance', { currency: asset.currency.code }),
       amount: asset.available_balance,
@@ -118,7 +118,26 @@ export function useDashboard() {
     })),
   );
 
-  const pendingCount = computed(() => overview.value?.pending_counts?.total ?? 0);
+  const pendingBusinessKeys = ['deposit', 'exchange', 'whitelist', 'withdrawal'] as const;
+  const pendingCount = computed(() => {
+    const counts = overview.value?.pending_counts;
+    if (!counts) return 0;
+    return counts.total ?? pendingBusinessKeys.reduce((sum, key) => sum + (counts[key] ?? 0), 0);
+  });
+  const pendingScope = computed(() => {
+    const counts = overview.value?.pending_counts;
+    if (!counts) return '—';
+    const labels = pendingBusinessKeys
+      .filter((key) => Object.prototype.hasOwnProperty.call(counts, key))
+      .map((key) => t(`dashboard.${key}`));
+    if (!labels.length) return '—';
+    if (labels.length === 1) return labels[0];
+    const conjunction = t('textFormat.conjunction');
+    if (labels.length === 2) return labels.join(conjunction);
+    return locale.value.startsWith('en')
+      ? `${labels.slice(0, -1).join(t('textFormat.separator'))}${conjunction}${labels[labels.length - 1]}`
+      : `${labels.slice(0, -1).join(t('textFormat.separator'))}${conjunction}${labels.at(-1)}`;
+  });
   const feeAmount = computed(() => formatMoney(formatFixedFee(overview.value?.capabilities?.withdrawal_fee_amount)));
   const companyName = computed(() => overview.value?.user?.company_name ?? '');
 
@@ -144,6 +163,7 @@ export function useDashboard() {
     overview,
     balances,
     pendingCount,
+    pendingScope,
     feeAmount,
     companyName,
     recentTransactions,

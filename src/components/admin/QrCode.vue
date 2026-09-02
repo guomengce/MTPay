@@ -1,13 +1,12 @@
 <template>
   <section class="qr-code" :style="{ '--qr-size': `${size}px` }">
-    <header v-if="title || description" class="qr-code__header">
+    <header v-if="title" class="qr-code__header">
       <div>
         <h3 v-if="title">{{ title }}</h3>
-        <p v-if="description">{{ description }}</p>
       </div>
       <span class="qr-code__status">
         <i aria-hidden="true" />
-        {{ value ? '可扫码' : '待生成' }}
+        {{ t(value ? 'ui.qrReady' : 'ui.qrPending') }}
       </span>
     </header>
 
@@ -28,7 +27,7 @@
         <span class="qr-code__corner qr-code__corner--br" />
       </div>
 
-      <el-empty v-else :image-size="72" :description="emptyText" />
+      <el-empty v-else :image-size="72" :description="emptyText || t('ui.qrEmpty')" />
     </div>
 
     <footer v-if="value && (showValue || copyable)" class="qr-code__footer">
@@ -36,7 +35,7 @@
         <span>{{ value }}</span>
       </div>
       <el-button v-if="copyable" type="primary" plain :icon="CopyDocument" @click="copyValue">
-        复制
+        {{ t('ui.copy') }}
       </el-button>
     </footer>
   </section>
@@ -50,6 +49,9 @@
 import { CopyDocument } from '@element-plus/icons-vue';
 import { ElMessage } from 'element-plus';
 import QrcodeVue from 'qrcode.vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const props = withDefaults(defineProps<{
   /** 二维码原始内容，例如链上收款地址或完整支付 URI。 */
@@ -73,7 +75,7 @@ const props = withDefaults(defineProps<{
   margin: 1,
   foreground: '#0b1d34',
   background: '#ffffff',
-  emptyText: '暂无二维码内容',
+  emptyText: '',
   showValue: true,
   copyable: true,
 });
@@ -84,10 +86,10 @@ async function copyValue() {
   if (!props.value) return;
   try {
     await navigator.clipboard.writeText(props.value);
-    ElMessage.success('已复制');
+    ElMessage.success(t('ui.copied'));
     emit('copied', props.value);
   } catch {
-    ElMessage.error('复制失败，请手动复制');
+    ElMessage.error(t('ui.copyFailed'));
   }
 }
 </script>

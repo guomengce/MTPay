@@ -1,5 +1,6 @@
 import CryptoJS from 'crypto-js';
 import JSEncrypt from 'jsencrypt';
+import { i18n } from '@/locales';
 
 const LOGIN_IV = CryptoJS.enc.Utf8.parse('1234567887654321');
 const AES_KEY_LENGTH = 32;
@@ -42,7 +43,7 @@ export function createLoginEnvelope(
   const rsa = new JSEncrypt();
   rsa.setPublicKey(toPem(normalizedPublicKey));
   const random = rsa.encrypt(aesKey);
-  if (!random) throw new Error('登录公钥加密失败，请重试');
+  if (!random) throw new Error(i18n.global.t('textFormat.loginEncryptionFailed'));
 
   return {
     random,

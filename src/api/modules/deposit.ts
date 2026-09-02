@@ -48,6 +48,8 @@ export interface DepositOrder {
   network: DepositNetwork;
   amount: string;
   txid: string;
+  safeheron_tx_key?: string;
+  source_address_snapshot?: string;
   receiving_address_snapshot: string;
   status: 0 | 1 | 2;
   status_name: string;
@@ -57,14 +59,14 @@ export interface DepositOrder {
 
 /** 入金详情响应。 */
 export interface DepositOrderDetail extends DepositOrder {
-  review: {
+  review?: {
     admin_id: number | null;
     admin_name: string | null;
     note: string | null;
     reviewed_at: string | null;
   };
   credited_at: string | null;
-  timeline: { event: string; name: string; time: string | null }[];
+  timeline?: { event: string; name: string; time: string | null }[];
 }
 
 /* ---------- 请求参数 ---------- */

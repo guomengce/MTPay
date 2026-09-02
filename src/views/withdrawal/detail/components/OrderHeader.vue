@@ -20,7 +20,7 @@
 </template>
 
 <script setup lang="ts">
-/** 出金订单顶部信息栏：只展示订单标识、时间和状态。 */
+/** 法币出金订单顶部信息栏：只展示订单标识、时间和状态。 */
 import { ElMessage } from 'element-plus';
 import { useI18n } from 'vue-i18n';
 
@@ -69,18 +69,21 @@ const { t } = useI18n();
   }
 
   &__meta {
-    display: flex;
-    align-items: center;
-    gap: 26px;
+    display: grid;
+    width: min(38vw, 460px);
+    min-width: 360px;
+    align-items: start;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 28px;
 
-    span { display: grid; gap: 3px; }
-    small { color: #7b8b9f; font-size: 10px; }
-    strong { color: #30475f; font-size: 12px; font-weight: 600; white-space: nowrap; }
+    span { display: grid; min-width: 0; gap: 5px; }
+    small { color: #718399; font-size: 12px; }
+    strong { color: #20364e; font-size: 14px; font-weight: 650; white-space: nowrap; }
   }
 }
 
 @include mobile {
   .order-header { align-items: flex-start; padding: 16px; grid-template-columns: minmax(0, 1fr) auto; gap: 14px; }
-  .order-header__meta { align-items: flex-start; flex-direction: column; grid-column: 1 / -1; gap: 9px; }
+  .order-header__meta { width: 100%; min-width: 0; grid-column: 1 / -1; grid-template-columns: 1fr; gap: 12px; }
 }
 </style>

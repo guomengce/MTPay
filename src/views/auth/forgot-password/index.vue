@@ -1,26 +1,28 @@
 ﻿<template>
   <main class="forgot-page">
+    <LanguageSwitcher class="public-language" />
     <section class="forgot-card">
 
       <template v-if="sent">
         <el-icon class="forgot-card__result-icon"><CircleCheckFilled /></el-icon>
-        <h1>请检查你的邮箱</h1>
-        <p>如果该邮箱已注册，密码重置邮件将发送到该邮箱，请按照邮件中的链接设置新密码。</p>
-        <el-button type="primary" @click="goToLogin">返回登录</el-button>
+        <h1>{{ t('publicAuth.checkEmailTitle') }}</h1>
+        <p>{{ t('publicAuth.checkEmailDescription') }}</p>
+        <el-button type="primary" @click="goToLogin">{{ t('publicAuth.backToLogin') }}</el-button>
       </template>
 
       <template v-else>
-        <h1>找回密码</h1>
-        <p>输入代理账户 Email，我们会向该邮箱发送密码重置链接。</p>
+        <h1>{{ t('publicAuth.forgotTitle') }}</h1>
+        <p>{{ t('publicAuth.forgotDescription') }}</p>
 
         <el-form
           ref="formRef"
           :model="form"
           :rules="rules"
+          :validate-on-rule-change="false"
           label-position="top"
           @submit.prevent="handleSubmit"
         >
-          <el-form-item label="账户 Email" prop="email">
+          <el-form-item :label="t('publicAuth.accountEmail')" prop="email">
             <el-input v-model="form.email" autocomplete="email" placeholder="name@example.com">
               <template #prefix
                 ><el-icon><Message /></el-icon
@@ -33,13 +35,13 @@
             native-type="submit"
             :loading="submitting"
           >
-            发送重置邮件
+            {{ t('publicAuth.sendResetEmail') }}
           </el-button>
         </el-form>
 
         <button class="forgot-card__back" type="button" @click="goToLogin">
           <el-icon><ArrowLeft /></el-icon>
-          返回登录
+          {{ t('publicAuth.backToLogin') }}
         </button>
       </template>
     </section>
@@ -53,23 +55,26 @@
  */
 import { ArrowLeft, CircleCheckFilled, Message } from '@element-plus/icons-vue';
 import type { FormInstance, FormRules } from 'element-plus';
-import { reactive, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import * as authApi from '@/api/modules/auth';
+import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue';
 
 const router = useRouter();
+const { t } = useI18n();
 const formRef = ref<FormInstance>();
 const form = reactive({ email: '' });
 const submitting = ref(false);
 const sent = ref(false);
-const rules: FormRules<typeof form> = {
+const rules = computed<FormRules<typeof form>>(() => ({
   email: [
-    { required: true, message: '请输入账户 Email', trigger: 'blur' },
-    { type: 'email', message: '请输入有效的 Email 地址', trigger: ['blur', 'change'] },
-    { max: 191, message: 'Email 不能超过 191 个字符', trigger: 'blur' },
+    { required: true, message: t('publicAuth.emailRequired'), trigger: 'blur' },
+    { type: 'email', message: t('publicAuth.emailInvalid'), trigger: ['blur', 'change'] },
+    { max: 191, message: t('publicAuth.emailTooLong'), trigger: 'blur' },
   ],
-};
+}));
 
 async function handleSubmit() {
   if (submitting.value) return;
@@ -92,6 +97,7 @@ function goToLogin() {
 
 <style scoped lang="scss">
 .forgot-page {
+  position: relative;
   display: grid;
   min-height: 100vh;
   place-items: center;
@@ -100,6 +106,8 @@ function goToLogin() {
     radial-gradient(circle at 18% 16%, rgb(39 185 170 / 16%), transparent 28%),
     radial-gradient(circle at 85% 78%, rgb(29 141 181 / 14%), transparent 30%), #f5f9fc;
 }
+
+.public-language { position: absolute; z-index: 2; top: 22px; right: 28px; }
 
 .forgot-card {
   width: min(460px, 100%);

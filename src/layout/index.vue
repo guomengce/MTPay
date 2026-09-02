@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted } from 'vue';
+import { computed, onBeforeUnmount, onMounted, watch } from 'vue';
 
 import AppAside from './components/AppAside.vue';
 import AppHeader from './components/AppHeader.vue';
@@ -27,9 +27,11 @@ import PageProgress from './components/PageProgress.vue';
 import { useAppStore } from '@/stores/modules/app';
 import { useRouteStore } from '@/stores/modules/route';
 import { featureRoutes } from '@/router/modules';
+import { useAuthStore } from '@/stores/modules/auth';
 
 const appStore = useAppStore();
 const routeStore = useRouteStore();
+const authStore = useAuthStore();
 const isMobile = computed(() => appStore.device === 'mobile');
 
 function syncDevice() {
@@ -41,6 +43,7 @@ onMounted(() => {
   syncDevice();
   window.addEventListener('resize', syncDevice);
 });
+watch(()=>authStore.cryptoEnabled,()=>routeStore.generateMenus(featureRoutes));
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', syncDevice);

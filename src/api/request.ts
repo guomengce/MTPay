@@ -12,8 +12,16 @@ import axios, {
 import { ElMessage } from 'element-plus';
 
 import { appConfig } from '@/config';
+import { i18n } from '@/locales';
 import router from '@/router';
 import { useAuthStore } from '@/stores/modules/auth';
+import { useLocaleStore } from '@/stores/modules/locale';
+
+const ACCEPT_LANGUAGE = {
+  'en-US': 'en',
+  'zh-CN': 'zh-CN',
+  'zh-HK': 'zh-TW',
+} as const;
 
 /* ---------------- 类型 ---------------- */
 
@@ -26,6 +34,10 @@ export interface ApiEnvelope<T> {
 
 /** 扩展 axios 配置：自定义透传字段 */
 declare module 'axios' {
+  export interface AxiosRequestConfig {
+    /** 跳过全局错误提示 */
+    silent?: boolean;
+  }
   export interface InternalAxiosRequestConfig {
     /** 跳过全局错误提示 */
     silent?: boolean;
@@ -52,12 +64,15 @@ const PUBLIC_AUTH_PATHS = new Set([
   '/web/resetAgentPassword',
 ]);
 let sessionExpiredHandled = false;
+let permissionRefreshPromise: Promise<void> | null = null;
 
 /* ---------------- 请求拦截器 ---------------- */
 
 request.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const authStore = useAuthStore();
+    const localeStore = useLocaleStore();
+    config.headers.set('Accept-Language', ACCEPT_LANGUAGE[localeStore.locale]);
     if (authStore.token && !isPublicAuthRequest(config.url)) {
       sessionExpiredHandled = false;
       config.headers.Authorization = `Bearer ${authStore.token}`;
@@ -96,14 +111,25 @@ request.interceptors.response.use(
       await handleSessionExpired();
       return Promise.reject(new Error(payload.message || 'Unauthorized'));
     }
+    if (businessStatus === 50012 && response.config.url !== '/web/getAgentProfile') {
+      await handlePermissionChanged();
+      return Promise.reject(new Error(payload.message || i18n.global.t('ui.permissionDenied')));
+    }
     if (!response.config.silent) {
-      ElMessage.error(payload.message || '请求失败');
+      ElMessage.error(payload.message || i18n.global.t('ui.requestFailed'));
     }
     return Promise.reject(new Error(payload.message || 'BizError'));
   },
   async (error: AxiosError<ApiEnvelope<unknown>>) => {
+    logRequestError(error);
     const status = error.response?.status;
-    const message = error.response?.data?.message || error.message || '请求失败';
+    const businessStatus = Number(error.response?.data?.status);
+    const message = error.response?.data?.message || error.message || i18n.global.t('ui.requestFailed');
+
+    if (businessStatus === 50012 && !isPublicAuthRequest(error.config?.url)) {
+      await handlePermissionChanged();
+      return Promise.reject(error);
+    }
 
     if (status && AUTH_EXPIRED_STATUSES.has(status) && !isPublicAuthRequest(error.config?.url)) {
       await handleSessionExpired();
@@ -116,6 +142,19 @@ request.interceptors.response.use(
     return Promise.reject(error);
   },
 );
+
+/** 保留接口原始错误，便于区分前端超时、HTTP 错误和传输中断。 */
+function logRequestError(error: AxiosError<ApiEnvelope<unknown>>) {
+  console.error('[API request failed]', {
+    method: error.config?.method?.toUpperCase(),
+    url: error.config?.url,
+    timeout: error.config?.timeout,
+    code: error.code,
+    httpStatus: error.response?.status,
+    message: error.message,
+    response: error.response?.data,
+  }, error);
+}
 
 function isPublicAuthRequest(url?: string) {
   return Boolean(url && PUBLIC_AUTH_PATHS.has(url.split('?')[0]));
@@ -131,10 +170,21 @@ async function handleSessionExpired() {
   const redirect = currentRoute.name === 'Login' ? undefined : currentRoute.fullPath;
 
   authStore.clearAuth();
-  ElMessage.error('登錄狀態已失效，請重新登錄');
+  ElMessage.error(i18n.global.t('ui.sessionExpired'));
   await router
     .replace({ name: 'Login', query: redirect ? { redirect } : undefined })
     .catch(() => undefined);
+}
+
+async function handlePermissionChanged() {
+  if (!permissionRefreshPromise) permissionRefreshPromise = (async()=>{
+    const authStore=useAuthStore();
+    const { fetchAgentProfile } = await import('@/api/modules/auth');
+    const result=await fetchAgentProfile();
+    authStore.setUserInfo({id:String(result.id),name:result.company_name,role:'agent',agentCode:result.agent_code,companyName:result.company_name,email:result.email,phone:result.phone,status:result.status,statusName:result.status_name,activatedAt:result.activated_at,lastLoginAt:result.last_login_at,cryptoEnabled:Boolean(result.crypto_enabled)});
+    if(router.currentRoute.value.meta?.cryptoOnly&&!authStore.cryptoEnabled)await router.replace('/dashboard');
+  })().finally(()=>{permissionRefreshPromise=null});
+  await permissionRefreshPromise;
 }
 
 export default request;

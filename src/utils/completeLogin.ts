@@ -17,6 +17,7 @@ export function completeLogin(result: AgentLoginResult) {
         statusName: result.status_name,
         activatedAt: result.activated_at,
         lastLoginAt: result.last_login_at,
+        cryptoEnabled: Boolean(result.crypto_enabled),
       },
     });
   clearLoginChallenge();

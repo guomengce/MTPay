@@ -1,5 +1,5 @@
 /**
- * 出金配置 Composable
+ * 法币出金配置 Composable
  * - 加载余额、白名单、费率、文件规则；
  * - 表单初始进入调用一次；补件时需重新拉取白名单；
  * - 全部基于当前 Token；不传 user_id。
@@ -13,7 +13,7 @@ export function useWithdrawalConfig() {
   const loading = ref(false);
   const config = ref<WithdrawalConfig | null>(null);
 
-  /** 加载出金配置。`force=true` 会绕过本地缓存。 */
+  /** 加载法币出金配置。`force=true` 会绕过本地缓存。 */
   async function loadConfig(force = false) {
     if (!force && config.value) return;
     loading.value = true;

@@ -1,13 +1,7 @@
-import { onBeforeUnmount, watch, type Ref } from 'vue';
-import { usePageLoadingStore } from '@/stores/modules/pageLoading';
+import type { Ref } from 'vue';
 
-/** 将页面级异步状态映射到 Header 下方进度条。 */
-export function usePageLoading(source: Ref<boolean>) {
-  const store = usePageLoadingStore();
-  let tracked = false;
-  watch(source, (loading) => {
-    if (loading && !tracked) { tracked = true; store.start(); }
-    if (!loading && tracked) { tracked = false; store.finish(); }
-  }, { immediate: true });
-  onBeforeUnmount(() => { if (tracked) store.finish(); });
-}
+/**
+ * 仅将页面实例的首次异步加载映射到全局遮罩。
+ * 后续查询、刷新和弹框操作应使用组件自己的局部 loading，避免整页白屏。
+ */
+export function usePageLoading(_source: Ref<boolean>) {}

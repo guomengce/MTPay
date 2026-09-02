@@ -5,6 +5,7 @@
 import { ElMessage } from 'element-plus';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
 import * as authApi from '@/api/modules/auth';
 import type { AgentProfile } from '@/api/modules/auth';
@@ -17,6 +18,7 @@ export function useAccount() {
   const profile = ref<AgentProfile | null>(null);
   const authStore = useAuthStore();
   const router = useRouter();
+  const { t } = useI18n();
 
   /* ---------- 账户资料 ---------- */
   async function fetchProfile() {
@@ -36,6 +38,7 @@ export function useAccount() {
         statusName: result.status_name,
         activatedAt: result.activated_at,
         lastLoginAt: result.last_login_at,
+        cryptoEnabled: Boolean(result.crypto_enabled),
       });
     } finally {
       loading.value = false;
@@ -51,7 +54,7 @@ export function useAccount() {
     submitting.value = true;
     try {
       await authApi.updateAgentPassword(payload);
-      ElMessage.success('密码修改成功，请使用新密码重新登录');
+      ElMessage.success(t('ui.passwordChanged'));
       authStore.clearAuth();
       await router.replace({ name: 'Login' });
     } finally {

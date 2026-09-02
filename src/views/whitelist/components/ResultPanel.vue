@@ -17,10 +17,10 @@
       </div>
     </div>
 
-    <div v-if="total > 0" class="result-panel__pagination">
-      <span>{{ t('whitelist.total', { total }) }}</span>
+    <div class="result-panel__pagination">
       <el-pagination
-        layout="prev, pager, next"
+        class="app-pagination"
+        layout="total, prev, pager, next"
         :total="total"
         :page-size="limit"
         :current-page="page"

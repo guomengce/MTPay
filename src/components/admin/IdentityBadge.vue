@@ -8,6 +8,8 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import {
   getIdentityBadgeType,
+  isCompanyEntity,
+  isPayerRole,
   type IdentityEntityType,
   type IdentityRole,
 } from '@/utils/identityBadge';
@@ -15,8 +17,8 @@ import {
 const props = defineProps<{ role: IdentityRole; entityType: IdentityEntityType }>();
 const { t } = useI18n();
 const label = computed(() => {
-  const payer = props.role === 1 || props.role === '付款人' || props.role === '付款方';
-  const company = props.entityType === 1 || props.entityType === '公司';
+  const payer = isPayerRole(props.role);
+  const company = isCompanyEntity(props.entityType);
   return `${t(payer ? 'identity.payer' : 'identity.payee')} · ${t(company ? 'identity.company' : 'identity.individual')}`;
 });
 </script>

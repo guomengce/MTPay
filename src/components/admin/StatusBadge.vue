@@ -1,6 +1,6 @@
 <template>
   <span class="status-badge" :class="`status-badge--${type}`">
-    <i v-if="effect === 'pending'" class="status-badge__indicator" aria-hidden="true"></i>
+    <i v-if="hasPendingEffect" class="status-badge__indicator" aria-hidden="true"></i>
     {{ label }}
   </span>
 </template>
@@ -11,7 +11,9 @@ export type StatusBadgeEffect = 'pending';
 </script>
 
 <script setup lang="ts">
-withDefaults(
+import { computed } from 'vue';
+
+const props = withDefaults(
   defineProps<{
     label: string;
     type?: StatusBadgeType;
@@ -22,6 +24,11 @@ withDefaults(
     effect: undefined,
   },
 );
+
+const hasPendingEffect = computed(() => {
+  if (props.effect === 'pending') return true;
+  return /(待|審核中|审核中|處理中|处理中|pending|awaiting|processing|under review|action required)/i.test(props.label);
+});
 </script>
 
 <style scoped lang="scss">

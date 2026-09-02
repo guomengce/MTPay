@@ -6,7 +6,7 @@
     </header>
 
     <div class="security-card__body">
-      <el-form ref="formRef" :model="form" :rules="rules" label-position="top" @submit.prevent="handleSubmit">
+      <el-form ref="formRef" :model="form" :rules="rules" :validate-on-rule-change="false" label-position="top" @submit.prevent="handleSubmit">
         <el-form-item class="is-current" :label="t('account.currentPassword')" prop="currentPassword">
           <el-input v-model="form.currentPassword" type="password" show-password maxlength="255" autocomplete="current-password" :placeholder="t('account.currentPasswordPlaceholder')"><template #prefix><el-icon><Lock /></el-icon></template></el-input>
         </el-form-item>

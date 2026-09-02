@@ -24,6 +24,7 @@ export interface AgentProfile {
   status_name: string;
   activated_at: string | null;
   last_login_at: string | null;
+  crypto_enabled: boolean;
 }
 
 /**

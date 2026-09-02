@@ -12,7 +12,6 @@ import type { WithdrawalOrderDetail } from './withdrawal';
 export type TransactionBusinessType =
   | 'deposit'
   | 'fiat_deposit'
-  | 'fiat_deposit'
   | 'exchange'
   | 'withdrawal'
   | 'manual_increase'
@@ -87,10 +86,14 @@ export interface ManualBalanceAdjustmentDetail {
   id?: number;
   user_id?: number;
   currency_code?: string;
-  direction?: 'increase' | 'decrease';
+  direction?: 'increase' | 'decrease' | 1 | 2;
   amount?: string;
+  balance_before?: string | null;
+  balance_after?: string | null;
   reason?: string | null;
   admin_name?: string | null;
+  admin?: { id: number; name: string } | null;
+  adjusted_at?: string | null;
   created_at?: string | null;
 }
 

@@ -18,11 +18,12 @@
       <el-empty v-if="!loading && list.length === 0" :description="t('records.empty')" />
       <footer class="records-page__pager">
         <el-pagination
-          layout="prev, pager, next, total"
+          class="app-pagination"
+          layout="total, prev, pager, next"
+          background
           :current-page="page"
           :page-size="limit"
           :total="total"
-          :hide-on-single-page="total <= limit"
           @current-change="setPage"
         />
       </footer>

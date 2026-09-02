@@ -1,34 +1,34 @@
-﻿<template>
+<template>
   <main class="reset-page">
+    <LanguageSwitcher class="public-language" />
     <div class="reset-page__orb reset-page__orb--left" />
     <div class="reset-page__orb reset-page__orb--right" />
 
     <section class="reset-card">
       <header class="reset-card__brand">
-        <span>M</span>
-        <div><strong>MTPay</strong><small>AGENT PORTAL</small></div>
+        <img src="/assets/mtpay-logo.png" alt="MTPay" />
       </header>
 
       <div v-if="resetProfile" class="reset-card__result">
         <span class="reset-card__result-icon reset-card__result-icon--success">
           <el-icon><CircleCheckFilled /></el-icon>
         </span>
-        <h1>密码重置成功</h1>
-        <p>新密码已生效，之前的登录状态已失效，请使用新密码重新登录。</p>
+        <h1>{{ t('publicAuth.resetSuccess') }}</h1>
+        <p>{{ t('publicAuth.resetSuccessDescription') }}</p>
         <div class="reset-card__account">
-          <small>代理账户</small>
+          <small>{{ t('publicAuth.agentAccount') }}</small>
           <strong>{{ resetProfile.email }}</strong>
         </div>
-        <el-button type="primary" @click="goLogin">使用新密码登录</el-button>
+        <el-button type="primary" @click="goLogin">{{ t('publicAuth.loginWithNewPassword') }}</el-button>
       </div>
 
       <div v-else-if="!validToken" class="reset-card__result">
         <span class="reset-card__result-icon reset-card__result-icon--warning">
           <el-icon><WarningFilled /></el-icon>
         </span>
-        <h1>重置链接无效</h1>
-        <p>链接缺少有效 Token，请使用邮件中的完整链接，或联系平台管理员重新发送密码重置邮件。</p>
-        <el-button plain @click="goLogin">返回登录页</el-button>
+        <h1>{{ t('publicAuth.resetInvalid') }}</h1>
+        <p>{{ t('publicAuth.resetInvalidDescription') }}</p>
+        <el-button plain @click="goLogin">{{ t('publicAuth.backToLoginPage') }}</el-button>
       </div>
 
       <template v-else>
@@ -36,40 +36,40 @@
           <span
             ><el-icon><Key /></el-icon
           ></span>
-          <div>
-            <h1>重置登录密码</h1>
-            <p>设置一个新的安全密码</p>
+
+
+            <h1>{{ t('publicAuth.resetTitle') }}</h1>
+            <p>{{ t('publicAuth.resetSubtitle') }}</p>
           </div>
-        </div>
 
         <el-alert class="reset-card__notice" type="warning" :closable="false" show-icon>
-          重置成功后，当前账户之前的所有登录状态都会失效。
+          {{ t('publicAuth.resetNotice') }}
         </el-alert>
 
-        <el-form ref="formRef" :model="form" :rules="rules" label-position="top" @submit.prevent>
-          <el-form-item label="新密码" prop="password">
+        <el-form ref="formRef" :model="form" :rules="rules" :validate-on-rule-change="false" label-position="top" @submit.prevent>
+          <el-form-item :label="t('publicAuth.newPassword')" prop="password">
             <el-input
               v-model="form.password"
               type="password"
               show-password
               autocomplete="new-password"
-              placeholder="请输入 8–20 位新密码"
+              :placeholder="t('publicAuth.newPasswordPlaceholder')"
               :prefix-icon="Lock"
             />
           </el-form-item>
           <div class="reset-card__rules">
-            <span :class="{ passed: passwordChecks.length }">8–20 位</span>
-            <span :class="{ passed: passwordChecks.upper }">大写字母</span>
-            <span :class="{ passed: passwordChecks.lower }">小写字母</span>
-            <span :class="{ passed: passwordChecks.number }">数字</span>
+            <span :class="{ passed: passwordChecks.length }">{{ t('publicAuth.passwordLength') }}</span>
+            <span :class="{ passed: passwordChecks.upper }">{{ t('publicAuth.uppercase') }}</span>
+            <span :class="{ passed: passwordChecks.lower }">{{ t('publicAuth.lowercase') }}</span>
+            <span :class="{ passed: passwordChecks.number }">{{ t('publicAuth.number') }}</span>
           </div>
-          <el-form-item label="确认新密码" prop="password_confirmation">
+          <el-form-item :label="t('publicAuth.confirmNewPassword')" prop="password_confirmation">
             <el-input
               v-model="form.password_confirmation"
               type="password"
               show-password
               autocomplete="new-password"
-              placeholder="请再次输入新密码"
+              :placeholder="t('publicAuth.confirmNewPasswordPlaceholder')"
               :prefix-icon="Key"
               @keyup.enter="submitReset"
             />
@@ -80,13 +80,13 @@
             :loading="submitting"
             @click="submitReset"
           >
-            确认重置密码
+            {{ t('publicAuth.resetPassword') }}
           </el-button>
         </el-form>
       </template>
 
       <footer class="reset-card__footer">
-        <el-icon><CircleCheck /></el-icon><span>企业级安全保护 · 交易全程可追溯</span>
+        <el-icon><CircleCheck /></el-icon><span>{{ t('publicAuth.securityNote') }}</span>
       </footer>
     </section>
   </main>
@@ -95,9 +95,11 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import type { FormInstance, FormRules } from 'element-plus';
 import { CircleCheck, CircleCheckFilled, Key, Lock, WarningFilled } from '@element-plus/icons-vue';
 import { resetAgentPassword, type AgentProfile } from '@/api/modules/auth';
+import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue';
 
 interface PasswordForm {
   password: string;
@@ -106,6 +108,7 @@ interface PasswordForm {
 
 const route = useRoute();
 const router = useRouter();
+const { t } = useI18n();
 const token = computed(() =>
   typeof route.query.token === 'string' ? route.query.token.trim() : '',
 );
@@ -123,24 +126,24 @@ const passwordChecks = computed(() => ({
   number: /\d/.test(form.password),
 }));
 
-const rules: FormRules<PasswordForm> = {
+const rules = computed<FormRules<PasswordForm>>(() => ({
   password: [
-    { required: true, message: '请输入新密码', trigger: 'blur' },
+    { required: true, message: t('publicAuth.newPasswordRequired'), trigger: 'blur' },
     {
       pattern: passwordPattern,
-      message: '密码必须为 8–20 位，并包含大写字母、小写字母和数字',
+      message: t('publicAuth.passwordInvalid'),
       trigger: 'blur',
     },
   ],
   password_confirmation: [
-    { required: true, message: '请再次输入新密码', trigger: 'blur' },
+    { required: true, message: t('publicAuth.confirmNewPasswordRequired'), trigger: 'blur' },
     {
       validator: (_rule, value, callback) =>
-        value === form.password ? callback() : callback(new Error('两次输入的密码不一致')),
+        value === form.password ? callback() : callback(new Error(t('publicAuth.passwordMismatch'))),
       trigger: 'blur',
     },
   ],
-};
+}));
 
 /** 使用 URL 中的重置 Token 调用公开接口；成功后不自动登录。 */
 async function submitReset() {
@@ -196,6 +199,7 @@ function goLogin() {
     background: #499cf2;
   }
 }
+.public-language { position: absolute; z-index: 2; top: 22px; right: 28px; }
 .reset-card {
   position: relative;
   z-index: 1;
@@ -212,16 +216,10 @@ function goLogin() {
     gap: 11px;
     margin-bottom: 30px;
   }
-  &__brand > span {
-    display: grid;
-    width: 42px;
-    height: 42px;
-    place-items: center;
-    border-radius: 11px;
-    color: #fff;
-    background: linear-gradient(135deg, #28d4c2, #158eb9);
-    font-size: 20px;
-    font-weight: 900;
+  &__brand > img {
+    display: block;
+    width: 164px;
+    height: auto;
   }
   &__brand div {
     display: grid;

@@ -22,6 +22,7 @@ body {
 
 /* 英文界面降低自定义组件中过重的字重，保持表格和状态信息清晰疏朗。 */
 html[lang='en-US'] body {
+  font-family: "Plus Jakarta Sans", "Noto Sans SC", system-ui, sans-serif;
   font-weight: 400;
   letter-spacing: 0.005em;
 }

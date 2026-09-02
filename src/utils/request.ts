@@ -2,6 +2,7 @@ import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import { ElMessage } from 'element-plus';
 
 import { appConfig } from '@/config';
+import { i18n } from '@/locales';
 import router from '@/router';
 import { useAuthStore } from '@/stores/modules/auth';
 
@@ -29,11 +30,11 @@ request.interceptors.response.use(
       const authStore = useAuthStore();
       authStore.clearAuth();
       await router.replace({ name: 'Login' });
-      ElMessage.error('登录状态已失效，请重新登录');
+      ElMessage.error(i18n.global.t('ui.sessionExpired'));
       return Promise.reject(error);
     }
 
-    ElMessage.error(error.response?.data?.message || '请求失败，请稍后重试');
+    ElMessage.error(error.response?.data?.message || i18n.global.t('ui.requestRetry'));
     return Promise.reject(error);
   },
 );

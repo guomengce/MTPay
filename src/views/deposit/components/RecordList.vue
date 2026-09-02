@@ -72,11 +72,12 @@
 
       <footer class="record-list__pager">
         <el-pagination
-        layout="prev, pager, next, total"
+        class="app-pagination"
+        layout="total, prev, pager, next"
+        background
         :current-page="page"
         :page-size="limit"
         :total="total"
-        :hide-on-single-page="total <= limit"
         @current-change="onPage"
         />
       </footer>

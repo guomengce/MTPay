@@ -12,7 +12,7 @@
       />
     </header>
 
-    <div class="whitelist-detail__content">
+    <div v-loading="loading" class="whitelist-detail__content">
       <template v-if="detail">
         <div class="whitelist-detail__grid">
           <div class="whitelist-detail__main">

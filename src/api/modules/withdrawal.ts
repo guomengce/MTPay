@@ -162,23 +162,35 @@ export interface WithdrawalDraft {
 export interface SubmitWithdrawalPayload extends WithdrawalDraft { security_challenge: string }
 export interface WithdrawalSecurityChallenge { security_challenge: string; expires_at: string; email: string }
 
-// FRONTEND_AI_API_DOCUMENT(2).md §8.7: every verification uses the unchanged draft.
-export function createWithdrawalSecurityChallenge(payload: WithdrawalDraft) {
-  return request.post<unknown, WithdrawalSecurityChallenge>('/web/createWithdrawalSecurityChallenge', payload);
-}
-export function sendWithdrawalEmailCode(payload: SubmitWithdrawalPayload) {
-  return request.post<unknown, { expires_in: number }>('/web/sendWithdrawalEmailCode', payload);
-}
-export function verifyWithdrawalEmailCode(payload: SubmitWithdrawalPayload & { email_code: string }) {
-  return request.post<unknown, { email_verified: boolean }>('/web/verifyWithdrawalEmailCode', payload);
-}
-export function verifyWithdrawalTwoFactor(payload: SubmitWithdrawalPayload & { code: string }) {
-  return request.post<unknown, { two_factor_verified: boolean }>('/web/verifyWithdrawalTwoFactor', payload);
-}
-export function cancelWithdrawalSecurityChallenge(security_challenge: string) {
-  return request.post<unknown, []>('/web/cancelWithdrawalSecurityChallenge', { security_challenge });
+function toWithdrawalFormData<T extends object>(payload: T) {
+  const form = new FormData();
+  Object.entries(payload as Record<string, unknown>).forEach(([key, value]) => {
+    if (value === undefined || value === null) return;
+    if (Array.isArray(value)) {
+      value.forEach((item, index) => form.append(`${key}[${index}]`, String(item)));
+      return;
+    }
+    form.append(key, String(value));
+  });
+  return form;
 }
 
+// FRONTEND_AI_API_DOCUMENT(2).md §8.7: every verification uses the unchanged draft.
+export function createWithdrawalSecurityChallenge(payload: WithdrawalDraft) {
+  return request.post<unknown, WithdrawalSecurityChallenge>('/web/createWithdrawalSecurityChallenge', toWithdrawalFormData(payload));
+}
+export function sendWithdrawalEmailCode(payload: SubmitWithdrawalPayload) {
+  return request.post<unknown, { expires_in: number }>('/web/sendWithdrawalEmailCode', toWithdrawalFormData(payload));
+}
+export function verifyWithdrawalEmailCode(payload: SubmitWithdrawalPayload & { email_code: string }) {
+  return request.post<unknown, { email_verified: boolean }>('/web/verifyWithdrawalEmailCode', toWithdrawalFormData(payload));
+}
+export function verifyWithdrawalTwoFactor(payload: SubmitWithdrawalPayload & { code: string }) {
+  return request.post<unknown, { two_factor_verified: boolean }>('/web/verifyWithdrawalTwoFactor', toWithdrawalFormData(payload));
+}
+export function cancelWithdrawalSecurityChallenge(security_challenge: string) {
+  return request.post<unknown, []>('/web/cancelWithdrawalSecurityChallenge', toWithdrawalFormData({ security_challenge }));
+}
 export interface SupplementWithdrawalPayload {
   id: number;
   file_ids: number[];
@@ -218,7 +230,7 @@ export function uploadWithdrawalFile(formData: FormData) {
 
 /** 提交出金申请；手续费和总扣款由后端按固定配置计算。 */
 export function submitWithdrawal(payload: SubmitWithdrawalPayload) {
-  return request.post<unknown, WithdrawalOrderDetail>('/web/submitWithdrawal', payload);
+  return request.post<unknown, WithdrawalOrderDetail>('/web/submitWithdrawal', toWithdrawalFormData(payload));
 }
 
 /** 查询当前代理的出金订单分页列表。 */
@@ -241,6 +253,7 @@ export function previewWithdrawalFile(fileId: number) {
   return request.get<unknown, AxiosResponse<Blob>>('/web/previewWithdrawalFile', {
     params: { file_id: fileId },
     responseType: 'blob',
+    timeout: 120_000,
   });
 }
 
@@ -249,6 +262,7 @@ export function downloadWithdrawalFile(fileId: number) {
   return request.get<unknown, AxiosResponse<Blob>>('/web/downloadWithdrawalFile', {
     params: { file_id: fileId },
     responseType: 'blob',
+    timeout: 120_000,
   });
 }
 

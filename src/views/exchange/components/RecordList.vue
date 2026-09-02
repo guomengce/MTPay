@@ -33,7 +33,7 @@
       stripe
       class="record-list__table"
     >
-      <el-table-column prop="order_no" :label="t('exchange.orderNo')" min-width="170">
+      <el-table-column prop="order_no" :label="t('exchange.orderNo')" min-width="190">
         <template #default="{ row }">
           <strong
             class="record-list__link"
@@ -53,7 +53,7 @@
           <small>{{ row.source_currency.code }}</small>
         </template>
       </el-table-column>
-      <el-table-column :label="t('exchange.rate')" min-width="170">
+      <el-table-column :label="t('exchange.rate')" min-width="120">
         <template #default="{ row }">{{ formatExchangeRate(row.exchange_rate) || '—' }}</template>
       </el-table-column>
       <el-table-column :label="t('exchange.receivedUsd')" min-width="170">
@@ -74,7 +74,7 @@
           />
         </template>
       </el-table-column>
-      <el-table-column :label="t('exchange.actions')" width="110" fixed="right" align="center">
+      <el-table-column :label="t('exchange.actions')" min-width="110" fixed="right" align="center">
         <template #default="{ row }">
           <el-button plain type="primary" size="small" :icon="View" @click="emit('detail', row.id)">
             {{ t('exchange.details') }}
@@ -87,11 +87,12 @@
 
     <footer class="record-list__pager">
       <el-pagination
-        layout="prev, pager, next, total"
+        class="app-pagination"
+        layout="total, prev, pager, next"
+        background
         :current-page="page"
         :page-size="limit"
         :total="total"
-        :hide-on-single-page="total <= limit"
         @current-change="onPage"
       />
     </footer>

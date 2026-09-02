@@ -241,6 +241,72 @@
   background: #fbfcfe;
 }
 
+/* ============================================
+ * Pagination System
+ * 所有列表统一使用左侧总数、右侧翻页按钮；单页也保持显示。
+ * ============================================ */
+.el-pagination.app-pagination {
+  width: 100%;
+  min-height: 36px;
+  box-sizing: border-box;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 16px 20px;
+  --el-pagination-button-width: 34px;
+  --el-pagination-button-height: 34px;
+  --el-pagination-button-disabled-bg-color: #f4f7fa;
+  --el-pagination-hover-color: #078f87;
+}
+
+.record-list__pager,
+.records-page__pager,
+.result-panel__pagination {
+  padding: 0 !important;
+}
+
+.el-pagination.app-pagination .el-pagination__total {
+  margin-right: auto;
+  color: #607188;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.el-pagination.app-pagination.is-background .btn-prev,
+.el-pagination.app-pagination.is-background .btn-next,
+.el-pagination.app-pagination.is-background .el-pager li {
+  min-width: 34px;
+  height: 34px;
+  margin: 0;
+  border: 1px solid #dfe7ef;
+  border-radius: 8px;
+  color: #52657b;
+  background: #ffffff;
+  box-shadow: 0 3px 8px rgb(23 50 79 / 4%);
+}
+
+.el-pagination.app-pagination.is-background .el-pager li.is-active {
+  border-color: #07978f;
+  color: #ffffff;
+  background: #07978f;
+  box-shadow: 0 6px 14px rgb(7 151 143 / 20%);
+}
+
+.el-pagination.app-pagination.is-background .btn-prev:disabled,
+.el-pagination.app-pagination.is-background .btn-next:disabled {
+  border-color: #edf1f5;
+  color: #c4ccd5;
+  background: #f7f9fb;
+  box-shadow: none;
+}
+
+@media (max-width: 767px) {
+  .el-pagination.app-pagination {
+    width: max-content;
+    min-width: 100%;
+    padding: 14px 16px;
+  }
+}
+
 .el-button:hover,
 .el-button:focus {
   box-shadow: 0 10px 20px rgb(15 23 42 / 10%);

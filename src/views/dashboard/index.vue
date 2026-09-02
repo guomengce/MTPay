@@ -22,7 +22,12 @@
 
     <template v-else>
     <div class="dashboard-page__balances">
-      <BalanceCard v-for="item in balances" :key="item.code" v-bind="item" />
+      <BalanceCard
+        v-for="item in balances"
+        :key="item.code"
+        v-bind="item"
+        :class="{ 'dashboard-page__balance--wide': balances.length === 1 }"
+      />
       <div class="dashboard-page__todo">
         <div class="dashboard-page__todo-head">
           <el-icon class="dashboard-page__todo-icon"><BellFilled /></el-icon>
@@ -32,7 +37,7 @@
           <span>{{ pendingCount }}</span>
           <em>{{ t('dashboard.pending') }}</em>
         </div>
-        <p>{{ t('dashboard.pendingScope') }}</p>
+        <p>{{ pendingScope }}</p>
       </div>
     </div>
 
@@ -47,7 +52,7 @@
     </div>
 
     <div class="dashboard-page__content">
-      <ExchangeRatePanel compact :agent="companyName" :rates="rateItems" />
+      <ExchangeRatePanel v-if="authStore.cryptoEnabled" compact :agent="companyName" :rates="rateItems" />
       <RecentTransactions :transactions="recentTransactions" />
     </div>
     </template>
@@ -59,6 +64,7 @@ import { computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter, type RouteLocationRaw } from 'vue-router';
 import { usePageLoading } from '@/composables/usePageLoading';
+import { useAuthStore } from '@/stores/modules/auth';
 import { ArrowDown, BellFilled, Switch, Upload, UserFilled } from '@element-plus/icons-vue';
 import BalanceCard from './components/BalanceCard.vue';
 import ExchangeRatePanel from '@/components/admin/ExchangeRatePanel.vue';
@@ -70,6 +76,7 @@ const {
   loading,
   balances,
   pendingCount,
+  pendingScope,
   companyName,
   recentTransactions,
   rateItems,
@@ -77,19 +84,24 @@ const {
 } = useDashboard();
 usePageLoading(loading);
 const router = useRouter();
+const authStore = useAuthStore();
 const { t } = useI18n();
 
 const quickActions = computed(() => [
-  { icon: ArrowDown, title: t('dashboard.deposit'), route: { name: 'Deposit' } },
-  { icon: Switch, title: t('dashboard.exchange'), route: { name: 'Exchange' } },
+  ...(authStore.cryptoEnabled
+    ? [
+        { icon: ArrowDown, title: t('menu.deposit'), route: { name: 'Deposit' } },
+        { icon: Switch, title: t('menu.exchange'), route: { name: 'Exchange' } },
+      ]
+    : []),
   {
     icon: UserFilled,
-    title: t('dashboard.addWhitelist'),
+    title: t('menu.whitelist'),
     route: { name: 'Whitelist', query: { action: 'create' } },
   },
   {
     icon: Upload,
-    title: t('dashboard.withdraw'),
+    title: t('menu.withdrawal'),
     route: { name: 'Withdrawal' },
   },
 ]);
@@ -236,7 +248,12 @@ onMounted(loadOverview);
     margin-bottom: 18px;
   }
 
+  &__balance--wide {
+    grid-column: span 3;
+  }
+
   &__todo {
+    grid-column: 4;
     min-width: 0;
     padding: 22px 24px 18px;
     background: #ffffff;
@@ -310,6 +327,10 @@ onMounted(loadOverview);
 
     &__banner {
       height: 96px;
+    }
+
+    &__todo {
+      grid-column: auto;
     }
 
     &__banner-orbit--outer {

@@ -1,3 +1,5 @@
+import { COUNTRY_NAMES } from './countryNames';
+
 /** ISO 3166-1 alpha-2 国家／地区代码，用于生成选项和兼容历史代码值。 */
 export const COUNTRY_CODES = [
   'AD',
@@ -258,52 +260,41 @@ export interface CountryOption {
   label: string;
 }
 
-const displayNames = new Intl.DisplayNames(['zh-Hant'], { type: 'region' });
 const collator = new Intl.Collator(['zh-Hant'], { sensitivity: 'base' });
-const COUNTRY_NAME_OVERRIDES: Partial<Record<CountryCode, string>> = {
-  HK: '香港',
-  MO: '澳門',
-  TW: '台灣',
-};
 
 /** 繁体中文国家名称；白名单注册/经营国家字段直接提交该名称。 */
 export const COUNTRY_OPTIONS: CountryOption[] = COUNTRY_CODES.map((code) => ({
   code,
-  label: COUNTRY_NAME_OVERRIDES[code] || displayNames.of(code) || code,
+  label: COUNTRY_NAMES[code]['zh-HK'],
 })).sort((left, right) => collator.compare(left.label, right.label));
 
 const COUNTRY_LABEL_MAP = new Map<string, string>(
   COUNTRY_OPTIONS.map(({ code, label }) => [code, label]),
 );
-const COUNTRY_CODE_BY_LABEL = new Map<string, CountryCode>(
-  COUNTRY_OPTIONS.map(({ code, label }) => [label, code]),
-);
-
-function displayLocale(locale = 'zh-HK') {
-  if (locale.toLowerCase().startsWith('zh-cn')) return 'zh-Hans';
-  if (locale.toLowerCase().startsWith('en')) return 'en';
-  return 'zh-Hant';
+const COUNTRY_CODE_BY_LABEL = new Map<string, CountryCode>();
+for (const code of COUNTRY_CODES) {
+  const names = COUNTRY_NAMES[code];
+  COUNTRY_CODE_BY_LABEL.set(names['zh-CN'], code);
+  COUNTRY_CODE_BY_LABEL.set(names['zh-HK'], code);
+  COUNTRY_CODE_BY_LABEL.set(names['en-US'], code);
 }
 
-/** 取得当前界面语言的国家名称；value 始终保留繁体名称供接口提交。 */
-export function getLocalizedCountryOptions(locale = 'zh-HK') {
-  const targetLocale = displayLocale(locale);
-  const names = new Intl.DisplayNames([targetLocale], { type: 'region' });
-  const sorter = new Intl.Collator([targetLocale], { sensitivity: 'base' });
+/** 国家组件统一显示繁体名称，value 同样保留繁体名称供接口提交。 */
+export function getLocalizedCountryOptions(_locale = 'zh-HK') {
+  const sorter = new Intl.Collator(['zh-Hant'], { sensitivity: 'base' });
   return COUNTRY_OPTIONS.map((country) => ({
     ...country,
-    displayLabel: names.of(country.code) || country.label,
+    displayLabel: COUNTRY_NAMES[country.code]['zh-HK'],
   })).sort((left, right) => sorter.compare(left.displayLabel, right.displayLabel));
 }
 
 /** 将历史 ISO 代码转换为繁体名称；后端已返回名称时保持原样。 */
-export function getCountryLabel(value: unknown, locale = 'zh-HK'): string {
+export function getCountryLabel(value: unknown, _locale = 'zh-HK'): string {
   if (typeof value !== 'string' || !value.trim()) return '—';
   const code = value.trim().toUpperCase();
   const countryCode = COUNTRY_LABEL_MAP.has(code)
     ? (code as CountryCode)
     : COUNTRY_CODE_BY_LABEL.get(value.trim());
   if (!countryCode) return value;
-  const names = new Intl.DisplayNames([displayLocale(locale)], { type: 'region' });
-  return names.of(countryCode) || COUNTRY_LABEL_MAP.get(countryCode) || value;
+  return COUNTRY_NAMES[countryCode]['zh-HK'] || COUNTRY_LABEL_MAP.get(countryCode) || value;
 }

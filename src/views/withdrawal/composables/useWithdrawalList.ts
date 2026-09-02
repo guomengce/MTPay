@@ -1,5 +1,5 @@
 /**
- * 出金列表 Composable
+ * 法币出金列表 Composable
  * - 管理分页与列表状态；
  * - 金额/手续费/到账金额保留字符串展示，不在前端做数值换算。
  */
@@ -14,12 +14,12 @@ import type {
 
 /** 模块外的状态映射，便于组件按 status 取 label / type。 */
 export const WITHDRAWAL_STATUS_MAP = {
-  0: { label: '待审核', type: 'warning' as const, effect: 'pending' as const },
-  1: { label: '待补充文件', type: 'warning' as const, effect: undefined },
-  2: { label: '付款处理中', type: 'primary' as const, effect: undefined },
-  3: { label: '已完成', type: 'success' as const, effect: undefined },
-  4: { label: '已驳回', type: 'danger' as const, effect: undefined },
-  5: { label: '付款失败', type: 'danger' as const, effect: undefined },
+  0: { type: 'warning' as const, effect: 'pending' as const },
+  1: { type: 'warning' as const, effect: undefined },
+  2: { type: 'primary' as const, effect: undefined },
+  3: { type: 'success' as const, effect: undefined },
+  4: { type: 'danger' as const, effect: undefined },
+  5: { type: 'danger' as const, effect: undefined },
 } as const;
 
 export type WithdrawalStatus = 0 | 1 | 2 | 3 | 4 | 5;

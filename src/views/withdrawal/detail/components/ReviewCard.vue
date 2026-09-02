@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-/** 出金审核信息：仅展示接口已经返回的审核字段，不重复订单状态。 */
+/** 法币出金审核信息：仅展示接口已经返回的审核字段，不重复订单状态。 */
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 

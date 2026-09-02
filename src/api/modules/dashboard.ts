@@ -32,7 +32,7 @@ export interface AssetOverview {
   };
   assets: AssetBalance[];
   effective_exchange_rates: Partial<Record<'USDT' | 'USDC', EffectiveRate>>;
-  pending_counts: { deposit: number; exchange: number; whitelist: number; withdrawal: number; total: number };
+  pending_counts: Partial<Record<'deposit' | 'exchange' | 'whitelist' | 'withdrawal', number>> & { total?: number };
   capabilities: {
     deposit_channel_count: number;
     exchange_source_currencies: string[];

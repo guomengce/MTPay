@@ -1,0 +1,2 @@
+<template><PartyCardBase :title="t('withdrawal.bankDetails')" :fields="fields" tone="is-bank" /></template>
+<script setup lang="ts">import{computed}from'vue';import{useI18n}from'vue-i18n';import type{WithdrawalPartySummary}from'@/api/modules/withdrawal';import PartyCardBase from'./PartyCardBase.vue';import{buildPartyFields,PAYEE_BANK_KEYS}from'./partyCardFields';const props=defineProps<{party:WithdrawalPartySummary}>();const{t}=useI18n();const fields=computed(()=>buildPartyFields(props.party,PAYEE_BANK_KEYS,t));</script>

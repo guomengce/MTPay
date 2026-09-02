@@ -4,29 +4,12 @@
     :class="{ 'is-collapsed': isCollapsed, 'is-mobile': isMobile }"
   >
     <div class="app-aside__brand">
-      <span class="app-aside__mark">
-        <svg viewBox="0 0 32 32" aria-hidden="true">
-          <defs>
-            <linearGradient id="aside-mark-gradient" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#10aaa4" />
-              <stop offset="100%" stop-color="#2878ff" />
-            </linearGradient>
-          </defs>
-          <path
-            d="M6 4h10.6c3.6 0 6.4 2.7 6.4 6.2 0 2.5-1.4 4.5-3.5 5.4 2.6.7 4.4 2.9 4.4 5.8 0 3.9-3.1 6.6-7.2 6.6H6V4Zm4.6 9.6h5.6c1.6 0 2.7-1 2.7-2.6 0-1.5-1.1-2.5-2.7-2.5h-5.6v5.1Zm0 9.6h6.2c1.8 0 2.9-1.1 2.9-2.7 0-1.6-1.1-2.7-2.9-2.7h-6.2v5.4Z"
-            fill="url(#aside-mark-gradient)"
-          />
-        </svg>
-      </span>
-      <div v-if="!isCollapsed" class="app-aside__brand-text">
-        <strong>MTPay</strong>
-        <span>CLIENT PORTAL</span>
-      </div>
+      <img class="app-aside__logo" src="/assets/mtpay-logo.png" alt="MTPay" />
     </div>
 
     <div v-if="!isCollapsed" class="app-aside__divider" aria-hidden="true" />
 
-    <nav class="app-aside__nav" aria-label="主导航">
+    <nav class="app-aside__nav" :aria-label="t('ui.mainNavigation')">
       <ul class="app-aside__menu">
         <li
           v-for="menu in routeStore.menus"
@@ -120,46 +103,12 @@ function isActive(path: string) {
   flex: 0 0 auto;
 }
 
-.app-aside__mark {
-  display: inline-flex;
-  width: 40px;
-  height: 40px;
-  flex: 0 0 40px;
-  align-items: center;
-  justify-content: center;
-  border-radius: 10px;
-  background: rgb(255 255 255);
-  box-shadow: 0 4px 14px rgb(40 120 255 / 18%);
-
-  svg {
-    width: 26px;
-    height: 26px;
-  }
-}
-
-.app-aside__brand-text {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 2px;
-
-  strong {
-    background: linear-gradient(135deg, #082551 0%, #2878ff 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    font-size: 22px;
-    font-weight: 800;
-    line-height: 1.1;
-    letter-spacing: 0.2px;
-  }
-
-  span {
-    color: #2878ff;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 2.4px;
-  }
+.app-aside__logo {
+  display: block;
+  width: 150px;
+  max-width: 100%;
+  height: auto;
+  margin:0 auto;
 }
 
 .app-aside__nav {
@@ -405,6 +354,8 @@ function isActive(path: string) {
     justify-content: center;
     padding: 28px 0 6px;
   }
+
+  .app-aside__logo { width: 58px; }
 
   .app-aside__menu-link {
     justify-content: center;

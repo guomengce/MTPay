@@ -13,7 +13,7 @@
       >
     </div>
 
-    <div class="business-detail__content">
+    <div v-loading="loading" class="business-detail__content">
       <template v-if="detail">
         <WithdrawalDetailContent :detail="detail" :file-loading="fileLoading" @preview="openFilePreview" @download="downloadFile" />
 
@@ -37,7 +37,7 @@
 
 <script setup lang="ts">
 /**
- * 出金详情（代理端）
+ * 法币出金详情（代理端）
  * - 页面只负责数据加载与卡片编排，各信息模块为独立组件；
  * - 补件入口严格依据详情中的 available_actions.agent_can_supplement。
  */

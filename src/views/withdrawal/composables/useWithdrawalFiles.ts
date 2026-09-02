@@ -1,5 +1,5 @@
 /**
- * 出金附件查看 Composable
+ * 法币出金附件查看 Composable
  * - 调用预览/下载接口拿到临时 URL，前端直接打开或触发 a[download]；
  * - 禁止在前端读取附件 blob 再保存到本地。
  */

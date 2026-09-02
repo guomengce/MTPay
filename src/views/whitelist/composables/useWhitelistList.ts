@@ -11,10 +11,10 @@ import type { WhitelistItem, WhitelistPageResult } from '@/api/modules/whitelist
 
 /** 状态映射，供组件按 status 取 label / type。 */
 export const WHITELIST_STATUS_MAP = {
-  0: { label: '待审核', type: 'warning' as const, effect: 'pending' as const },
-  1: { label: '待补充文件', type: 'warning' as const, effect: undefined },
-  2: { label: '已通过', type: 'success' as const, effect: undefined },
-  3: { label: '已驳回', type: 'danger' as const, effect: undefined },
+  0: { type: 'warning' as const, effect: 'pending' as const },
+  1: { type: 'warning' as const, effect: undefined },
+  2: { type: 'success' as const, effect: undefined },
+  3: { type: 'danger' as const, effect: undefined },
 } as const;
 
 export type WhitelistStatus = 0 | 1 | 2 | 3;

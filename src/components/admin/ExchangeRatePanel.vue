@@ -4,9 +4,9 @@
       <div class="exchange-rate-panel__header">
         <div class="exchange-rate-panel__title">
           <span />
-          <strong>当前比例</strong>
+          <strong>{{ t('dashboard.currentRatio') }}</strong>
         </div>
-        <p>{{ agent }}</p>
+        <p>{{ agent || t('auth.guest') }}</p>
       </div>
     </template>
 
@@ -23,6 +23,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { formatExchangeRate } from '@/utils/decimal';
 
 export interface ExchangeRateItem {
@@ -31,6 +32,8 @@ export interface ExchangeRateItem {
   sample: string;
   mark: string;
 }
+
+const { t } = useI18n();
 
 const DEFAULT_RATES: ExchangeRateItem[] = [
   { pair: 'USDT → USD', value: '0.9900', sample: '1,000 USDT = 990.00 USD', mark: '₮' },
@@ -45,7 +48,7 @@ const props = withDefaults(
   }>(),
   {
     compact: false,
-    agent: '代理A · Apex Trading',
+    agent: '',
     rates: undefined,
   },
 );

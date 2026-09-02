@@ -1,8 +1,10 @@
 <template>
   <main class="business-detail">
     <el-button plain :icon="Back" @click="router.go(-1)">{{ t('fiatDepositDetail.back') }}</el-button>
-    <FiatDepositDetailContent v-if="detail" :detail="detail" @preview="preview" @download="download" />
-    <el-empty v-else-if="!loading" :description="t('fiatDepositDetail.notFound')" />
+    <div v-loading="loading" class="business-detail__content">
+      <FiatDepositDetailContent v-if="detail" :detail="detail" @preview="preview" @download="download" />
+      <el-empty v-else-if="!loading" :description="t('fiatDepositDetail.notFound')" />
+    </div>
   </main>
 </template>
 <script setup lang="ts">
@@ -20,4 +22,4 @@ async function download(id:number,name:string){openBlob(await downloadFiatFile(i
 async function load(){const id=Number(route.params.id);if(!Number.isInteger(id)||id<=0)return;loading.value=true;try{detail.value=await fetchFiatDetail(id);}finally{loading.value=false;}}
 onMounted(load);
 </script>
-<style scoped lang="scss">.business-detail{display:grid;min-width:0;gap:18px;padding:20px}.business-detail>.el-button{width:fit-content}@include mobile{.business-detail{gap:14px;padding:0}}</style>
+<style scoped lang="scss">.business-detail{display:grid;min-width:0;gap:18px;padding:20px}.business-detail>.el-button{width:fit-content}.business-detail__content{min-width:0;min-height:300px}@include mobile{.business-detail{gap:14px;padding:0}}</style>

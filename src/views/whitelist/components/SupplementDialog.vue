@@ -11,10 +11,7 @@
     <template #header>
       <div class="supplement-dialog__header">
         <span class="supplement-dialog__icon"><i class="ri-file-upload-line" /></span>
-        <div>
-          <h2>{{ t('whitelist.supplementTitle') }}</h2>
-          <p>{{ t('whitelist.supplementDesc') }}</p>
-        </div>
+        <h2>{{ t('whitelist.supplementTitle') }}</h2>
       </div>
     </template>
 
@@ -63,7 +60,6 @@
 
     <template #footer>
       <div class="supplement-dialog__footer">
-        <span><i class="ri-lock-line" /> {{ t('whitelist.secureUpload') }}</span>
         <div>
           <el-button @click="close">{{ t('common.actions.cancel') }}</el-button>
           <el-button type="primary" :loading="submitting || uploading" @click="submit">

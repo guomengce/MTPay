@@ -2,7 +2,6 @@
   <div class="form-card">
     <header class="form-card__header">
       <h2 class="form-card__title">{{ t('auth.welcome') }}</h2>
-      <p class="form-card__subtitle">{{ t('auth.subtitle') }}</p>
     </header>
 
     <el-form
@@ -55,10 +54,10 @@
       <a class="form-card__link" href="javascript:void(0)" @click.prevent="emit('forgot-password')"
         >{{ t('auth.forgotPassword') }}</a
       >
-      <span class="form-card__divider" />
+      <!-- <span class="form-card__divider" />
       <a class="form-card__link" href="javascript:void(0)" @click.prevent="emit('contact')"
         >{{ t('auth.contact') }}</a
-      >
+      > -->
     </div>
 
   </div>

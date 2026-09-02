@@ -1,5 +1,5 @@
 /**
- * 出金补件 Composable
+ * 法币出金补件 Composable
  * - 仅当订单 status=1（待补充文件）且 available_actions 允许时调用；
  * - 上传新附件并调用 `/web/supplementWithdrawal`，触发重新审核。
  */
