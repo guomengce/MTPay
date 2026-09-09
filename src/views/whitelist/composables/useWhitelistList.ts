@@ -1,6 +1,6 @@
 /**
  * 白名单列表 Composable
- * - 支持按白名单角色和主体类型筛选；
+ * - 支持按白名单角色、主体类型和状态筛选；
  * - Laravel 分页：列表读 data.data，总数读 data.total；
  * - 提交/补件成功后由组合入口触发刷新。
  */
@@ -12,7 +12,7 @@ import type { WhitelistItem, WhitelistPageResult } from '@/api/modules/whitelist
 /** 状态映射，供组件按 status 取 label / type。 */
 export const WHITELIST_STATUS_MAP = {
   0: { type: 'warning' as const, effect: 'pending' as const },
-  1: { type: 'warning' as const, effect: undefined },
+  1: { type: 'warning' as const, effect: 'pending' as const },
   2: { type: 'success' as const, effect: undefined },
   3: { type: 'danger' as const, effect: undefined },
 } as const;
@@ -27,6 +27,7 @@ export function useWhitelistList() {
   const limit = ref(15);
   const role = ref<1 | 2>();
   const entityType = ref<1 | 2>();
+  const status = ref<WhitelistStatus>();
 
   async function fetchList() {
     loading.value = true;
@@ -36,6 +37,7 @@ export function useWhitelistList() {
         limit: limit.value,
         role: role.value,
         entity_type: entityType.value,
+        status: status.value,
       });
       list.value = data.data ?? [];
       total.value = data.total ?? 0;
@@ -72,6 +74,7 @@ export function useWhitelistList() {
     limit,
     role,
     entityType,
+    status,
     fetchList,
     setPage,
     setLimit,

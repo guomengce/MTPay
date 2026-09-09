@@ -1,0 +1,23 @@
+:root {
+  --portal-message-accent: var(--mt-btn-primary);
+  --portal-message-border: var(--mt-btn-primary-border);
+  --portal-message-icon-background: var(--mt-btn-primary-soft);
+  --portal-message-background: linear-gradient(115deg, #f6fcfb 0%, #f2f9fc 100%);
+}
+
+.el-message:not(.login-message--dark) {
+  width: fit-content; min-width: 0; max-width: min(560px, calc(100vw - 32px)); padding: 10px 15px;
+  border: 1px solid var(--portal-message-border); border-radius: 999px;
+  background: var(--portal-message-background); box-shadow: 0 10px 28px rgb(4 143 143 / 14%);
+
+  .el-message__icon {
+    width: 24px; height: 24px; flex: 0 0 24px; margin-right: 9px; padding: 5px;
+    border: 1px solid var(--portal-message-border); border-radius: 50%; color: var(--portal-message-accent);
+    background: var(--portal-message-icon-background); font-size: 14px;
+  }
+  .el-message__content { min-width: 0; color: var(--portal-text); font-size: 14px; font-weight: 600; line-height: 1.55; }
+}
+
+@media (max-width: 767px) {
+  .el-message:not(.login-message--dark) { max-width: calc(100vw - 24px); padding: 10px 14px; }
+}

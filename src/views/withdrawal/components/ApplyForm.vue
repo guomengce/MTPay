@@ -1,6 +1,5 @@
 <template>
   <section class="apply-form">
-
     <el-form
       ref="formRef"
       :disabled="locked || configLoading"
@@ -18,9 +17,22 @@
               <span>01</span>
               <h4>{{ t('withdrawal.fillWithdrawalInfo') }}</h4>
             </header>
-            <el-form-item :label="t('withdrawal.currency')" prop="currency_id" class="apply-form__currency-field">
-              <el-select v-model="formState.currency_id" :placeholder="t('withdrawal.selectCurrency')" :loading="configLoading">
-                <el-option v-for="item in currencyOptions" :key="item.currency.id" :value="item.currency.id" :label="`${item.currency.code} · ${item.currency.name}`" />
+            <el-form-item
+              :label="t('withdrawal.currency')"
+              prop="currency_id"
+              class="apply-form__currency-field"
+            >
+              <el-select
+                v-model="formState.currency_id"
+                :placeholder="t('withdrawal.selectCurrency')"
+                :loading="configLoading"
+              >
+                <el-option
+                  v-for="item in currencyOptions"
+                  :key="item.currency.id"
+                  :value="item.currency.id"
+                  :label="`${item.currency.code} · ${item.currency.name}`"
+                />
               </el-select>
             </el-form-item>
             <div class="apply-form__party-fields">
@@ -60,7 +72,11 @@
                 </el-select>
               </el-form-item>
             </div>
-            <el-form-item :label="t('withdrawal.amount')" prop="amount" class="apply-form__amount-field">
+            <el-form-item
+              :label="t('withdrawal.amount')"
+              prop="amount"
+              class="apply-form__amount-field"
+            >
               <el-input
                 v-model="formState.amount"
                 placeholder="0.00"
@@ -74,15 +90,18 @@
             </el-form-item>
             <div class="apply-form__balance-tip">
               <span class="apply-form__maximum">
-                {{ t('withdrawal.maximum') }} <strong>{{ formatMoney(maximumAmount) }} {{ currencyCode }}</strong>
-                <small>（{{ t('withdrawal.feeReserved', { fee: formatMoney(formatFixedFee(feeAmount) || '—'), currency: currencyCode }) }}）</small>
+                {{ t('withdrawal.maximum') }}
+                <strong>{{ formatMoney(maximumAmount) }} {{ currencyCode }}</strong>
+                <small
+                  >（{{
+                    t('withdrawal.feeReserved', {
+                      fee: formatMoney(formatFixedFee(feeAmount) || '—'),
+                      currency: currencyCode,
+                    })
+                  }}）</small
+                >
               </span>
-              <el-button
-                link
-                type="primary"
-                :disabled="maximumAmount === '—'"
-                @click="fillMaximum"
-              >
+              <el-button link type="primary" :disabled="maximumAmount === '—'" @click="fillMaximum">
                 {{ t('withdrawal.withdrawAll') }}
               </el-button>
             </div>
@@ -91,7 +110,9 @@
           <section class="apply-form__section is-files">
             <header class="apply-form__section-header">
               <span>02</span>
-              <h4>{{ t('withdrawal.addProof') }} <small>{{ t('withdrawal.optional') }}</small></h4>
+              <h4>
+                {{ t('withdrawal.addProof') }} <small>{{ t('withdrawal.optional') }}</small>
+              </h4>
             </header>
             <el-upload
               v-model:file-list="fileList"
@@ -104,7 +125,13 @@
               <el-button plain :icon="Upload">{{ t('withdrawal.chooseFile') }}</el-button>
               <template #tip>
                 <p class="apply-form__file-tip">
-                  {{ t('withdrawal.uploadRules', { count: fileRules.max_files_per_round, size: fileRules.max_file_size_mb, types: fileRules.allowed_extensions.join(' / ').toUpperCase() }) }}
+                  {{
+                    t('withdrawal.uploadRules', {
+                      count: fileRules.max_files_per_round,
+                      size: fileRules.max_file_size_mb,
+                      types: fileRules.allowed_extensions.join(' / ').toUpperCase(),
+                    })
+                  }}
                 </p>
               </template>
             </el-upload>
@@ -118,21 +145,33 @@
 
           <div class="apply-form__available">
             <small>{{ t('withdrawal.availableBalance') }}</small>
-            <strong>{{ formatMoney(balance?.available_balance || '—') }} <span>{{ currencyCode }}</span></strong>
+            <strong
+              >{{ formatMoney(balance?.available_balance || '—') }}
+              <span>{{ currencyCode }}</span></strong
+            >
           </div>
 
           <dl class="apply-form__summary-rows">
             <div>
               <dt>{{ t('withdrawal.amount') }}</dt>
-              <dd>{{ formatMoney(amountPreview) }}<span v-if="amountPreview !== '—'"> {{ currencyCode }}</span></dd>
+              <dd>
+                {{ formatMoney(amountPreview)
+                }}<span v-if="amountPreview !== '—'"> {{ currencyCode }}</span>
+              </dd>
             </div>
             <div>
               <dt>{{ t('withdrawal.fixedFee') }}</dt>
-              <dd>{{ formatMoney(formatFixedFee(feeAmount) || '—') }}<span v-if="feeAmount"> {{ currencyCode }}</span></dd>
+              <dd>
+                {{ formatMoney(formatFixedFee(feeAmount) || '—')
+                }}<span v-if="feeAmount"> {{ currencyCode }}</span>
+              </dd>
             </div>
             <div class="is-total">
               <dt>{{ t('withdrawal.estimatedDeduction') }}</dt>
-              <dd>{{ formatMoney(totalPreview) }}<span v-if="totalPreview !== '—'"> {{ currencyCode }}</span></dd>
+              <dd>
+                {{ formatMoney(totalPreview)
+                }}<span v-if="totalPreview !== '—'"> {{ currencyCode }}</span>
+              </dd>
             </div>
           </dl>
 
@@ -163,7 +202,7 @@ import { formatMoney } from '@/utils/formatMoney';
 import { computed, reactive, ref as refHook, watch } from 'vue';
 import type { FormInstance, FormRules } from 'element-plus';
 import type { UploadFile, UploadFiles, UploadUserFile } from 'element-plus';
-import { InfoFilled, Money, Right, Upload } from '@element-plus/icons-vue';
+import { Money, Right, Upload } from '@element-plus/icons-vue';
 import { useI18n } from 'vue-i18n';
 import { formatFixedFee } from '@/utils/decimal';
 
@@ -225,7 +264,9 @@ const fileRules = computed<WithdrawalFileRules>(
 const payers = computed(() => props.payers ?? []);
 const payees = computed(() => props.payees ?? []);
 const currencyOptions = computed(() => props.currencyOptions ?? []);
-const selectedCurrency = computed(() => currencyOptions.value.find((item) => item.currency.id === formState.currency_id));
+const selectedCurrency = computed(() =>
+  currencyOptions.value.find((item) => item.currency.id === formState.currency_id),
+);
 const balance = computed(() => selectedCurrency.value?.balance);
 const feeAmount = computed(() => selectedCurrency.value?.fee_amount);
 const currencyCode = computed(() => selectedCurrency.value?.currency.code ?? '—');
@@ -243,10 +284,16 @@ const maximumAmount = computed(() =>
 );
 const remainingPreview = computed(() => {
   if (totalPreview.value === '—') return '—';
-  const value = subtractDecimalStrings(balance.value?.available_balance, totalPreview.value, currencyScale.value);
+  const value = subtractDecimalStrings(
+    balance.value?.available_balance,
+    totalPreview.value,
+    currencyScale.value,
+  );
   return value === '—' ? t('withdrawal.insufficientBalance') : value;
 });
-const insufficientBalance = computed(() => remainingPreview.value === t('withdrawal.insufficientBalance'));
+const insufficientBalance = computed(
+  () => remainingPreview.value === t('withdrawal.insufficientBalance'),
+);
 
 const rules: FormRules = {
   currency_id: [{ required: true, message: t('withdrawal.selectCurrency'), trigger: 'change' }],
@@ -256,8 +303,14 @@ const rules: FormRules = {
     { required: true, message: t('withdrawal.amountRequired'), trigger: 'change' },
     {
       validator: (_rule, value: string, callback) => {
-        const pattern = new RegExp(`^(?!0+(?:\\.0+)?$)\\d{1,20}(?:\\.\\d{1,${currencyScale.value}})?$`);
-        callback(pattern.test(value) ? undefined : new Error(t('withdrawal.amountInvalid', { scale: currencyScale.value })));
+        const pattern = new RegExp(
+          `^(?!0+(?:\\.0+)?$)\\d{1,20}(?:\\.\\d{1,${currencyScale.value}})?$`,
+        );
+        callback(
+          pattern.test(value)
+            ? undefined
+            : new Error(t('withdrawal.amountInvalid', { scale: currencyScale.value })),
+        );
       },
       trigger: 'blur',
     },
@@ -381,9 +434,16 @@ function fillMaximum() {
 async function handleSubmit() {
   if (props.locked || props.configLoading || props.submitting) return;
   if (!(await formRef.value?.validate().catch(() => false))) return;
-  if (formState.currency_id == null || formState.payer_whitelist_id == null || formState.payee_whitelist_id == null) return;
+  if (
+    formState.currency_id == null ||
+    formState.payer_whitelist_id == null ||
+    formState.payee_whitelist_id == null
+  )
+    return;
   if (fileList.value.some((item) => item.status === 'uploading' || item.status === 'ready')) return;
-  const fileIds = fileList.value.map((item) => (item.response as WithdrawalFile | undefined)?.file_id).filter((id): id is number => typeof id === 'number');
+  const fileIds = fileList.value
+    .map((item) => (item.response as WithdrawalFile | undefined)?.file_id)
+    .filter((id): id is number => typeof id === 'number');
   emit('submit', {
     currency_id: formState.currency_id,
     payer_whitelist_id: formState.payer_whitelist_id,
@@ -409,7 +469,6 @@ defineExpose({ reset });
   border-radius: 16px;
   background: #fff;
   box-shadow: 0 16px 40px rgb(22 34 51 / 6%);
-
 
   &__form {
     margin-top: 20px;

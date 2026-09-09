@@ -8,14 +8,27 @@
         v-if="supplementVisible"
         type="primary"
         :icon="Upload"
-        @click="supplementDialogVisible = true"
+        @click="openSupplement('business')"
         >{{ t('withdrawal.supplement') }}</el-button
+      >
+      <el-button
+        v-if="riskSupplementVisible"
+        type="danger"
+        plain
+        :icon="Upload"
+        @click="openSupplement('risk')"
+        >{{ t('withdrawal.riskSupplement') }}</el-button
       >
     </div>
 
     <div v-loading="loading" class="business-detail__content">
       <template v-if="detail">
-        <WithdrawalDetailContent :detail="detail" :file-loading="fileLoading" @preview="openFilePreview" @download="downloadFile" />
+        <WithdrawalDetailContent
+          :detail="detail"
+          :file-loading="fileLoading"
+          @preview="openFilePreview"
+          @download="downloadFile"
+        />
 
         <SupplementDialog
           v-model="supplementDialogVisible"
@@ -24,6 +37,7 @@
           :submitting="supplementSubmitting"
           :uploading="supplementUploading"
           :upload-file="uploadSupplementFile"
+          :mode="supplementMode"
           @submit="handleSupplement"
         />
       </template>
@@ -64,18 +78,23 @@ const {
   submitting: supplementSubmitting,
   uploading: supplementUploading,
   submit: submitSupplement,
+  submitRisk: submitRiskSupplement,
   uploadFile: uploadSupplementFile,
 } = useWithdrawalSupplement();
 
 const id = computed(() => Number(route.params.id));
 const supplementDialogVisible = ref(false);
+const supplementMode = ref<'business' | 'risk'>('business');
 
 const supplementVisible = computed(() =>
-  Boolean(detail.value?.available_actions?.agent_can_supplement),
+  Boolean(detail.value?.available_actions?.can_supplement_withdrawal),
 );
+const riskSupplementVisible = computed(() => detail.value?.risk?.can_supplement_risk === true);
 const supplementRequirement = computed(() => {
   const d = detail.value;
   if (!d) return t('withdrawal.defaultSupplement');
+  if (supplementMode.value === 'risk')
+    return d.risk?.risk_supplement_request || t('withdrawal.defaultRiskSupplement');
   if (d.review?.note) return d.review.note;
   const request = (d.records ?? []).find((record) => {
     const text = record.action_name;
@@ -84,6 +103,10 @@ const supplementRequirement = computed(() => {
   return request?.message || t('withdrawal.defaultSupplement');
 });
 
+function openSupplement(mode: 'business' | 'risk') {
+  supplementMode.value = mode;
+  supplementDialogVisible.value = true;
+}
 
 function goBack() {
   void router.push('/withdrawal');
@@ -100,16 +123,22 @@ function downloadFile(fileId: number) {
 async function handleSupplement(payload: { file_ids: number[]; message?: string }) {
   if (!detail.value) return;
   try {
-    await submitSupplement({
+    const submit = supplementMode.value === 'risk' ? submitRiskSupplement : submitSupplement;
+    await submit({
       id: detail.value.id,
       file_ids: payload.file_ids,
       message: payload.message,
     });
-    ElMessage.success(t('withdrawal.supplemented'));
+    ElMessage.success(
+      t(
+        supplementMode.value === 'risk' ? 'withdrawal.riskSupplemented' : 'withdrawal.supplemented',
+      ),
+    );
     supplementDialogVisible.value = false;
     await reload();
   } catch {
-    /* 统一请求层已提示后端错误 */
+    /* 狀態可能已變更，立即同步最新詳情。 */
+    await reload();
   }
 }
 
@@ -176,7 +205,9 @@ watch(id, reload);
     gap: 18px;
     margin-top: 18px;
 
-    &.is-single { grid-template-columns: minmax(0, 1fr); }
+    &.is-single {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
 
   &__main,

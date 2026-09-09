@@ -37,7 +37,7 @@
           {{ t('whitelist.supplement') }}
         </el-button>
         <el-button size="small" type="primary" plain :icon="ArrowRight" @click="emit('view', item)">
-          {{ t('whitelist.viewDetails') }}
+          {{ t('common.actions.details') }}
         </el-button>
       </div>
     </footer>
@@ -154,6 +154,7 @@ const avatarText = computed(() => {
         height: 24px;
         padding: 0 9px;
         font-size: 11px;
+        font-weight: 700 !important;
       }
 
       .entry-card__country {
@@ -223,8 +224,8 @@ const avatarText = computed(() => {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 12px;
+    flex-wrap: nowrap;
+    gap: 8px;
     margin-top: 16px;
     padding-top: 14px;
     border-top: 1px solid #e8edf2;
@@ -234,11 +235,26 @@ const avatarText = computed(() => {
     display: flex;
     flex: none;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
+
+    :deep(.el-button) {
+      padding-right: 9px;
+      padding-left: 9px;
+      font-size: 12px;
+      font-weight: 700 !important;
+    }
 
     :deep(.el-button + .el-button) {
       margin-left: 0;
     }
+  }
+
+  &__footer :deep(.status-badge) {
+    min-height: 26px;
+    padding: 0 9px;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700 !important;
   }
 
   @include mobile {
@@ -261,6 +277,11 @@ const avatarText = computed(() => {
 
     &__actions {
       justify-content: flex-end;
+    }
+
+    &__footer {
+      align-items: flex-start;
+      flex-wrap: wrap;
     }
   }
 }

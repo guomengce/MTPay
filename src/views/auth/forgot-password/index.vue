@@ -61,8 +61,10 @@ import { useRouter } from 'vue-router';
 
 import * as authApi from '@/api/modules/auth';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue';
+import { useAuthStore } from '@/stores/modules/auth';
 
 const router = useRouter();
+const authStore = useAuthStore();
 const { t } = useI18n();
 const formRef = ref<FormInstance>();
 const form = reactive({ email: '' });
@@ -91,6 +93,8 @@ async function handleSubmit() {
 }
 
 function goToLogin() {
+  // 用户明确选择重新登录时，清除浏览器中可能残留的旧会话。
+  authStore.clearAuth();
   void router.push({ name: 'Login' });
 }
 </script>

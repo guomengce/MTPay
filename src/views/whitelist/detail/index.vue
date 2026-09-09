@@ -40,7 +40,12 @@
               :icon="detail.status === 3 ? 'ri-close-circle-line' : 'ri-shield-check-line'"
             >
               <template v-if="detail.status === 1" #extra>
-                <el-button size="small" type="warning" plain @click="supplementDialogVisible = true">
+                <el-button
+                  size="small"
+                  type="warning"
+                  :icon="Upload"
+                  @click="supplementDialogVisible = true"
+                >
                   {{ t('whitelist.supplement') }}
                 </el-button>
               </template>
@@ -79,6 +84,7 @@
 /** 代理端白名单详情：展示真实 business_data、审核信息、处理记录与补件入口。 */
 import { computed, onMounted, ref, watch } from 'vue';
 import { ElMessage } from 'element-plus';
+import { Upload } from '@element-plus/icons-vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 

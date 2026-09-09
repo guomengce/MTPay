@@ -100,6 +100,7 @@ import type { FormInstance, FormRules } from 'element-plus';
 import { CircleCheck, CircleCheckFilled, Key, Lock, WarningFilled } from '@element-plus/icons-vue';
 import { resetAgentPassword, type AgentProfile } from '@/api/modules/auth';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue';
+import { useAuthStore } from '@/stores/modules/auth';
 
 interface PasswordForm {
   password: string;
@@ -108,6 +109,7 @@ interface PasswordForm {
 
 const route = useRoute();
 const router = useRouter();
+const authStore = useAuthStore();
 const { t } = useI18n();
 const token = computed(() =>
   typeof route.query.token === 'string' ? route.query.token.trim() : '',
@@ -158,6 +160,8 @@ async function submitReset() {
 }
 
 function goLogin() {
+  // 重置密码会使全部旧 Token 失效，不能再让路由守卫使用本地旧会话。
+  authStore.clearAuth();
   void router.replace({ name: 'Login' });
 }
 </script>

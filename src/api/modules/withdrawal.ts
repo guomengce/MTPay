@@ -92,6 +92,11 @@ export interface WithdrawalRecord {
 
 export type WithdrawalStatus = 0 | 1 | 2 | 3 | 4 | 5;
 
+export interface WithdrawalAvailableActions {
+  can_supplement_withdrawal: boolean;
+  can_supplement_risk: boolean;
+}
+
 export interface WithdrawalOrder {
   id: number;
   order_no: string;
@@ -108,6 +113,12 @@ export interface WithdrawalOrder {
   payment_file_count: number;
   submitted_at: string | null;
   updated_at: string | null;
+  available_actions?: WithdrawalAvailableActions;
+  risk?: {
+    can_supplement_risk: boolean;
+    customer_risk_status: string | null;
+    risk_supplement_request: string | null;
+  };
 }
 
 export interface WithdrawalOrderDetail extends WithdrawalOrder {
@@ -129,7 +140,7 @@ export interface WithdrawalOrderDetail extends WithdrawalOrder {
   application_files: WithdrawalFile[];
   payment_files: WithdrawalFile[];
   records: WithdrawalRecord[];
-  available_actions: {
+  available_actions: WithdrawalAvailableActions & {
     agent_can_supplement: boolean;
     admin_can_request_supplement: boolean;
     admin_can_approve: boolean;
@@ -159,8 +170,14 @@ export interface WithdrawalDraft {
   file_ids: number[];
 }
 
-export interface SubmitWithdrawalPayload extends WithdrawalDraft { security_challenge: string }
-export interface WithdrawalSecurityChallenge { security_challenge: string; expires_at: string; email: string }
+export interface SubmitWithdrawalPayload extends WithdrawalDraft {
+  security_challenge: string;
+}
+export interface WithdrawalSecurityChallenge {
+  security_challenge: string;
+  expires_at: string;
+  email: string;
+}
 
 function toWithdrawalFormData<T extends object>(payload: T) {
   const form = new FormData();
@@ -177,19 +194,36 @@ function toWithdrawalFormData<T extends object>(payload: T) {
 
 // FRONTEND_AI_API_DOCUMENT(2).md §8.7: every verification uses the unchanged draft.
 export function createWithdrawalSecurityChallenge(payload: WithdrawalDraft) {
-  return request.post<unknown, WithdrawalSecurityChallenge>('/web/createWithdrawalSecurityChallenge', toWithdrawalFormData(payload));
+  return request.post<unknown, WithdrawalSecurityChallenge>(
+    '/web/createWithdrawalSecurityChallenge',
+    toWithdrawalFormData(payload),
+  );
 }
 export function sendWithdrawalEmailCode(payload: SubmitWithdrawalPayload) {
-  return request.post<unknown, { expires_in: number }>('/web/sendWithdrawalEmailCode', toWithdrawalFormData(payload));
+  return request.post<unknown, { expires_in: number }>(
+    '/web/sendWithdrawalEmailCode',
+    toWithdrawalFormData(payload),
+  );
 }
-export function verifyWithdrawalEmailCode(payload: SubmitWithdrawalPayload & { email_code: string }) {
-  return request.post<unknown, { email_verified: boolean }>('/web/verifyWithdrawalEmailCode', toWithdrawalFormData(payload));
+export function verifyWithdrawalEmailCode(
+  payload: SubmitWithdrawalPayload & { email_code: string },
+) {
+  return request.post<unknown, { email_verified: boolean }>(
+    '/web/verifyWithdrawalEmailCode',
+    toWithdrawalFormData(payload),
+  );
 }
 export function verifyWithdrawalTwoFactor(payload: SubmitWithdrawalPayload & { code: string }) {
-  return request.post<unknown, { two_factor_verified: boolean }>('/web/verifyWithdrawalTwoFactor', toWithdrawalFormData(payload));
+  return request.post<unknown, { two_factor_verified: boolean }>(
+    '/web/verifyWithdrawalTwoFactor',
+    toWithdrawalFormData(payload),
+  );
 }
 export function cancelWithdrawalSecurityChallenge(security_challenge: string) {
-  return request.post<unknown, []>('/web/cancelWithdrawalSecurityChallenge', toWithdrawalFormData({ security_challenge }));
+  return request.post<unknown, []>(
+    '/web/cancelWithdrawalSecurityChallenge',
+    toWithdrawalFormData({ security_challenge }),
+  );
 }
 export interface SupplementWithdrawalPayload {
   id: number;
@@ -213,10 +247,14 @@ export interface WithdrawalCurrencyOption {
 /** 将新版多币种配置与旧版单币种配置统一为表单选项。 */
 export function normalizeWithdrawalCurrencyOptions(config: WithdrawalConfig | null | undefined) {
   if (!config) return [] as WithdrawalCurrencyOption[];
-  const options = (config.currencies ?? []).map((entry) => {
-    if ('currency' in entry) return entry;
-    return { currency: entry, balance: entry.balance, fee_amount: entry.fee_amount };
-  }).filter((entry): entry is WithdrawalCurrencyOption => Boolean(entry.balance && entry.fee_amount !== undefined));
+  const options = (config.currencies ?? [])
+    .map((entry) => {
+      if ('currency' in entry) return entry;
+      return { currency: entry, balance: entry.balance, fee_amount: entry.fee_amount };
+    })
+    .filter((entry): entry is WithdrawalCurrencyOption =>
+      Boolean(entry.balance && entry.fee_amount !== undefined),
+    );
   if (options.length) return options;
   return config.currency && config.balance && config.fee_amount !== undefined
     ? [{ currency: config.currency, balance: config.balance, fee_amount: config.fee_amount }]
@@ -230,7 +268,10 @@ export function uploadWithdrawalFile(formData: FormData) {
 
 /** 提交出金申请；手续费和总扣款由后端按固定配置计算。 */
 export function submitWithdrawal(payload: SubmitWithdrawalPayload) {
-  return request.post<unknown, WithdrawalOrderDetail>('/web/submitWithdrawal', toWithdrawalFormData(payload));
+  return request.post<unknown, WithdrawalOrderDetail>(
+    '/web/submitWithdrawal',
+    toWithdrawalFormData(payload),
+  );
 }
 
 /** 查询当前代理的出金订单分页列表。 */
@@ -246,6 +287,11 @@ export function fetchWithdrawalDetail(id: number) {
 /** 待补件订单提交新一轮文件。 */
 export function supplementWithdrawal(payload: SupplementWithdrawalPayload) {
   return request.post<unknown, WithdrawalOrderDetail>('/web/supplementWithdrawal', payload);
+}
+
+/** 提交風控要求的補件；與原出金審核補件流程分開。 */
+export function supplementWithdrawalRisk(payload: SupplementWithdrawalPayload) {
+  return request.post<unknown, WithdrawalOrderDetail>('/web/supplementWithdrawalRisk', payload);
 }
 
 /** 预览私有附件。接口直接返回二进制内容。 */

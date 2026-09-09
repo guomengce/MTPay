@@ -49,6 +49,7 @@ export function useWithdrawalManagement() {
     supplementSubmitting: supplement.submitting,
     supplementUploading: supplement.uploading,
     submitSupplement: supplement.submit,
+    submitRiskSupplement: supplement.submitRisk,
     uploadSupplementFile: supplement.uploadFile,
     clearSupplementResult: supplement.clearLast,
 

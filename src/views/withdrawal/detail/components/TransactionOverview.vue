@@ -3,12 +3,26 @@
     <div class="amounts">
       <header class="section-title"><i />{{ t('withdrawal.amountDetails') }}</header>
       <div class="amounts__rows">
-        <div><span><i class="is-debit" />{{ t('withdrawal.accountDeduction') }}</span><strong>{{
-          formatMoney(detail.total_amount) }} <small>{{ detail.currency.code }}</small></strong></div>
-        <div><span><i class="is-fee" />{{ t('withdrawal.fixedFee') }}</span><strong>{{
-          formatMoney(formatFixedFee(detail.fee_amount)) }} <small>{{ detail.currency.code }}</small></strong></div>
-        <div class="is-result"><span><i />{{ t('withdrawal.actualWithdrawal') }}</span><strong>{{
-          formatMoney(detail.amount) }} <small>{{ detail.currency.code }}</small></strong></div>
+        <div>
+          <span><i class="is-debit" />{{ t('withdrawal.accountDeduction') }}</span
+          ><strong
+            >{{ formatMoney(detail.total_amount) }}
+            <small>{{ detail.currency.code }}</small></strong
+          >
+        </div>
+        <div>
+          <span><i class="is-fee" />{{ t('withdrawal.fixedFee') }}</span
+          ><strong
+            >{{ formatMoney(formatFixedFee(detail.fee_amount)) }}
+            <small>{{ detail.currency.code }}</small></strong
+          >
+        </div>
+        <div class="is-result">
+          <span><i />{{ t('withdrawal.actualWithdrawal') }}</span
+          ><strong
+            >{{ formatMoney(detail.amount) }} <small>{{ detail.currency.code }}</small></strong
+          >
+        </div>
       </div>
     </div>
     <div class="parties">
@@ -30,7 +44,11 @@ import { useI18n } from 'vue-i18n';
 import type { WithdrawalOrderDetail } from '@/api/modules/withdrawal';
 import { formatMoney } from '@/utils/formatMoney';
 import { formatFixedFee } from '@/utils/decimal';
-import PayerCompanyCard from './PayerCompanyCard.vue'; import PayerPersonCard from './PayerPersonCard.vue'; import PayeeCompanyCard from './PayeeCompanyCard.vue'; import PayeePersonCard from './PayeePersonCard.vue'; import PayeeBankCard from './PayeeBankCard.vue';
+import PayerCompanyCard from './PayerCompanyCard.vue';
+import PayerPersonCard from './PayerPersonCard.vue';
+import PayeeCompanyCard from './PayeeCompanyCard.vue';
+import PayeePersonCard from './PayeePersonCard.vue';
+import PayeeBankCard from './PayeeBankCard.vue';
 defineProps<{ detail: WithdrawalOrderDetail }>();
 const { t } = useI18n();
 </script>
@@ -40,7 +58,9 @@ const { t } = useI18n();
   border: 1px solid #d8e3ec;
   border-radius: 15px;
   background: #fff;
-  box-shadow: 0 2px 5px rgb(20 46 78 / 4%), 0 12px 30px rgb(20 46 78 / 8%);
+  box-shadow:
+    0 2px 5px rgb(20 46 78 / 4%),
+    0 12px 30px rgb(20 46 78 / 8%);
 }
 
 .section-title {
@@ -72,7 +92,7 @@ const { t } = useI18n();
     gap: 2px;
   }
 
-  &__rows>div {
+  &__rows > div {
     display: flex;
     min-width: 0;
     align-items: center;
@@ -82,7 +102,7 @@ const { t } = useI18n();
     padding: 7px 10px;
     color: #53677c;
 
-    >span {
+    > span {
       display: inline-flex;
       align-items: center;
       gap: 9px;
@@ -131,7 +151,7 @@ const { t } = useI18n();
   }
 }
 
-.amounts>.section-title {
+.amounts > .section-title {
   margin: 0 -15px;
 }
 
@@ -198,11 +218,11 @@ const { t } = useI18n();
   .amounts {
     padding: 0 12px 12px;
 
-    >.section-title {
+    > .section-title {
       margin: 0 -12px;
     }
 
-    &__rows>div strong {
+    &__rows > div strong {
       font-size: 16px;
     }
 

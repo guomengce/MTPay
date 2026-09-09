@@ -9,6 +9,7 @@
           <WhitelistFilters
             v-model:role="role"
             v-model:entity-type="entityType"
+            v-model:status="status"
             :loading="listLoading"
             @change="applyFilters"
           />
@@ -80,6 +81,7 @@ const {
   limit,
   role,
   entityType,
+  status,
   listLoading,
   fetchList,
   setPage,

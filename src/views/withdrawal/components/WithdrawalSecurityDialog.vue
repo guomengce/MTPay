@@ -1,5 +1,5 @@
 <template>
-  <el-dialog :model-value="modelValue" class="security-dialog" width="480px" append-to-body destroy-on-close
+  <AgentDialog :model-value="modelValue" :title="stepTitle" class="security-dialog" width="480px" append-to-body destroy-on-close
     :close-on-click-modal="false" :close-on-press-escape="!busy" :show-close="!busy" :before-close="requestClose">
     <template #header>
       <div class="security-dialog__header">
@@ -40,11 +40,12 @@
         </el-button>
       </div>
     </template>
-  </el-dialog>
+  </AgentDialog>
 </template>
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import AgentDialog from '@/components/common/AgentDialog.vue';
 const props = defineProps<{ modelValue: boolean; busy: boolean; email: string; emailVerified: boolean; twoFactorVerified: boolean; expired: boolean; uncertain: boolean; error: string; resendSeconds: number; ready: boolean }>();
 const emit = defineEmits<{ (e: 'close'): void; (e: 'confirm'): void; (e: 'send-email-code'): void; (e: 'verify', kind: 'email' | 'twoFactor', code: string): void }>();
 const { t } = useI18n();

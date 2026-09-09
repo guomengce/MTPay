@@ -1,24 +1,20 @@
 <template>
-  <el-dialog
+  <AgentDialog
     :model-value="modelValue"
-    class="withdrawal-supplement-dialog"
+    :title="t(mode === 'risk' ? 'withdrawal.riskSupplementTitle' : 'withdrawal.supplementTitle')"
+    :icon="UploadFilled"
     width="min(560px, calc(100vw - 24px))"
     append-to-body
     destroy-on-close
     :close-on-click-modal="false"
     @close="close"
   >
-    <template #header>
-      <div class="withdrawal-supplement-dialog__header">
-        <span class="withdrawal-supplement-dialog__icon"><i class="ri-file-upload-line" /></span>
-        <h2>{{ t('withdrawal.supplementTitle') }}</h2>
-      </div>
-    </template>
-
     <div v-if="requirement" class="withdrawal-supplement-dialog__requirement">
       <i class="ri-error-warning-line" />
       <div>
-        <strong>{{ t('withdrawal.platformRequirement') }}</strong>
+        <strong>{{
+          t(mode === 'risk' ? 'withdrawal.riskRequirement' : 'withdrawal.platformRequirement')
+        }}</strong>
         <p>{{ requirement }}</p>
       </div>
     </div>
@@ -37,7 +33,9 @@
           @change="handleFileChange"
         >
           <el-icon class="el-icon--upload"><UploadFilled /></el-icon>
-          <div class="el-upload__text">{{ t('withdrawal.dropFiles') }}<em>{{ t('withdrawal.clickSelect') }}</em></div>
+          <div class="el-upload__text">
+            {{ t('withdrawal.dropFiles') }}<em>{{ t('withdrawal.clickSelect') }}</em>
+          </div>
           <template #tip>
             <div class="el-upload__tip">
               {{ t('withdrawal.fileLimit') }}
@@ -68,7 +66,7 @@
         </div>
       </div>
     </template>
-  </el-dialog>
+  </AgentDialog>
 </template>
 
 <script setup lang="ts">
@@ -81,6 +79,7 @@ import { UploadFilled } from '@element-plus/icons-vue';
 import { useI18n } from 'vue-i18n';
 
 import type { WithdrawalFile, WithdrawalOrder } from '@/api/modules/withdrawal';
+import AgentDialog from '@/components/common/AgentDialog.vue';
 
 const props = defineProps<{
   modelValue: boolean;
@@ -89,6 +88,7 @@ const props = defineProps<{
   submitting?: boolean;
   uploading?: boolean;
   uploadFile?: (file: File) => Promise<WithdrawalFile>;
+  mode?: 'business' | 'risk';
 }>();
 
 const emit = defineEmits<{
@@ -115,18 +115,40 @@ function handleExceed() {
 async function handleFileChange(file: UploadFile, files: UploadFiles) {
   fileList.value = files;
   if (!file.raw || file.status === 'success' || !props.uploadFile) return;
-  if (file.raw.size > 10 * 1024 * 1024) { ElMessage.warning(t('withdrawal.fileTooLarge')); fileList.value=fileList.value.filter(item=>item.uid!==file.uid); return; }
-  try { file.status='uploading'; file.response=await props.uploadFile(file.raw); file.status='success'; }
-  catch { file.status='fail'; fileList.value=fileList.value.filter(item=>item.uid!==file.uid); }
+  const extension = file.name.split('.').pop()?.toLowerCase();
+  if (!extension || !['pdf', 'png', 'jpg', 'jpeg'].includes(extension)) {
+    ElMessage.warning(t('withdrawal.unsupportedFormat'));
+    fileList.value = fileList.value.filter((item) => item.uid !== file.uid);
+    return;
+  }
+  if (file.raw.size > 10 * 1024 * 1024) {
+    ElMessage.warning(t('withdrawal.fileTooLarge'));
+    fileList.value = fileList.value.filter((item) => item.uid !== file.uid);
+    return;
+  }
+  try {
+    file.status = 'uploading';
+    file.response = await props.uploadFile(file.raw);
+    file.status = 'success';
+  } catch {
+    file.status = 'fail';
+    fileList.value = fileList.value.filter((item) => item.uid !== file.uid);
+  }
 }
 
 function submit() {
-  const fileIds=fileList.value.map(item=>(item.response as WithdrawalFile|undefined)?.file_id).filter((id):id is number=>typeof id==='number');
+  const fileIds = [
+    ...new Set(
+      fileList.value
+        .map((item) => (item.response as WithdrawalFile | undefined)?.file_id)
+        .filter((id): id is number => typeof id === 'number'),
+    ),
+  ];
   if (!fileIds.length) {
     ElMessage.warning(t('withdrawal.selectFile'));
     return;
   }
-  emit('submit', { file_ids:fileIds, message: message.value.trim() || undefined });
+  emit('submit', { file_ids: fileIds, message: message.value.trim() || undefined });
 }
 
 watch(
@@ -139,36 +161,6 @@ watch(
 
 <style scoped lang="scss">
 .withdrawal-supplement-dialog {
-  &__header {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-
-    h2 {
-      margin: 0;
-      color: #102a49;
-      font-size: 20px;
-    }
-
-    p {
-      margin: 5px 0 0;
-      color: #718298;
-      font-size: 13px;
-    }
-  }
-
-  &__icon {
-    display: inline-flex;
-    width: 44px;
-    height: 44px;
-    align-items: center;
-    justify-content: center;
-    border-radius: 13px;
-    color: #079d98;
-    background: #e7f8f6;
-    font-size: 22px;
-  }
-
   &__requirement {
     display: flex;
     gap: 10px;
@@ -201,7 +193,7 @@ watch(
   &__footer {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
     gap: 16px;
 
     > span {
@@ -211,29 +203,8 @@ watch(
   }
 }
 
-:global(.withdrawal-supplement-dialog) {
-  overflow: hidden;
-  border-radius: 18px;
-}
-
-:global(.withdrawal-supplement-dialog .el-dialog__header) {
-  margin: 0;
-  padding: 22px 24px 18px;
-  border-bottom: 1px solid #e8eef3;
-}
-
-:global(.withdrawal-supplement-dialog .el-dialog__body) {
-  padding: 22px 24px 8px;
-}
-
-:global(.withdrawal-supplement-dialog .el-dialog__footer) {
-  padding: 16px 24px 20px;
-  border-top: 1px solid #e8eef3;
-}
-
 @include mobile {
   .withdrawal-supplement-dialog {
-
     &__footer {
       align-items: stretch;
       flex-direction: column;

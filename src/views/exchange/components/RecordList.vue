@@ -159,7 +159,7 @@ const cardItems = computed<ResponsiveCardItem[]>(() => props.list.map((row) => (
     { label: t('exchange.sourceAsset'), value: `${formatMoney(row.source_amount)} ${row.source_currency.code}`, strong: true },
     { label: t('records.exchangeRate'), value: formatExchangeRate(row.exchange_rate), strong: true },
     { label: t('exchange.receivedAsset'), value: `${formatMoney(row.target_amount)} ${row.target_currency.code}`, strong: true },
-  ], actions: [{ key: 'detail', label: t('exchange.viewDetails'), icon: View, type: 'primary', plain: true }],
+  ], actions: [{ key: 'detail', label: t('common.actions.details'), icon: View, type: 'primary', plain: true }],
 })));
 
 const sourceCurrencyFilter = computed<number | undefined>({

@@ -4,24 +4,41 @@
       <small>{{ t('withdrawal.orderEyebrow') }}</small>
       <div>
         <h1>{{ detail.order_no }}</h1>
-        <button type="button" :title="t('withdrawal.copyOrder')" :aria-label="t('withdrawal.copyOrder')" @click="copyOrderNo">
+        <button
+          type="button"
+          :title="t('withdrawal.copyOrder')"
+          :aria-label="t('withdrawal.copyOrder')"
+          @click="copyOrderNo"
+        >
           <i class="ri-file-copy-line" />
         </button>
       </div>
     </div>
 
     <div class="order-header__meta">
-      <span><small>{{ t('withdrawal.submittedAt') }}</small><strong>{{ detail.submitted_at || '—' }}</strong></span>
-      <span><small>{{ t('withdrawal.updatedAt') }}</small><strong>{{ detail.updated_at || '—' }}</strong></span>
+      <span
+        ><small>{{ t('withdrawal.submittedAt') }}</small
+        ><strong>{{ detail.submitted_at || '—' }}</strong></span
+      >
+      <span
+        ><small>{{ t('withdrawal.updatedAt') }}</small
+        ><strong>{{ detail.updated_at || '—' }}</strong></span
+      >
     </div>
 
-    <StatusBadge :label="detail.status_name" :type="statusType" :effect="statusEffect" />
+    <div class="order-header__statuses">
+      <StatusBadge :label="detail.status_name" :type="statusType" :effect="statusEffect" />
+      <span v-if="visibleRiskStatus" class="order-header__risk-status">
+        {{ visibleRiskStatus }}
+      </span>
+    </div>
   </section>
 </template>
 
 <script setup lang="ts">
 /** 法币出金订单顶部信息栏：只展示订单标识、时间和状态。 */
 import { ElMessage } from 'element-plus';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import type { WithdrawalOrderDetail } from '@/api/modules/withdrawal';
@@ -33,6 +50,10 @@ const props = defineProps<{
   statusType: StatusBadgeType;
   statusEffect?: StatusBadgeEffect;
 }>();
+const visibleRiskStatus = computed(() => {
+  const value = props.detail.risk?.customer_risk_status?.trim() || '';
+  return ['待平台審核', '待平台审核', 'Pending platform review'].includes(value) ? '' : value;
+});
 
 async function copyOrderNo() {
   try {
@@ -61,11 +82,56 @@ const { t } = useI18n();
   &__identity {
     min-width: 0;
 
-    > small { color: #77889c; font-size: 11px; font-weight: 600; }
-    > div { display: flex; min-width: 0; align-items: center; gap: 8px; margin-top: 4px; }
-    h1 { margin: 0; color: #10243d; font-size: clamp(18px, 2vw, 23px); font-weight: 720; line-height: 1.3; overflow-wrap: anywhere; }
-    button { display: grid; width: 27px; height: 27px; flex: 0 0 27px; padding: 0; place-items: center; border: 1px solid #dce6ed; border-radius: 8px; color: #668098; background: #f8fafc; cursor: pointer; }
-    button:hover { border-color: #a9dcd8; color: #078f89; background: #f0faf9; }
+    > small {
+      color: #77889c;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    > div {
+      display: flex;
+      min-width: 0;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    h1 {
+      margin: 0;
+      color: #10243d;
+      font-size: clamp(18px, 2vw, 23px);
+      font-weight: 720;
+      line-height: 1.3;
+      overflow-wrap: anywhere;
+    }
+    button {
+      display: grid;
+      width: 27px;
+      height: 27px;
+      flex: 0 0 27px;
+      padding: 0;
+      place-items: center;
+      border: 1px solid #dce6ed;
+      border-radius: 8px;
+      color: #668098;
+      background: #f8fafc;
+      cursor: pointer;
+    }
+    button:hover {
+      border-color: #a9dcd8;
+      color: #078f89;
+      background: #f0faf9;
+    }
+  }
+
+  &__statuses {
+    display: grid;
+    justify-items: end;
+    gap: 7px;
+  }
+
+  &__risk-status {
+    color: #a65f00;
+    font-size: 11px;
+    font-weight: 650;
   }
 
   &__meta {
@@ -76,14 +142,37 @@ const { t } = useI18n();
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 28px;
 
-    span { display: grid; min-width: 0; gap: 5px; }
-    small { color: #718399; font-size: 12px; }
-    strong { color: #20364e; font-size: 14px; font-weight: 650; white-space: nowrap; }
+    span {
+      display: grid;
+      min-width: 0;
+      gap: 5px;
+    }
+    small {
+      color: #718399;
+      font-size: 12px;
+    }
+    strong {
+      color: #20364e;
+      font-size: 14px;
+      font-weight: 650;
+      white-space: nowrap;
+    }
   }
 }
 
 @include mobile {
-  .order-header { align-items: flex-start; padding: 16px; grid-template-columns: minmax(0, 1fr) auto; gap: 14px; }
-  .order-header__meta { width: 100%; min-width: 0; grid-column: 1 / -1; grid-template-columns: 1fr; gap: 12px; }
+  .order-header {
+    align-items: flex-start;
+    padding: 16px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 14px;
+  }
+  .order-header__meta {
+    width: 100%;
+    min-width: 0;
+    grid-column: 1 / -1;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
 }
 </style>

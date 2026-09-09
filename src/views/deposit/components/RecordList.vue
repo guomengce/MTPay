@@ -144,7 +144,7 @@ const cardItems = computed<ResponsiveCardItem[]>(() => props.list.map((row) => (
     { label: t('deposit.currencyNetwork'), value: `${row.currency.code} · ${row.network.code}`, strong: true },
     { label: t('deposit.amount'), value: `${formatMoney(row.amount)} ${row.currency.code}`, strong: true },
     { label: 'Txid', value: formatLongIdentifier(row.txid), mono: true },
-  ], actions: [{ key: 'detail', label: t('deposit.viewDetails'), icon: View, type: 'primary', plain: true }],
+  ], actions: [{ key: 'detail', label: t('common.actions.details'), icon: View, type: 'primary', plain: true }],
 })));
 
 const statusFilter = computed<DepositStatus | undefined>({

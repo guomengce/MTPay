@@ -50,7 +50,7 @@ export function useWhitelistDetailView(detail: Ref<WhitelistItemDetail | null>) 
     if (COUNTRY_FIELDS.has(key)) value = getCountryLabel(raw, locale.value);
     if (key === 'company_type') value = Number(raw) === 1 ? t('whitelist.nonFinancial') : Number(raw) === 2 ? t('whitelist.financial') : value;
     if (key === 'document_type') value = Number(raw) === 1 ? t('whitelist.identityDocument') : Number(raw) === 2 ? t('whitelist.passport') : value;
-    if (key === 'remittance_purpose') value = getRemittancePurposeLabel(raw);
+    if (key === 'remittance_purpose') value = getRemittancePurposeLabel(raw, t);
     return { key, label, value, ...options };
   }
 

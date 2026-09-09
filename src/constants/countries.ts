@@ -260,6 +260,14 @@ export interface CountryOption {
   label: string;
 }
 
+type SupportedLocale = keyof (typeof COUNTRY_NAMES)[CountryCode];
+
+function normalizeLocale(locale: string): SupportedLocale {
+  if (locale.toLowerCase().startsWith('zh-cn')) return 'zh-CN';
+  if (locale.toLowerCase().startsWith('en')) return 'en-US';
+  return 'zh-HK';
+}
+
 const collator = new Intl.Collator(['zh-Hant'], { sensitivity: 'base' });
 
 /** 繁体中文国家名称；白名单注册/经营国家字段直接提交该名称。 */
@@ -279,22 +287,24 @@ for (const code of COUNTRY_CODES) {
   COUNTRY_CODE_BY_LABEL.set(names['en-US'], code);
 }
 
-/** 国家组件统一显示繁体名称，value 同样保留繁体名称供接口提交。 */
-export function getLocalizedCountryOptions(_locale = 'zh-HK') {
-  const sorter = new Intl.Collator(['zh-Hant'], { sensitivity: 'base' });
+/** 国家组件按界面语言显示名称，value 始终使用 ISO 两位代码供接口提交。 */
+export function getLocalizedCountryOptions(locale = 'zh-HK') {
+  const normalizedLocale = normalizeLocale(locale);
+  const sorter = new Intl.Collator([normalizedLocale], { sensitivity: 'base' });
   return COUNTRY_OPTIONS.map((country) => ({
     ...country,
-    displayLabel: COUNTRY_NAMES[country.code]['zh-HK'],
+    displayLabel: COUNTRY_NAMES[country.code][normalizedLocale],
+    searchLabels: Object.values(COUNTRY_NAMES[country.code]),
   })).sort((left, right) => sorter.compare(left.displayLabel, right.displayLabel));
 }
 
-/** 将历史 ISO 代码转换为繁体名称；后端已返回名称时保持原样。 */
-export function getCountryLabel(value: unknown, _locale = 'zh-HK'): string {
+/** 将 ISO 代码或历史名称转换为当前界面语言的国家名称。 */
+export function getCountryLabel(value: unknown, locale = 'zh-HK'): string {
   if (typeof value !== 'string' || !value.trim()) return '—';
   const code = value.trim().toUpperCase();
   const countryCode = COUNTRY_LABEL_MAP.has(code)
     ? (code as CountryCode)
     : COUNTRY_CODE_BY_LABEL.get(value.trim());
   if (!countryCode) return value;
-  return COUNTRY_NAMES[countryCode]['zh-HK'] || COUNTRY_LABEL_MAP.get(countryCode) || value;
+  return COUNTRY_NAMES[countryCode][normalizeLocale(locale)] || COUNTRY_LABEL_MAP.get(countryCode) || value;
 }

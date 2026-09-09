@@ -55,7 +55,7 @@ const request = axios.create({
 });
 
 /** 仅凭证失效才清理登录态；兼容 HTTP 401 与后端业务失效状态。 */
-const AUTH_EXPIRED_STATUSES = new Set([401, 50013, 50039]);
+const AUTH_EXPIRED_STATUSES = new Set([401, 50013, 50015, 50039]);
 const PUBLIC_AUTH_PATHS = new Set([
   '/api/getPubKey', '/web/verifyTwoFactorLogin',
   '/web/agentLogin',

@@ -1,20 +1,14 @@
 <template>
-  <el-dialog
+  <AgentDialog
     :model-value="modelValue"
-    class="whitelist-supplement-dialog"
+    :title="t('whitelist.supplementTitle')"
+    :icon="UploadFilled"
     width="min(560px, calc(100vw - 24px))"
     append-to-body
     destroy-on-close
     :close-on-click-modal="false"
     @close="close"
   >
-    <template #header>
-      <div class="supplement-dialog__header">
-        <span class="supplement-dialog__icon"><i class="ri-file-upload-line" /></span>
-        <h2>{{ t('whitelist.supplementTitle') }}</h2>
-      </div>
-    </template>
-
     <div v-if="supplementRequirement" class="supplement-dialog__requirement">
       <i class="ri-error-warning-line" />
       <div>
@@ -68,7 +62,7 @@
         </div>
       </div>
     </template>
-  </el-dialog>
+  </AgentDialog>
 </template>
 
 <script setup lang="ts">
@@ -80,6 +74,7 @@ import { UploadFilled } from '@element-plus/icons-vue';
 import { useI18n } from 'vue-i18n';
 
 import type { WhitelistFile, WhitelistItem } from '@/api/modules/whitelist';
+import AgentDialog from '@/components/common/AgentDialog.vue';
 
 const props = defineProps<{
   modelValue: boolean;
@@ -132,35 +127,6 @@ watch(
 
 <style scoped lang="scss">
 .supplement-dialog {
-  &__header {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-
-    h2 {
-      margin: 0;
-      color: #102a49;
-      font-size: 20px;
-    }
-    p {
-      margin: 5px 0 0;
-      color: #718298;
-      font-size: 13px;
-    }
-  }
-
-  &__icon {
-    display: inline-flex;
-    width: 44px;
-    height: 44px;
-    align-items: center;
-    justify-content: center;
-    border-radius: 13px;
-    color: #079d98;
-    background: #e7f8f6;
-    font-size: 22px;
-  }
-
   &__requirement {
     display: flex;
     gap: 10px;
@@ -191,7 +157,7 @@ watch(
   &__footer {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
     gap: 16px;
 
     > span {
@@ -199,24 +165,6 @@ watch(
       font-size: 12px;
     }
   }
-}
-
-:global(.whitelist-supplement-dialog) {
-  overflow: hidden;
-  border-radius: 18px;
-}
-
-:global(.whitelist-supplement-dialog .el-dialog__header) {
-  margin: 0;
-  padding: 22px 24px 18px;
-  border-bottom: 1px solid #e8eef3;
-}
-:global(.whitelist-supplement-dialog .el-dialog__body) {
-  padding: 22px 24px 8px;
-}
-:global(.whitelist-supplement-dialog .el-dialog__footer) {
-  padding: 16px 24px 20px;
-  border-top: 1px solid #e8eef3;
 }
 
 @include mobile {

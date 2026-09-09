@@ -27,6 +27,7 @@ export function useWhitelistManagement() {
     limit: list.limit,
     role: list.role,
     entityType: list.entityType,
+    status: list.status,
     listLoading: list.loading,
     fetchList: list.fetchList,
     setPage: list.setPage,

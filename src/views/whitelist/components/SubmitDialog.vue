@@ -1,33 +1,15 @@
 <template>
-  <el-dialog
+  <AgentDialog
     :model-value="modelValue"
     class="whitelist-submit-dialog"
+    :title="t('whitelist.add')"
+    :icon="DocumentAdd"
     width="min(880px, calc(100vw - 32px))"
     top="4vh"
-    :show-close="false"
     :close-on-click-modal="false"
     destroy-on-close
     @update:model-value="emit('update:modelValue', $event)"
   >
-    <template #header>
-      <header class="submit-dialog__header">
-        <span class="submit-dialog__header-icon">
-          <el-icon><DocumentAdd /></el-icon>
-        </span>
-        <div>
-          <h2>{{ t('whitelist.add') }}</h2>
-        </div>
-        <el-button
-          class="submit-dialog__close"
-          text
-          circle
-          :icon="Close"
-          :aria-label="t('common.actions.close')"
-          @click="close"
-        />
-      </header>
-    </template>
-
     <div class="submit-dialog__body">
       <el-steps
         class="submit-dialog__steps"
@@ -205,12 +187,11 @@
                   <el-option
                     v-for="option in REMITTANCE_PURPOSE_OPTIONS"
                     :key="option.value"
-                    :label="option.label"
+                    :label="t(option.labelKey)"
                     :value="option.value"
                   >
                     <span class="remittance-option">
-                      <small>{{ option.value }}</small>
-                      <span>{{ option.label }}</span>
+                      <span>{{ t(option.labelKey) }}</span>
                     </span>
                   </el-option>
                 </el-select>
@@ -270,7 +251,7 @@
           </el-button>
       </footer>
     </template>
-  </el-dialog>
+  </AgentDialog>
 </template>
 
 <script setup lang="ts">
@@ -281,17 +262,13 @@
  * - 文件上传与接口提交仍由父级 useWhitelistForm 处理。
  */
 import { ref, watch } from 'vue';
-import { ElMessage } from 'element-plus';
 import { useI18n } from 'vue-i18n';
 import type { UploadFile, UploadFiles } from 'element-plus';
-import {
-  Close,
-  DocumentAdd,
-  UploadFilled,
-} from '@element-plus/icons-vue';
+import { DocumentAdd, UploadFilled } from '@element-plus/icons-vue';
 
 import type { SubmitWhitelistPayload, WhitelistFile, WhitelistItemDetail } from '@/api/modules/whitelist';
 import CountrySelect from '@/components/common/CountrySelect.vue';
+import AgentDialog from '@/components/common/AgentDialog.vue';
 import { REMITTANCE_PURPOSE_OPTIONS } from '@/constants/remittancePurposes';
 import { useWhitelistSubmitForm } from '../composables/useWhitelistSubmitForm';
 
@@ -324,12 +301,14 @@ const {
 const activeStep = ref(0);
 const { t } = useI18n();
 
-function goNext() {
-  if (formState.role === null || formState.entity_type === null) {
-    ElMessage.warning(t('whitelist.selectIdentityWarning'));
-    return;
-  }
-  formRef.value?.clearValidate();
+async function goNext() {
+  if (!formRef.value) return;
+  const valid = await formRef.value
+    .validateField(['role', 'entity_type'])
+    .then(() => true)
+    .catch(() => false);
+  if (!valid) return;
+  formRef.value.clearValidate();
   activeStep.value = 1;
 }
 
@@ -363,17 +342,7 @@ defineExpose({ close });
 
 <style scoped lang="scss">
 :global(.whitelist-submit-dialog) {
-  overflow: hidden;
-  border: 1px solid #dce6ef;
-  border-radius: 22px;
   background: #f5f8fb;
-  box-shadow: 0 28px 80px rgb(8 31 58 / 22%);
-  padding:0;
-}
-
-:global(.whitelist-submit-dialog .el-dialog__header) {
-  margin: 0;
-  padding: 0;
 }
 
 :global(.whitelist-submit-dialog .el-dialog__body) {
@@ -385,49 +354,6 @@ defineExpose({ close });
 }
 
 .submit-dialog {
-  &__header {
-    display: flex;
-    position: relative;
-    align-items: center;
-    gap: 11px;
-    padding: 13px 20px;
-    border-bottom: 1px solid #e2e9f0;
-    background: radial-gradient(circle at 78% 0%, rgb(25 184 168 / 12%), transparent 32%), #fff;
-
-    &-icon {
-      display: inline-flex;
-      width: 38px;
-      height: 38px;
-      flex: 0 0 38px;
-      align-items: center;
-      justify-content: center;
-      border-radius: 11px;
-      color: #fff;
-      background: linear-gradient(135deg, #19b8a8, #268ee6);
-      box-shadow: 0 10px 24px rgb(20 166 174 / 22%);
-      font-size: 19px;
-    }
-
-    div {
-      min-width: 0;
-      flex: 1;
-    }
-
-    h2 {
-      margin: 0;
-      color: #0a2342;
-      font-size: 19px;
-      font-weight: 750;
-    }
-
-  }
-
-  &__close {
-    flex: 0 0 auto;
-    color: #718096;
-    font-size: 18px;
-  }
-
   &__body {
     max-height: calc(92vh - 174px);
     overflow-y: auto;
@@ -599,16 +525,6 @@ defineExpose({ close });
   display: flex;
   min-width: 0;
   align-items: center;
-  gap: 10px;
-
-  small {
-    display: inline-flex;
-    width: 24px;
-    flex: 0 0 24px;
-    justify-content: center;
-    color: #078f89;
-    font-weight: 700;
-  }
 
   span {
     overflow: hidden;

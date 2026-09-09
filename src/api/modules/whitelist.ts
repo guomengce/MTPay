@@ -81,6 +81,8 @@ export interface WhitelistItemDetail extends WhitelistItem {
 export interface WhitelistListParams {
   page?: number;
   limit?: number;
+  /** 0 待审核 / 1 待补交文件 / 2 通过 / 3 驳回。 */
+  status?: 0 | 1 | 2 | 3;
   /** 1 付款人 / 2 收款人。 */
   role?: 1 | 2;
   /** 1 公司 / 2 个人。 */

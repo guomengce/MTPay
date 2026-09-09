@@ -1,8 +1,5 @@
 <template>
-  <DetailCard
-    :title="t('withdrawal.reviewInfo')"
-    icon="ri-shield-check-line"
-  >
+  <DetailCard :title="t('withdrawal.reviewInfo')" icon="ri-shield-check-line">
     <DetailFieldGrid :items="items" />
   </DetailCard>
 </template>
@@ -22,10 +19,12 @@ const items = computed<DetailFieldItem[]>(() => {
   const review = props.detail.review;
   const result: DetailFieldItem[] = [];
   if (review.admin_name) result.push({ label: t('withdrawal.reviewer'), value: review.admin_name });
-  if (review.reviewed_at) result.push({ label: t('withdrawal.reviewedAt'), value: review.reviewed_at });
+  if (review.reviewed_at)
+    result.push({ label: t('withdrawal.reviewedAt'), value: review.reviewed_at });
   if (review.note) {
     result.push({
-      label: props.detail.status === 4 ? t('withdrawal.rejectionReason') : t('withdrawal.reviewNote'),
+      label:
+        props.detail.status === 4 ? t('withdrawal.rejectionReason') : t('withdrawal.reviewNote'),
       value: review.note,
       wide: true,
     });

@@ -72,6 +72,14 @@ const dateRange = computed<string[]>({
 
   .filter-actions {
     min-width: max-content;
+
+    :deep(.el-button) {
+      width: auto;
+      min-width: 64px;
+      height: 34px;
+      min-height: 34px;
+      padding-inline: 13px;
+    }
   }
 }
 </style>

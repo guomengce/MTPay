@@ -103,7 +103,7 @@ const cardItems = computed<ResponsiveCardItem[]>(() => props.list.map((row) => (
     { label: t('fiatDeposit.payerBank'), value: row.payer_bank || '—' },
     { label: t('fiatDeposit.remittanceDate'), value: row.remittance_date || '—' },
   ],
-  actions: [{ key: 'detail', label: t('fiatDeposit.viewDetails'), icon: View, type: 'primary', plain: true }],
+  actions: [{ key: 'detail', label: t('common.actions.details'), icon: View, type: 'primary', plain: true }],
 })));
 function statusLabel(row: FiatOrder) { return statusOptions.value.find((item) => item.value === row.status)?.label || row.status_name; }
 function statusType(status: FiatDepositStatus) { return status === 1 ? 'success' : status === 2 ? 'danger' : 'warning'; }

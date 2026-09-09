@@ -7,7 +7,7 @@
  * - 校验并提取 Element Plus 上传组件中的原始 File；
  * - 不调用接口，真实上传与提交仍由 useWhitelistForm 负责。
  */
-import { computed, nextTick, reactive, ref, watch } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import { ElMessage } from 'element-plus';
 import { useI18n } from 'vue-i18n';
 import type { FormInstance, FormRules, UploadFile, UploadFiles, UploadUserFile } from 'element-plus';
@@ -79,7 +79,6 @@ export function useWhitelistSubmitForm() {
   const formRef = ref<FormInstance>();
   const fileList = ref<UploadUserFile[]>([]);
   const formState = reactive<WhitelistSubmitFormState>(createInitialState());
-  const validationEnabled = ref(false);
 
   /** -------------------- 页面展示状态 -------------------- */
   const hasSubjectSelection = computed(
@@ -94,7 +93,6 @@ export function useWhitelistSubmitForm() {
 
   /** -------------------- 动态校验规则 -------------------- */
   const rules = computed<FormRules>(() => {
-    if (!validationEnabled.value) return {};
     const role = formState.role;
     const entityType = formState.entity_type;
     const result: FormRules = {
@@ -219,8 +217,6 @@ export function useWhitelistSubmitForm() {
   /** -------------------- 表单提交与重置 -------------------- */
   async function validateAndBuild(): Promise<WhitelistSubmitData | null> {
     if (!formRef.value) return null;
-    validationEnabled.value = true;
-    await nextTick();
     if (!(await formRef.value.validate().catch(() => false))) return null;
     const business = buildPayload();
     if (!business) return null;
@@ -233,17 +229,8 @@ export function useWhitelistSubmitForm() {
   function resetForm() {
     Object.assign(formState, createInitialState());
     fileList.value = [];
-    validationEnabled.value = false;
     formRef.value?.clearValidate();
   }
-
-  watch(
-    () => [formState.role, formState.entity_type],
-    () => {
-      if (!validationEnabled.value) formRef.value?.clearValidate();
-    },
-    { flush: 'post' },
-  );
 
   return {
     formRef,

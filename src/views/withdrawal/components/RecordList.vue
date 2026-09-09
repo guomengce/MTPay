@@ -2,116 +2,144 @@
   <AdminPanel class="record-list" :title="t('withdrawal.records')">
     <template #extra>
       <div class="filter-bar">
-      <el-select v-model="statusFilter" :placeholder="t('withdrawal.orderStatus')" clearable>
-        <el-option
-          v-for="item in statusOptions"
-          :key="item.value"
-          :value="item.value"
-          :label="item.label"
+        <el-select v-model="statusFilter" :placeholder="t('withdrawal.orderStatus')" clearable>
+          <el-option
+            v-for="item in statusOptions"
+            :key="item.value"
+            :value="item.value"
+            :label="item.label"
+          />
+        </el-select>
+        <el-input v-model="orderNoFilter" :placeholder="t('withdrawal.orderNo')" clearable />
+        <el-date-picker
+          v-model="dateRange"
+          type="daterange"
+          :range-separator="t('withdrawal.dateTo')"
+          :start-placeholder="t('withdrawal.startDate')"
+          :end-placeholder="t('withdrawal.endDate')"
+          value-format="YYYY-MM-DD"
+          unlink-panels
         />
-      </el-select>
-      <el-input v-model="orderNoFilter" :placeholder="t('withdrawal.orderNo')" clearable />
-      <el-date-picker
-        v-model="dateRange"
-        type="daterange"
-        :range-separator="t('withdrawal.dateTo')"
-        :start-placeholder="t('withdrawal.startDate')"
-        :end-placeholder="t('withdrawal.endDate')"
-        value-format="YYYY-MM-DD"
-        unlink-panels
-      />
-      <div class="filter-actions">
-        <el-button type="primary" :loading="loading" @click="onSearch">{{ t('common.actions.search') }}</el-button>
-        <el-button @click="onReset">{{ t('common.actions.reset') }}</el-button>
-      </div>
+        <div class="filter-actions">
+          <el-button type="primary" :loading="loading" @click="onSearch">{{
+            t('common.actions.search')
+          }}</el-button>
+          <el-button @click="onReset">{{ t('common.actions.reset') }}</el-button>
+        </div>
       </div>
     </template>
 
     <div class="record-list__body">
-
-    <el-table
-      v-loading="loading"
-      :data="list"
-      :empty-text="loading ? t('withdrawal.loading') : t('withdrawal.empty')"
-      stripe
-      class="record-list__table"
-    >
-      <el-table-column prop="order_no" :label="t('withdrawal.orderNo')" min-width="180">
-        <template #default="{ row }">
-          <strong
-            class="record-list__link"
-            href="javascript:void(0)"
-            @click.prevent="emit('detail', row.id)"
-          >
-            {{ row.order_no }}
-        </strong><br/>
-          <small>{{ formatTime(row.submitted_at) }}</small>
-        </template>
-      </el-table-column>
-      <el-table-column :label="t('withdrawal.transactionParties')" min-width="380" align="center" header-align="center">
-        <template #default="{ row }">
-          <WithdrawalPartyFlow
-            :payer-name="row.payer.name"
-            :payer-type="entityTypeName(row.payer.entity_type)"
-            :payee-name="row.payee.name"
-            :payee-type="entityTypeName(row.payee.entity_type)"
-          />
-        </template>
-      </el-table-column>
-      <el-table-column :label="t('withdrawal.amount')" min-width="250" align="left">
-        <template #default="{ row }">
-          <div class="record-list__amount-block">
-            <strong class="record-list__amount">
-              {{ formatMoney(row.amount) }} <span>{{ row.currency.code }}</span>
-            </strong>
-            <div class="record-list__deduction">
-              <span>{{ t('withdrawal.totalDeduction') }} {{ formatMoney(row.total_amount) }}</span>
-            </div>
-          </div>
-        </template>
-      </el-table-column>
-      <el-table-column :label="t('withdrawal.status')" min-width="150">
-        <template #default="{ row }">
-          <StatusBadge
-            :label="statusLabel(row.status, row.status_name)"
-            :type="statusMap[row.status as WithdrawalStatus]?.type"
-            :effect="statusMap[row.status as WithdrawalStatus]?.effect"
-          />
-        </template>
-      </el-table-column>
-      <el-table-column :label="t('withdrawal.actions')" min-width="180" fixed="right" align="center">
-        <template #default="{ row }">
-          <div class="record-list__actions">
-            <el-button type="primary" plain size="small" :icon="View" @click="emit('detail', row.id)">
-              {{ t('withdrawal.details') }}
-            </el-button>
-            <el-button
-              v-if="row.status === 1"
-              type="warning"
-              plain
-              size="small"
-              :icon="Upload"
-              @click="emit('supplement', row)"
-              >{{ t('withdrawal.supplement') }}</el-button
+      <el-table
+        v-loading="loading"
+        :data="list"
+        :empty-text="loading ? t('withdrawal.loading') : t('withdrawal.empty')"
+        stripe
+        class="record-list__table"
+      >
+        <el-table-column prop="order_no" :label="t('withdrawal.orderNo')" min-width="200">
+          <template #default="{ row }">
+            <strong
+              class="record-list__link"
+              href="javascript:void(0)"
+              @click.prevent="emit('detail', row.id)"
             >
-          </div>
-        </template>
-      </el-table-column>
-    </el-table>
+              {{ row.order_no }} </strong
+            ><br />
+            <small>{{ formatTime(row.submitted_at) }}</small>
+          </template>
+        </el-table-column>
+        <el-table-column
+          :label="t('withdrawal.transactionParties')"
+          min-width="380"
+          align="center"
+          header-align="center"
+        >
+          <template #default="{ row }">
+            <WithdrawalPartyFlow
+              :payer-name="row.payer.name"
+              :payer-type="entityTypeName(row.payer.entity_type)"
+              :payee-name="row.payee.name"
+              :payee-type="entityTypeName(row.payee.entity_type)"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column :label="t('withdrawal.amount')" min-width="250" align="left">
+          <template #default="{ row }">
+            <div class="record-list__amount-block">
+              <strong class="record-list__amount">
+                {{ formatMoney(row.amount) }} <span>{{ row.currency.code }}</span>
+              </strong>
+              <div class="record-list__deduction">
+                <span
+                  >{{ t('withdrawal.totalDeduction') }} {{ formatMoney(row.total_amount) }}</span
+                >
+              </div>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column :label="t('withdrawal.status')" min-width="200">
+          <template #default="{ row }">
+            <StatusBadge
+              :label="statusLabel(row.status, row.status_name)"
+              :type="statusMap[row.status as WithdrawalStatus]?.type"
+              :effect="statusMap[row.status as WithdrawalStatus]?.effect"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column
+          :label="t('withdrawal.actions')"
+          min-width="180"
+          fixed="right"
+          align="center"
+        >
+          <template #default="{ row }">
+            <div class="record-list__actions">
+              <el-button
+                type="primary"
+                plain
+                size="small"
+                :icon="View"
+                @click="emit('detail', row.id)"
+              >
+                {{ t('withdrawal.details') }}
+              </el-button>
+              <el-button
+                v-if="row.available_actions?.can_supplement_withdrawal"
+                type="warning"
+                plain
+                size="small"
+                :icon="Upload"
+                @click="emit('supplement', row)"
+                >{{ t('withdrawal.supplement') }}</el-button
+              >
+              <el-button
+                v-if="row.risk?.can_supplement_risk === true"
+                type="danger"
+                plain
+                size="small"
+                :icon="Upload"
+                @click="emit('risk-supplement', row)"
+                >{{ t('withdrawal.riskSupplement') }}</el-button
+              >
+            </div>
+          </template>
+        </el-table-column>
+      </el-table>
 
-    <ResponsiveCardList :items="cardItems" @action="handleCardAction" />
+      <ResponsiveCardList :items="cardItems" @action="handleCardAction" />
 
-    <footer class="record-list__pager">
-      <el-pagination
-        class="app-pagination"
-        layout="total, prev, pager, next"
-        background
-        :current-page="page"
-        :page-size="limit"
-        :total="total"
-        @current-change="onPage"
-      />
-    </footer>
+      <footer class="record-list__pager">
+        <el-pagination
+          class="app-pagination"
+          layout="total, prev, pager, next"
+          background
+          :current-page="page"
+          :page-size="limit"
+          :total="total"
+          @current-change="onPage"
+        />
+      </footer>
     </div>
   </AdminPanel>
 </template>
@@ -126,11 +154,13 @@ import { formatMoney } from '@/utils/formatMoney';
  */
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Refresh, Upload, View } from '@element-plus/icons-vue';
+import { Upload, View } from '@element-plus/icons-vue';
 import type { WithdrawalListParams, WithdrawalOrder } from '@/api/modules/withdrawal';
 import StatusBadge from '@/components/admin/StatusBadge.vue';
 import AdminPanel from '@/components/admin/AdminPanel.vue';
-import ResponsiveCardList, { type ResponsiveCardItem } from '@/components/common/ResponsiveCardList.vue';
+import ResponsiveCardList, {
+  type ResponsiveCardItem,
+} from '@/components/common/ResponsiveCardList.vue';
 import WithdrawalPartyFlow from './WithdrawalPartyFlow.vue';
 
 import {
@@ -159,30 +189,77 @@ const emit = defineEmits<{
   (e: 'page', value: number): void;
   (e: 'detail', id: number): void;
   (e: 'supplement', row: WithdrawalOrder): void;
+  (e: 'risk-supplement', row: WithdrawalOrder): void;
   (e: 'query-change', patch: Partial<WithdrawalListParams>): void;
 }>();
 
 const statusMap = WITHDRAWAL_STATUS_MAP;
 const statusOptions = computed(() => [
-  { value: 0, label: t('withdrawal.pending') }, { value: 1, label: t('withdrawal.filesRequired') },
-  { value: 2, label: t('withdrawal.processing') }, { value: 3, label: t('withdrawal.completed') },
-  { value: 4, label: t('withdrawal.rejected') }, { value: 5, label: t('withdrawal.failed') },
+  { value: 0, label: t('withdrawal.pending') },
+  { value: 1, label: t('withdrawal.filesRequired') },
+  { value: 2, label: t('withdrawal.processing') },
+  { value: 3, label: t('withdrawal.completed') },
+  { value: 4, label: t('withdrawal.rejected') },
+  { value: 5, label: t('withdrawal.failed') },
 ]);
 
-const cardItems = computed<ResponsiveCardItem[]>(() => props.list.map((row) => ({
-  key: String(row.id), title: row.order_no, subtitle: formatTime(row.submitted_at),
-  status: { label: statusLabel(row.status, row.status_name), type: statusMap[row.status]?.type, effect: statusMap[row.status]?.effect },
-  pending: statusMap[row.status]?.effect === 'pending', accent: row.status === 4 || row.status === 5 ? 'danger' : 'primary',
-  fields: [
-    { label: t('withdrawal.payer'), value: `${entityTypeName(row.payer.entity_type)} · ${row.payer.name}`, strong: true },
-    { label: t('withdrawal.payee'), value: `${entityTypeName(row.payee.entity_type)} · ${row.payee.name}`, strong: true },
-    { label: t('withdrawal.amount'), value: `${formatMoney(row.amount)} ${row.currency.code}`, subValue: `${t('withdrawal.totalDeduction')} ${formatMoney(row.total_amount)} ${row.currency.code}`, strong: true },
-  ],
-  actions: [
-    { key: 'detail', label: t('withdrawal.viewDetails'), icon: View, type: 'primary', plain: true },
-    { key: 'supplement', label: t('withdrawal.supplement'), icon: Upload, type: 'warning', plain: true, visible: row.status === 1 },
-  ],
-})));
+const cardItems = computed<ResponsiveCardItem[]>(() =>
+  props.list.map((row) => ({
+    key: String(row.id),
+    title: row.order_no,
+    subtitle: formatTime(row.submitted_at),
+    status: {
+      label: statusLabel(row.status, row.status_name),
+      type: statusMap[row.status]?.type,
+      effect: statusMap[row.status]?.effect,
+    },
+    pending: statusMap[row.status]?.effect === 'pending',
+    accent: row.status === 4 || row.status === 5 ? 'danger' : 'primary',
+    fields: [
+      {
+        label: t('withdrawal.payer'),
+        value: `${entityTypeName(row.payer.entity_type)} · ${row.payer.name}`,
+        strong: true,
+      },
+      {
+        label: t('withdrawal.payee'),
+        value: `${entityTypeName(row.payee.entity_type)} · ${row.payee.name}`,
+        strong: true,
+      },
+      {
+        label: t('withdrawal.amount'),
+        value: `${formatMoney(row.amount)} ${row.currency.code}`,
+        subValue: `${t('withdrawal.totalDeduction')} ${formatMoney(row.total_amount)} ${row.currency.code}`,
+        strong: true,
+      },
+    ],
+    actions: [
+      {
+        key: 'detail',
+        label: t('common.actions.details'),
+        icon: View,
+        type: 'primary',
+        plain: true,
+      },
+      {
+        key: 'supplement',
+        label: t('withdrawal.supplement'),
+        icon: Upload,
+        type: 'warning',
+        plain: true,
+        visible: Boolean(row.available_actions?.can_supplement_withdrawal),
+      },
+      {
+        key: 'risk-supplement',
+        label: t('withdrawal.riskSupplement'),
+        icon: Upload,
+        type: 'danger',
+        plain: true,
+        visible: row.risk?.can_supplement_risk === true,
+      },
+    ],
+  })),
+);
 
 const statusFilter = computed<WithdrawalStatus | undefined>({
   get: () => props.query.status,
@@ -195,9 +272,10 @@ const orderNoFilter = computed<string>({
 });
 
 const dateRange = computed<string[]>({
-  get: () => props.query.started_at && props.query.ended_at
-    ? [props.query.started_at, props.query.ended_at]
-    : [],
+  get: () =>
+    props.query.started_at && props.query.ended_at
+      ? [props.query.started_at, props.query.ended_at]
+      : [],
   set: (value: string[]) => {
     emit('query-change', {
       started_at: value?.[0] || '',
@@ -216,9 +294,6 @@ function onReset() {
 function onPage(value: number) {
   emit('page', value);
 }
-function refresh() {
-  emit('refresh');
-}
 function formatTime(value: string | null) {
   return value ?? '—';
 }
@@ -228,19 +303,34 @@ function entityTypeName(value: 1 | 2) {
   return value === 1 ? t('withdrawal.company') : t('withdrawal.individual');
 }
 function statusLabel(value: number, fallback = '') {
-  return [t('withdrawal.pending'), t('withdrawal.filesRequired'), t('withdrawal.processing'), t('withdrawal.completed'), t('withdrawal.rejected'), t('withdrawal.failed')][value] || fallback;
+  return (
+    [
+      t('withdrawal.pending'),
+      t('withdrawal.filesRequired'),
+      t('withdrawal.processing'),
+      t('withdrawal.completed'),
+      t('withdrawal.rejected'),
+      t('withdrawal.failed'),
+    ][value] || fallback
+  );
 }
 function handleCardAction(actionKey: string, itemKey: string) {
   const row = props.list.find((item) => item.id === Number(itemKey));
   if (!row) return;
   if (actionKey === 'detail') emit('detail', row.id);
   if (actionKey === 'supplement') emit('supplement', row);
+  if (actionKey === 'risk-supplement') emit('risk-supplement', row);
 }
 const { t } = useI18n();
 </script>
 
 <style scoped lang="scss">
-.record-list__body { display:flex; min-width:0; flex-direction:column; gap:16px;  }
+.record-list__body {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 16px;
+}
 .record-list__amount-block {
   display: flex;
   flex-direction: column;
@@ -298,8 +388,12 @@ const { t } = useI18n();
   justify-content: flex-end;
 }
 @include mobile {
-  .record-list__body { padding:16px; }
-  .record-list__table { display: none; }
+  .record-list__body {
+    padding: 16px;
+  }
+  .record-list__table {
+    display: none;
+  }
   .record-list__pager {
     justify-content: flex-end;
     overflow-x: auto;

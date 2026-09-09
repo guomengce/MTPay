@@ -92,9 +92,10 @@ import { computed, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import type { FormInstance, FormRules } from 'element-plus';
-import { CircleCheck, CircleCheckFilled, Key, Lock, WarningFilled } from '@element-plus/icons-vue';
+import { CircleCheckFilled, Key, Lock, WarningFilled } from '@element-plus/icons-vue';
 import { activateAgent, type AgentProfile } from '@/api/modules/auth';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue';
+import { useAuthStore } from '@/stores/modules/auth';
 
 interface ActivateForm {
   password: string;
@@ -103,6 +104,7 @@ interface ActivateForm {
 
 const route = useRoute();
 const router = useRouter();
+const authStore = useAuthStore();
 const { t } = useI18n();
 const token = computed(() =>
   typeof route.query.token === 'string' ? route.query.token.trim() : '',
@@ -153,6 +155,8 @@ async function submitActivation() {
 }
 
 function goLogin() {
+  // 激活流程不建立登录态；进入登录页前移除浏览器中可能残留的旧会话。
+  authStore.clearAuth();
   void router.replace({ name: 'Login' });
 }
 </script>

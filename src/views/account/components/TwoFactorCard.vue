@@ -46,11 +46,12 @@
 <script setup lang="ts">
 import { onMounted, onBeforeUnmount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { ElMessage, ElMessageBox } from 'element-plus';
+import { ElMessage } from 'element-plus';
 import { Lock } from '@element-plus/icons-vue';
 import QrcodeVue from 'qrcode.vue';
 import { useAuthStore } from '@/stores/modules/auth';
 import { getTwoFactorStatus, startTwoFactorSetup, confirmTwoFactorSetup, disableOwnTwoFactor, type TwoFactorSetup } from '@/api/modules/twoFactor';
+import { confirmPortalAction } from '@/utils/portalMessageBox';
 
 const { t } = useI18n();
 const auth = useAuthStore();
@@ -103,11 +104,13 @@ async function submit() {
   if (invalid.value) return;
   await run(async current => {
     if (disabling.value) {
-      try {
-        await ElMessageBox.confirm(t('twoFactorSettings.disableWarning'), t('twoFactorSettings.disable'), {
-          type: 'warning', confirmButtonText: t('twoFactorSettings.confirmDisable'), cancelButtonText: t('common.actions.cancel'),
-        });
-      } catch { return; }
+      const confirmed = await confirmPortalAction({
+        title: t('twoFactorSettings.disable'),
+        message: '確認關閉 2FA 嗎？',
+        confirmText: t('twoFactorSettings.confirmDisable'),
+        cancelText: t('common.actions.cancel'),
+      });
+      if (!confirmed) return;
       if (!current()) return;
       await disableOwnTwoFactor(code.value);
     } else { await confirmTwoFactorSetup(code.value); }

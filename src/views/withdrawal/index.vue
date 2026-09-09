@@ -1,9 +1,6 @@
 <template>
   <main class="withdrawal-page">
-    <AdminHero
-      :title="t('withdrawal.title')"
-      icon="ri-bank-card-line"
-    />
+    <AdminHero :title="t('withdrawal.title')" icon="ri-bank-card-line" />
 
     <section class="withdrawal-page__content">
       <section v-if="twoFactorEnabled === false" class="withdrawal-security-gate" role="alert">
@@ -17,7 +14,12 @@
           <i class="ri-arrow-right-line" />
         </el-button>
       </section>
-      <el-alert v-if="securityError && !securityDialogVisible" :title="securityError" type="error" :closable="false" />
+      <el-alert
+        v-if="securityError && !securityDialogVisible"
+        :title="securityError"
+        type="error"
+        :closable="false"
+      />
       <ApplyForm
         ref="applyFormRef"
         :currency-options="currencyOptions"
@@ -45,6 +47,7 @@
         @page="onPage"
         @detail="openDetail"
         @supplement="openSupplement"
+        @risk-supplement="openRiskSupplement"
       />
     </section>
 
@@ -55,14 +58,24 @@
       :submitting="supplementSubmitting"
       :uploading="supplementUploading"
       :upload-file="uploadSupplementFile"
+      :mode="supplementMode"
       @submit="handleSupplement"
     />
     <WithdrawalSecurityDialog
-      :model-value="securityDialogVisible" :busy="securityBusy" :email="securityEmail"
-      :email-verified="emailVerified" :two-factor-verified="twoFactorVerified"
-      :expired="securityExpired" :uncertain="securityUncertain" :error="securityError"
-      :resend-seconds="resendSeconds" :ready="securityReady"
-      @close="closeSecurity" @send-email-code="sendEmail" @verify="verifySecurity" @confirm="submitSecurity"
+      :model-value="securityDialogVisible"
+      :busy="securityBusy"
+      :email="securityEmail"
+      :email-verified="emailVerified"
+      :two-factor-verified="twoFactorVerified"
+      :expired="securityExpired"
+      :uncertain="securityUncertain"
+      :error="securityError"
+      :resend-seconds="resendSeconds"
+      :ready="securityReady"
+      @close="closeSecurity"
+      @send-email-code="sendEmail"
+      @verify="verifySecurity"
+      @confirm="submitSecurity"
     />
   </main>
 </template>
@@ -115,6 +128,7 @@ const {
   supplementSubmitting,
   supplementUploading,
   submitSupplement,
+  submitRiskSupplement,
   uploadSupplementFile,
 } = useWithdrawalManagement();
 usePageLoading(configLoading);
@@ -122,14 +136,29 @@ const applyFormRef = ref<InstanceType<typeof ApplyForm>>();
 const supplementDialogVisible = ref(false);
 const supplementItem = ref<WithdrawalOrder | null>(null);
 const supplementRequirement = ref('');
+const supplementMode = ref<'business' | 'risk'>('business');
 const twoFactorEnabled = ref<boolean | null>(null);
 const {
-  visible: securityDialogVisible, busy: securityBusy, locked: securityLocked, email: securityEmail,
-  emailVerified, twoFactorVerified, expired: securityExpired, uncertain: securityUncertain,
-  error: securityError, resendSeconds, ready: securityReady,
-  begin: beginSecurity, sendEmail, verify: verifySecurity, close: closeSecurity, submit: submitSecurity,
+  visible: securityDialogVisible,
+  busy: securityBusy,
+  locked: securityLocked,
+  email: securityEmail,
+  emailVerified,
+  twoFactorVerified,
+  expired: securityExpired,
+  uncertain: securityUncertain,
+  error: securityError,
+  resendSeconds,
+  ready: securityReady,
+  begin: beginSecurity,
+  sendEmail,
+  verify: verifySecurity,
+  close: closeSecurity,
+  submit: submitSecurity,
 } = useWithdrawalSecurity({
-  refresh: async () => { await Promise.all([loadConfig(true), fetchList()]); },
+  refresh: async () => {
+    await Promise.all([loadConfig(true), fetchList()]);
+  },
   completed: async () => {
     applyFormRef.value?.reset();
     ElMessage.success(t('withdrawalSecurity.submitted'));
@@ -157,8 +186,9 @@ onBeforeRouteLeave(async () => {
 });
 
 async function openSupplement(row: WithdrawalOrder) {
-  if (row.status !== 1) return;
+  if (!row.available_actions?.can_supplement_withdrawal) return;
   supplementItem.value = row;
+  supplementMode.value = 'business';
   supplementRequirement.value = '';
   supplementDialogVisible.value = true;
   try {
@@ -167,6 +197,15 @@ async function openSupplement(row: WithdrawalOrder) {
   } catch {
     supplementRequirement.value = t('withdrawal.defaultSupplement');
   }
+}
+
+function openRiskSupplement(row: WithdrawalOrder) {
+  if (row.risk?.can_supplement_risk !== true) return;
+  supplementItem.value = row;
+  supplementMode.value = 'risk';
+  supplementRequirement.value =
+    row.risk?.risk_supplement_request || t('withdrawal.defaultRiskSupplement');
+  supplementDialogVisible.value = true;
 }
 
 function extractSupplementRequirement(d: WithdrawalOrderDetail | null) {
@@ -181,17 +220,23 @@ function extractSupplementRequirement(d: WithdrawalOrderDetail | null) {
 async function handleSupplement(payload: { file_ids: number[]; message?: string }) {
   if (!supplementItem.value) return;
   try {
-    await submitSupplement({
+    const submit = supplementMode.value === 'risk' ? submitRiskSupplement : submitSupplement;
+    await submit({
       id: supplementItem.value.id,
       file_ids: payload.file_ids,
       message: payload.message,
     });
-    ElMessage.success(t('withdrawal.supplemented'));
+    ElMessage.success(
+      t(
+        supplementMode.value === 'risk' ? 'withdrawal.riskSupplemented' : 'withdrawal.supplemented',
+      ),
+    );
     supplementDialogVisible.value = false;
     supplementItem.value = null;
     await fetchList();
   } catch {
-    /* 统一请求层已提示后端错误 */
+    /* 狀態可能已變更，立即同步最新列表。 */
+    await fetchList();
   }
 }
 
@@ -211,8 +256,12 @@ function handleQueryChange(patch: Partial<WithdrawalListParams>) {
 
 onMounted(async () => {
   const statusPromise = getTwoFactorStatus()
-    .then((enabled) => { twoFactorEnabled.value = enabled; })
-    .catch(() => { twoFactorEnabled.value = false; });
+    .then((enabled) => {
+      twoFactorEnabled.value = enabled;
+    })
+    .catch(() => {
+      twoFactorEnabled.value = false;
+    });
   await Promise.all([loadConfig(true), fetchList(), statusPromise]);
 });
 const { t } = useI18n();
@@ -260,10 +309,22 @@ const { t } = useI18n();
     box-shadow: 0 8px 18px rgb(201 46 67 / 20%);
   }
 
-  &__copy { min-width: 0; }
-  strong { color: #a92134; font-size: 15px; }
-  p { margin: 5px 0 0; color: #83535a; font-size: 13px; line-height: 1.55; }
-  .el-button { margin: 0; }
+  &__copy {
+    min-width: 0;
+  }
+  strong {
+    color: #a92134;
+    font-size: 15px;
+  }
+  p {
+    margin: 5px 0 0;
+    color: #83535a;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .el-button {
+    margin: 0;
+  }
 }
 
 @include narrow {
@@ -282,8 +343,15 @@ const { t } = useI18n();
   .withdrawal-security-gate {
     grid-template-columns: 42px minmax(0, 1fr);
     padding: 15px;
-    &__icon { width: 40px; height: 40px; border-radius: 11px; }
-    .el-button { grid-column: 1 / -1; width: 100%; }
+    &__icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 11px;
+    }
+    .el-button {
+      grid-column: 1 / -1;
+      width: 100%;
+    }
   }
 }
 </style>

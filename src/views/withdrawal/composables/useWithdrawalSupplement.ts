@@ -41,6 +41,17 @@ export function useWithdrawalSupplement() {
     }
   }
 
+  async function submitRisk(payload: SupplementWithdrawalPayload) {
+    submitting.value = true;
+    try {
+      const detail = await withdrawalApi.supplementWithdrawalRisk(payload);
+      lastResult.value = detail;
+      return detail;
+    } finally {
+      submitting.value = false;
+    }
+  }
+
   function clearLast() {
     lastResult.value = null;
   }
@@ -51,6 +62,7 @@ export function useWithdrawalSupplement() {
     lastResult,
     uploadFile,
     submit,
+    submitRisk,
     clearLast,
   };
 }

@@ -14,7 +14,7 @@
       v-for="country in visibleCountries"
       :key="country.code"
       :label="country.displayLabel"
-      :value="country.label"
+      :value="country.code"
     >
       <span class="country-option">
         <span>{{ country.displayLabel }}</span>
@@ -27,9 +27,9 @@
 <script setup lang="ts">
 /**
  * 公共国家／地区选择器。
- * - 展示繁体中文名称；
- * - v-model 统一返回繁体中文名称，禁止业务表单提交 ISO 两位码；
- * - 支持按中文名称或两位代码搜索。
+ * - 根据当前语言展示简体中文、繁体中文或英文名称；
+ * - v-model 统一返回 ISO 3166-1 alpha-2 两位代码；
+ * - 支持按当前语言名称、三语言名称或两位代码搜索。
  */
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -50,8 +50,8 @@ const props = withDefaults(
 );
 
 const model = defineModel<string>({ default: '' });
-const { t } = useI18n();
-const localizedCountries = computed(() => getLocalizedCountryOptions());
+const { t, locale } = useI18n();
+const localizedCountries = computed(() => getLocalizedCountryOptions(locale.value));
 const visibleCountries = ref(localizedCountries.value);
 const selectPlaceholder = computed(() => props.placeholder || t('country.placeholder'));
 
@@ -59,10 +59,10 @@ function filterCountries(keyword: string) {
   const query = keyword.trim().toLocaleLowerCase('zh-Hant');
   visibleCountries.value = query
     ? localizedCountries.value.filter(
-        ({ code, label, displayLabel }) =>
+        ({ code, displayLabel, searchLabels }) =>
           code.toLowerCase().includes(query) ||
-          label.toLocaleLowerCase().includes(query) ||
-          displayLabel.toLocaleLowerCase().includes(query),
+          displayLabel.toLocaleLowerCase().includes(query) ||
+          searchLabels.some((name) => name.toLocaleLowerCase().includes(query)),
       )
     : localizedCountries.value;
 }

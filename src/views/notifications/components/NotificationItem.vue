@@ -7,7 +7,7 @@
       <span v-if="!compact && item.business_no" class="notice__number">{{ item.business_no }}</span>
     </span>
     <time class="notice__time">{{ compact ? item.created_at?.slice(5, 16) : item.created_at }}</time>
-    <span v-if="!compact && notificationRoute(item)" class="notice__link">{{ t('notifications.viewDetails') }} →</span>
+    <span v-if="!compact && notificationRoute(item)" class="notice__link">{{ t('common.actions.details') }} →</span>
   </button>
 </template>
 <script setup lang="ts">
