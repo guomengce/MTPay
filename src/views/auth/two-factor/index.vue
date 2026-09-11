@@ -1,7 +1,7 @@
 <template>
   <main class="two-factor-page">
     <BrandPanel />
-    <header><div class="brand"><img src="/assets/mtpay-logo.svg" alt="MTPay" /></div><LanguageSwitcher /></header>
+    <header><div class="brand"><img src="/assets/mtpay-logo.png" alt="MTPay" /></div><LanguageSwitcher /></header>
     <section class="content">
       <article class="two-factor-card">
         <span class="shield"><i class="ri-shield-keyhole-line" /></span>

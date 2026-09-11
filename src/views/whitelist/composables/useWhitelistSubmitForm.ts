@@ -1,21 +1,22 @@
 /**
- * 新增白名单表单状态与参数组装
+ * 新增/修改白名单表单状态与参数组装
  *
  * 功能边界：
  * - 管理表单状态、动态文案与校验规则；
  * - 按 role + entity_type 只组装当前业务分支允许的接口参数；
  * - 校验并提取 Element Plus 上传组件中的原始 File；
- * - 不调用接口，真实上传与提交仍由 useWhitelistForm 负责。
+ * - 编辑时区分原附件保留 retained_file_ids 与新增上传 file_ids；
+ * - 不调用接口，真实上传与提交仍由父级负责。
  */
 import { computed, reactive, ref } from 'vue';
 import { ElMessage } from 'element-plus';
 import { useI18n } from 'vue-i18n';
 import type { FormInstance, FormRules, UploadFile, UploadFiles, UploadUserFile } from 'element-plus';
 
-import type { SubmitWhitelistPayload, WhitelistFile } from '@/api/modules/whitelist';
+import type { EditWhitelistPayload, SubmitWhitelistPayload, WhitelistFile, WhitelistItemDetail } from '@/api/modules/whitelist';
 
 export interface WhitelistSubmitData {
-  business: SubmitWhitelistPayload;
+  business: SubmitWhitelistPayload | Omit<EditWhitelistPayload, 'id'>;
 }
 
 interface WhitelistSubmitFormState {
@@ -45,6 +46,7 @@ interface WhitelistSubmitFormState {
 
 const ALLOWED_FILE_EXTENSIONS = new Set(['pdf', 'png', 'jpg', 'jpeg']);
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const MAX_FILE_COUNT = 5;
 
 /** -------------------- 表单初始状态 -------------------- */
 function createInitialState(): WhitelistSubmitFormState {
@@ -78,6 +80,8 @@ export function useWhitelistSubmitForm() {
   const { t } = useI18n();
   const formRef = ref<FormInstance>();
   const fileList = ref<UploadUserFile[]>([]);
+  const retainedFiles = ref<WhitelistFile[]>([]);
+  const originalFileIds = ref<number[]>([]);
   const formState = reactive<WhitelistSubmitFormState>(createInitialState());
 
   /** -------------------- 页面展示状态 -------------------- */
@@ -90,6 +94,10 @@ export function useWhitelistSubmitForm() {
     const entityName = t(formState.entity_type === 1 ? 'whitelist.company' : 'whitelist.individual');
     return `${roleName} · ${entityName}`;
   });
+
+  const retainedFileIds = computed(() => retainedFiles.value.map((file) => file.file_id));
+  const totalFileCount = computed(() => retainedFiles.value.length + fileList.value.length);
+  const uploadLimitReached = computed(() => totalFileCount.value >= MAX_FILE_COUNT);
 
   /** -------------------- 动态校验规则 -------------------- */
   const rules = computed<FormRules>(() => {
@@ -204,31 +212,123 @@ export function useWhitelistSubmitForm() {
 
   /** -------------------- 附件提取与校验 -------------------- */
   async function handleFileChange(file: UploadFile, currentFiles: UploadFiles, uploadFile: (file: File) => Promise<WhitelistFile>) {
-    fileList.value=currentFiles;
-    if(!file.raw||file.status==='success')return;
-    if(file.raw.size>MAX_FILE_SIZE||!ALLOWED_FILE_EXTENSIONS.has(file.raw.name.split('.').pop()?.toLowerCase()||'')){ElMessage.warning(t('whitelist.uploadHint'));fileList.value=fileList.value.filter(item=>item.uid!==file.uid);return;}
-    try{file.status='uploading';file.response=await uploadFile(file.raw);file.status='success';}catch{file.status='fail';fileList.value=fileList.value.filter(item=>item.uid!==file.uid);}
+    fileList.value = currentFiles;
+    if (totalFileCount.value > MAX_FILE_COUNT) {
+      ElMessage.warning(t('whitelist.maxFiles'));
+      fileList.value = fileList.value.filter((item) => item.uid !== file.uid);
+      return;
+    }
+    if (!file.raw || file.status === 'success') return;
+    if (file.raw.size > MAX_FILE_SIZE || !ALLOWED_FILE_EXTENSIONS.has(file.raw.name.split('.').pop()?.toLowerCase() || '')) {
+      ElMessage.warning(t('whitelist.uploadHint'));
+      fileList.value = fileList.value.filter((item) => item.uid !== file.uid);
+      return;
+    }
+    try {
+      file.status = 'uploading';
+      file.response = await uploadFile(file.raw);
+      file.status = 'success';
+    } catch {
+      file.status = 'fail';
+      fileList.value = fileList.value.filter((item) => item.uid !== file.uid);
+    }
   }
 
   function handleExceed() {
     ElMessage.warning(t('whitelist.maxFiles'));
   }
 
+  function removeRetainedFile(fileId: number) {
+    retainedFiles.value = retainedFiles.value.filter((file) => file.file_id !== fileId);
+  }
+
+  function removeUploadedFile(uid: number | undefined) {
+    if (uid == null) return;
+    fileList.value = fileList.value.filter((file) => file.uid !== uid);
+  }
+
+  function collectDetailFiles(detail: WhitelistItemDetail) {
+    const map = new Map<number, WhitelistFile>();
+    for (const file of detail.files ?? []) map.set(file.file_id, file);
+    for (const record of detail.records ?? []) {
+      for (const file of record.files ?? []) map.set(file.file_id, file);
+    }
+    return Array.from(map.values());
+  }
+
+  function readString(data: Record<string, unknown>, key: keyof WhitelistSubmitFormState) {
+    const value = data[key];
+    return typeof value === 'string' || typeof value === 'number' ? String(value) : '';
+  }
+
+  function readEnum<T extends 1 | 2>(data: Record<string, unknown>, key: keyof WhitelistSubmitFormState): T | null {
+    const value = Number(data[key]);
+    return value === 1 || value === 2 ? (value as T) : null;
+  }
+
+  function readNumber(data: Record<string, unknown>, key: keyof WhitelistSubmitFormState) {
+    const value = Number(data[key]);
+    return Number.isFinite(value) && value > 0 ? value : null;
+  }
+
+  function loadDetail(detail: WhitelistItemDetail) {
+    const data = detail.business_data ?? {};
+    resetForm();
+    const files = collectDetailFiles(detail);
+    retainedFiles.value = files;
+    originalFileIds.value = files.map((file) => file.file_id);
+    Object.assign(formState, {
+      role: detail.role,
+      entity_type: detail.entity_type,
+      company_name: readString(data, 'company_name') || detail.subject_name || '',
+      registration_country: readString(data, 'registration_country'),
+      operating_country: readString(data, 'operating_country') || detail.country || '',
+      registration_date: readString(data, 'registration_date'),
+      company_type: readEnum(data, 'company_type'),
+      document_no: readString(data, 'document_no'),
+      given_name: readString(data, 'given_name'),
+      surname: readString(data, 'surname'),
+      nationality: readString(data, 'nationality'),
+      residence_country: readString(data, 'residence_country') || detail.country || '',
+      birth_date: readString(data, 'birth_date'),
+      document_type: readEnum(data, 'document_type'),
+      city: readString(data, 'city'),
+      address: readString(data, 'address'),
+      bank_name: readString(data, 'bank_name'),
+      bank_account: readString(data, 'bank_account'),
+      swift: readString(data, 'swift'),
+      intermediary_swift: readString(data, 'intermediary_swift'),
+      remittance_purpose: readNumber(data, 'remittance_purpose'),
+      remark: readString(data, 'remark'),
+    });
+    formRef.value?.clearValidate();
+  }
+
   /** -------------------- 表单提交与重置 -------------------- */
   async function validateAndBuild(): Promise<WhitelistSubmitData | null> {
     if (!formRef.value) return null;
     if (!(await formRef.value.validate().catch(() => false))) return null;
-    const business = buildPayload();
+    const business = buildPayload() as Omit<EditWhitelistPayload, 'id'> | null;
     if (!business) return null;
-    if(fileList.value.some(item=>item.status==='uploading'||item.status==='ready'))return null;
-    const fileIds=fileList.value.map(item=>(item.response as WhitelistFile|undefined)?.file_id).filter((id):id is number=>typeof id==='number');
-    business.file_ids=fileIds.length?fileIds:undefined;
+    if (fileList.value.some((item) => item.status === 'uploading' || item.status === 'ready')) return null;
+    const fileIds = fileList.value
+      .map((item) => (item.response as WhitelistFile | undefined)?.file_id)
+      .filter((id): id is number => typeof id === 'number');
+    if (fileIds.length) business.file_ids = fileIds;
+
+    const retainedIds = retainedFileIds.value;
+    const originalIds = originalFileIds.value;
+    const retainedChanged = retainedIds.length !== originalIds.length || retainedIds.some((id) => !originalIds.includes(id));
+    if (originalIds.length && retainedChanged) business.retained_file_ids = retainedIds;
+
     return { business };
   }
 
   function resetForm() {
     Object.assign(formState, createInitialState());
     fileList.value = [];
+    retainedFiles.value = [];
+    originalFileIds.value = [];
     formRef.value?.clearValidate();
   }
 
@@ -236,12 +336,24 @@ export function useWhitelistSubmitForm() {
     formRef,
     formState,
     fileList,
+    retainedFiles,
     rules,
     hasSubjectSelection,
     formSectionTitle,
+    totalFileCount,
+    uploadLimitReached,
     handleExceed,
     handleFileChange,
+    removeRetainedFile,
+    removeUploadedFile,
     validateAndBuild,
     resetForm,
+    loadDetail,
   };
 }
+
+
+
+
+
+

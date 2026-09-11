@@ -4,6 +4,7 @@
  * - 显式命名组合字段，避免对象展开冲突；
  * - 提交/补件成功后由页面级编排刷新列表与详情。
  */
+import { useWhitelistActions } from './useWhitelistActions';
 import { useWhitelistDetail } from './useWhitelistDetail';
 import { useWhitelistFiles } from './useWhitelistFiles';
 import { useWhitelistForm } from './useWhitelistForm';
@@ -18,6 +19,7 @@ export function useWhitelistManagement() {
   const supplement = useWhitelistSupplement();
   const files = useWhitelistFiles();
   const preview = useWhitelistPreview();
+  const actions = useWhitelistActions();
 
   return {
     // 列表
@@ -56,5 +58,13 @@ export function useWhitelistManagement() {
     openFilePreview: preview.openPreview,
     downloadFile: preview.triggerDownload,
     uploadFile: files.uploadFile,
+
+    // 卡片操作
+    actionSubmitting: actions.submitting,
+    editWhitelist: actions.edit,
+    deleteWhitelist: actions.remove,
+    updateWhitelistStatus: actions.updateStatus,
   };
 }
+
+

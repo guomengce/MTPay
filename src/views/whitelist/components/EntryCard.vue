@@ -1,5 +1,19 @@
 <template>
   <article class="entry-card">
+    <el-dropdown class="entry-card__menu" trigger="click" @command="handleCommand">
+      <el-button class="entry-card__menu-button" text :aria-label="t('whitelist.moreActions')">
+        <el-icon><MoreFilled /></el-icon>
+        <span>{{ t('whitelist.actionMenu') }}</span>
+      </el-button>
+      <template #dropdown>
+        <el-dropdown-menu>
+          <el-dropdown-item command="edit" :icon="EditPen">{{ t('whitelist.edit') }}</el-dropdown-item>
+          <el-dropdown-item command="toggle" :icon="SwitchButton">{{ toggleStatusLabel }}</el-dropdown-item>
+          <el-dropdown-item command="delete" :icon="Delete" divided>{{ t('whitelist.delete') }}</el-dropdown-item>
+        </el-dropdown-menu>
+      </template>
+    </el-dropdown>
+
     <header class="entry-card__header">
       <span class="entry-card__avatar">{{ avatarText }}</span>
       <div class="entry-card__heading">
@@ -47,7 +61,7 @@
 <script setup lang="ts">
 import { computed, type Component } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { ArrowRight, Calendar, Document, Files, Upload } from '@element-plus/icons-vue';
+import { ArrowRight, Calendar, Delete, Document, EditPen, Files, MoreFilled, SwitchButton, Upload } from '@element-plus/icons-vue';
 
 import StatusBadge from '@/components/admin/StatusBadge.vue';
 import IdentityBadge from '@/components/admin/IdentityBadge.vue';
@@ -61,10 +75,22 @@ const { t, locale } = useI18n();
 const emit = defineEmits<{
   (event: 'view', item: WhitelistItem): void;
   (event: 'supplement', item: WhitelistItem): void;
+  (event: 'edit', item: WhitelistItem): void;
+  (event: 'toggle-status', item: WhitelistItem): void;
+  (event: 'delete', item: WhitelistItem): void;
 }>();
 
-const statusMeta = computed(() => WHITELIST_STATUS_MAP[props.item.status as WhitelistStatus]);
-const statusLabel = computed(() => [t('whitelistStatus.pending'), t('whitelistStatus.filesRequired'), t('whitelistStatus.approved'), t('whitelistStatus.rejected')][props.item.status] || props.item.status_name);
+const statusMeta = computed(() => WHITELIST_STATUS_MAP[props.item.status as WhitelistStatus] ?? WHITELIST_STATUS_MAP[0]);
+const statusLabel = computed(() =>
+  [
+    t('whitelistStatus.pending'),
+    t('whitelistStatus.filesRequired'),
+    t('whitelistStatus.approved'),
+    t('whitelistStatus.rejected'),
+    t('whitelistStatus.disabled'),
+  ][props.item.status] || props.item.status_name,
+);
+const toggleStatusLabel = computed(() => t(props.item.status === 4 ? 'whitelist.enable' : 'whitelist.disable'));
 const countryName = computed(() => getCountryLabel(props.item.country, locale.value));
 
 interface InfoRow {
@@ -85,10 +111,17 @@ const avatarText = computed(() => {
   const name = props.item.subject_name?.trim() ?? '';
   return name ? name.charAt(0).toUpperCase() : '·';
 });
+
+function handleCommand(command: string | number | object) {
+  if (command === 'edit') emit('edit', props.item);
+  if (command === 'toggle') emit('toggle-status', props.item);
+  if (command === 'delete') emit('delete', props.item);
+}
 </script>
 
 <style scoped lang="scss">
 .entry-card {
+  position: relative;
   display: flex;
   min-width: 0;
   flex-direction: column;
@@ -108,11 +141,46 @@ const avatarText = computed(() => {
     transform: translateY(-2px);
   }
 
+  &__menu {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 2;
+  }
+
+  &__menu-button {
+    display: inline-flex;
+    height: 32px;
+    align-items: center;
+    gap: 4px;
+    padding: 0 10px;
+    border: 1px solid #cfe0eb;
+    border-radius: 999px;
+    color: #31516f;
+    background: #f8fbfd;
+    font-size: 12px;
+    font-weight: 700;
+    box-shadow: 0 6px 14px rgb(16 39 68 / 7%);
+
+    :deep(.el-icon) {
+      font-size: 15px;
+    }
+
+    &:hover,
+    &:focus-visible {
+      border-color: #7fc7c4;
+      color: #087f79;
+      background: #eef9f8;
+      box-shadow: 0 8px 18px rgb(8 127 121 / 12%);
+    }
+  }
+
   &__header {
     display: flex;
     min-width: 0;
     align-items: center;
     gap: 14px;
+    padding-right: 34px;
   }
 
   &__avatar {
@@ -260,6 +328,11 @@ const avatarText = computed(() => {
   @include mobile {
     padding: 18px;
 
+    &__menu {
+      top: 11px;
+      right: 11px;
+    }
+
     &__avatar {
       width: 44px;
       height: 44px;
@@ -286,3 +359,4 @@ const avatarText = computed(() => {
   }
 }
 </style>
+

@@ -6,7 +6,7 @@
 
     <section class="reset-card">
       <header class="reset-card__brand">
-        <img src="/assets/mtpay-logo.svg" alt="MTPay" />
+        <img src="/assets/mtpay-logo.png" alt="MTPay" />
       </header>
 
       <div v-if="resetProfile" class="reset-card__result">

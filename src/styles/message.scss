@@ -1,23 +1,78 @@
 :root {
-  --portal-message-accent: var(--mt-btn-primary);
-  --portal-message-border: var(--mt-btn-primary-border);
-  --portal-message-icon-background: var(--mt-btn-primary-soft);
+  --portal-message-accent: var(--mt-btn-info);
+  --portal-message-border: var(--mt-btn-info-border);
+  --portal-message-icon-background: var(--mt-btn-info-soft);
   --portal-message-background: linear-gradient(115deg, #f6fcfb 0%, #f2f9fc 100%);
+  --portal-message-shadow: rgb(29 141 181 / 14%);
 }
 
 .el-message:not(.login-message--dark) {
-  width: fit-content; min-width: 0; max-width: min(560px, calc(100vw - 32px)); padding: 10px 15px;
-  border: 1px solid var(--portal-message-border); border-radius: 999px;
-  background: var(--portal-message-background); box-shadow: 0 10px 28px rgb(4 143 143 / 14%);
+  width: fit-content;
+  min-width: 0;
+  max-width: min(560px, calc(100vw - 32px));
+  padding: 10px 15px;
+  border: 1px solid var(--portal-message-border);
+  border-radius: 999px;
+  background: var(--portal-message-background);
+  box-shadow: 0 10px 28px var(--portal-message-shadow);
+
+  &.el-message--success {
+    --portal-message-accent: var(--mt-btn-success);
+    --portal-message-border: var(--mt-btn-success-border);
+    --portal-message-icon-background: var(--mt-btn-success-soft);
+    --portal-message-background: linear-gradient(115deg, #f7fef9 0%, #eefdf4 100%);
+    --portal-message-shadow: rgb(22 163 74 / 14%);
+  }
+
+  &.el-message--warning {
+    --portal-message-accent: var(--mt-btn-warning);
+    --portal-message-border: var(--mt-btn-warning-border);
+    --portal-message-icon-background: var(--mt-btn-warning-soft);
+    --portal-message-background: linear-gradient(115deg, #fffdf4 0%, #fff8e6 100%);
+    --portal-message-shadow: rgb(245 158 11 / 16%);
+  }
+
+  &.el-message--error {
+    --portal-message-accent: var(--mt-btn-danger);
+    --portal-message-border: var(--mt-btn-danger-border);
+    --portal-message-icon-background: var(--mt-btn-danger-soft);
+    --portal-message-background: linear-gradient(115deg, #fff8f8 0%, #fff1f1 100%);
+    --portal-message-shadow: rgb(239 68 68 / 14%);
+  }
+
+  &.el-message--info {
+    --portal-message-accent: var(--mt-btn-info);
+    --portal-message-border: var(--mt-btn-info-border);
+    --portal-message-icon-background: var(--mt-btn-info-soft);
+    --portal-message-background: linear-gradient(115deg, #f5fbff 0%, #eaf6fc 100%);
+    --portal-message-shadow: rgb(29 141 181 / 14%);
+  }
 
   .el-message__icon {
-    width: 24px; height: 24px; flex: 0 0 24px; margin-right: 9px; padding: 5px;
-    border: 1px solid var(--portal-message-border); border-radius: 50%; color: var(--portal-message-accent);
-    background: var(--portal-message-icon-background); font-size: 14px;
+    width: 24px;
+    height: 24px;
+    flex: 0 0 24px;
+    margin-right: 9px;
+    padding: 5px;
+    border: 1px solid var(--portal-message-border);
+    border-radius: 50%;
+    color: var(--portal-message-accent);
+    background: var(--portal-message-icon-background);
+    font-size: 14px;
   }
-  .el-message__content { min-width: 0; color: var(--portal-text); font-size: 14px; font-weight: 600; line-height: 1.55; }
+
+  .el-message__content {
+    min-width: 0;
+    color: var(--portal-text);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.55;
+  }
 }
 
 @media (max-width: 767px) {
-  .el-message:not(.login-message--dark) { max-width: calc(100vw - 24px); padding: 10px 14px; }
+  .el-message:not(.login-message--dark) {
+    max-width: calc(100vw - 24px);
+    padding: 10px 14px;
+  }
 }

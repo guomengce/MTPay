@@ -15,9 +15,10 @@ export const WHITELIST_STATUS_MAP = {
   1: { type: 'warning' as const, effect: 'pending' as const },
   2: { type: 'success' as const, effect: undefined },
   3: { type: 'danger' as const, effect: undefined },
+  4: { type: 'gray' as const, effect: undefined },
 } as const;
 
-export type WhitelistStatus = 0 | 1 | 2 | 3;
+export type WhitelistStatus = 0 | 1 | 2 | 3 | 4;
 
 export function useWhitelistList() {
   const loading = ref(false);
@@ -82,3 +83,5 @@ export function useWhitelistList() {
     refresh,
   };
 }
+
+

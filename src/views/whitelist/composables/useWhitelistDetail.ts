@@ -12,12 +12,13 @@ export function useWhitelistDetail() {
   const detail = ref<WhitelistItemDetail | null>(null);
   let requestVersion = 0;
 
-  async function fetchDetail(id: number) {
+  async function fetchDetail(id: number): Promise<WhitelistItemDetail> {
     const version = ++requestVersion;
     loading.value = true;
     try {
       const result = await whitelistApi.fetchWhitelistDetail(id);
       if (version === requestVersion) detail.value = result;
+      return result;
     } finally {
       if (version === requestVersion) loading.value = false;
     }
@@ -36,3 +37,5 @@ export function useWhitelistDetail() {
     clear,
   };
 }
+
+

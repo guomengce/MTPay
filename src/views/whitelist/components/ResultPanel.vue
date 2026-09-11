@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <section class="result-panel">
     <div v-loading="loading" class="result-panel__grid-wrap">
       <el-empty
@@ -13,6 +13,9 @@
           :item="item"
           @view="emit('view', $event)"
           @supplement="emit('supplement', $event)"
+          @edit="emit('edit', $event)"
+          @toggle-status="emit('toggle-status', $event)"
+          @delete="emit('delete', $event)"
         />
       </div>
     </div>
@@ -52,6 +55,9 @@ defineProps<{
 const emit = defineEmits<{
   (event: 'view', item: WhitelistItem): void;
   (event: 'supplement', item: WhitelistItem): void;
+  (event: 'edit', item: WhitelistItem): void;
+  (event: 'toggle-status', item: WhitelistItem): void;
+  (event: 'delete', item: WhitelistItem): void;
   (event: 'page', page: number): void;
   (event: 'limit', limit: number): void;
 }>();
@@ -119,3 +125,4 @@ function handleLimitChange(nextLimit: number) {
   }
 }
 </style>
+

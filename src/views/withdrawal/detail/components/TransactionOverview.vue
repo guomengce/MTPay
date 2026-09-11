@@ -2,8 +2,18 @@
   <section class="transaction-overview">
     <div class="amounts">
       <header class="section-title">
-        <span class="section-title__icon"><i class="ri-wallet-3-line" /></span>
-        <h2>{{ t('withdrawal.amountDetails') }}</h2>
+        <div class="section-title__main">
+          <span class="section-title__icon"><i class="ri-wallet-3-line" /></span>
+          <h2>{{ t('withdrawal.amountDetails') }}</h2>
+        </div>
+        <el-button
+          circle
+          plain
+          size="small"
+          :icon="DocumentCopy"
+          :aria-label="t('withdrawal.copyParty')"
+          @click="copyWithdrawalSummary"
+        />
       </header>
       <div class="amounts__rows">
         <div>
@@ -29,20 +39,24 @@
     </div>
     <div class="parties">
       <header class="section-title">
-        <span class="section-title__icon"><i class="ri-group-line" /></span>
-        <h2>{{ t('withdrawal.transactionParties') }}</h2>
+        <div class="section-title__main">
+          <span class="section-title__icon"><i class="ri-group-line" /></span>
+          <h2>{{ t('withdrawal.transactionParties') }}</h2>
+        </div>
       </header>
       <div class="parties__grid">
         <CompanyInfoCard
           v-if="detail.payer.entity_type === 1"
           :data="detail.payer.data ?? {}"
           :role="1"
+          :show-copy="false"
           :title="t('withdrawal.payerCompany')"
         />
         <IndividualInfoCard
           v-else-if="detail.payer.entity_type === 2"
           :data="detail.payer.data ?? {}"
           :role="1"
+          :show-copy="false"
           :title="t('withdrawal.payerPerson')"
         />
         <div class="parties__payee-group">
@@ -50,17 +64,20 @@
             v-if="detail.payee.entity_type === 1"
             :data="detail.payee.data ?? {}"
             :role="2"
+            :show-copy="false"
             :title="t('withdrawal.payeeCompany')"
           />
           <IndividualInfoCard
             v-else-if="detail.payee.entity_type === 2"
             :data="detail.payee.data ?? {}"
             :role="2"
+            :show-copy="false"
             :title="t('withdrawal.payeePerson')"
           />
           <BankInfoCard
             :data="detail.payee.data ?? {}"
             :role="2"
+            :show-copy="false"
             :title="t('withdrawal.bankDetails')"
           />
         </div>
@@ -72,12 +89,76 @@
 import CompanyInfoCard from '@/components/party-info/CompanyInfoCard.vue';
 import IndividualInfoCard from '@/components/party-info/IndividualInfoCard.vue';
 import BankInfoCard from '@/components/party-info/BankInfoCard.vue';
+import { DocumentCopy } from '@element-plus/icons-vue';
+import { ElMessage } from 'element-plus';
 import { useI18n } from 'vue-i18n';
 import type { WithdrawalOrderDetail } from '@/api/modules/withdrawal';
+import { getCountryLabel } from '@/constants/countries';
 import { formatMoney } from '@/utils/formatMoney';
 
-defineProps<{ detail: WithdrawalOrderDetail }>();
-const { t } = useI18n();
+const props = defineProps<{ detail: WithdrawalOrderDetail }>();
+const { t, locale } = useI18n();
+
+function text(value: unknown) {
+  return value == null ? '' : String(value).trim();
+}
+
+function countryName(value: unknown) {
+  const raw = text(value);
+  return raw ? getCountryLabel(raw, locale.value) : '';
+}
+
+function partyName(party: WithdrawalOrderDetail['payer']) {
+  const data = party.data ?? {};
+  if (party.entity_type === 1) return text(data.company_name) || text(party.name);
+  return [text(data.surname), text(data.given_name)].filter(Boolean).join(' ') || text(party.name);
+}
+
+function partyAddress(party: WithdrawalOrderDetail['payer']) {
+  const data = party.data ?? {};
+  const country =
+    party.entity_type === 1
+      ? countryName(data.operating_country) || countryName(data.registration_country)
+      : countryName(data.residence_country);
+  return [text(data.address), text(data.city), country].filter(Boolean).join(' ');
+}
+
+function moneyLabel(code: string) {
+  return code.toUpperCase() === 'USD' ? t('withdrawal.copyUsd') : code.toUpperCase();
+}
+
+function buildWithdrawalSummary() {
+  const { detail } = props;
+  const payer = detail.payer;
+  const payee = detail.payee;
+  const bank = payee.data ?? {};
+  return [
+    `${t('withdrawal.orderNo')}： ${text(detail.order_no)}`,
+    '',
+    t('withdrawal.copyPayer'),
+    `${t('withdrawal.copyName')}： ${partyName(payer)}`,
+    `${t('whitelist.address')}： ${partyAddress(payer)}`,
+    '',
+    t('withdrawal.copyPayee'),
+    `${t('withdrawal.copyName')}： ${partyName(payee)}`,
+    `${t('whitelist.address')}： ${partyAddress(payee)}`,
+    `${t('whitelist.bankName')}： ${text(bank.bank_name)}`,
+    `${t('whitelist.bankAccount')}： ${text(bank.bank_account)}`,
+    `${t('whitelist.swift')}： ${text(bank.swift)}`,
+    `${t('whitelist.remark')}： ${text(bank.remark)}`,
+    '',
+    `${moneyLabel(detail.currency.code)}： ${formatMoney(detail.total_amount)}`,
+  ].join('\n');
+}
+
+async function copyWithdrawalSummary() {
+  try {
+    await navigator.clipboard.writeText(buildWithdrawalSummary());
+    ElMessage.success(t('withdrawal.partyCopied'));
+  } catch {
+    ElMessage.error(t('withdrawal.copyFailed'));
+  }
+}
 </script>
 <style scoped lang="scss">
 .transaction-overview {
@@ -93,10 +174,18 @@ const { t } = useI18n();
 .section-title {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 11px;
   padding: 18px 20px 10px;
   color: #142e4e;
   background: #fff;
+
+  &__main {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 11px;
+  }
 
   h2 {
     margin: 0;
@@ -114,6 +203,12 @@ const { t } = useI18n();
     color: #08a6a4;
     background: #e5f7f5;
     font-size: 18px;
+  }
+
+  .el-button {
+    flex: none;
+    margin-left: auto;
+    color: #168f89;
   }
 }
 

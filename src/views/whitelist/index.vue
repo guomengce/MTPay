@@ -25,9 +25,12 @@
       :total="total"
       :page="page"
       :limit="limit"
-      :loading="listLoading"
+      :loading="listLoading || actionSubmitting"
       @view="openDetail"
       @supplement="openSupplement"
+      @edit="openEdit"
+      @toggle-status="toggleWhitelistStatus"
+      @delete="deleteWhitelistItem"
       @page="onPage"
       @limit="onLimit"
     />
@@ -38,6 +41,16 @@
       :uploading="submitUploading"
       :upload-file="uploadFile"
       @submit="handleSubmit"
+    />
+
+    <SubmitDialog
+      v-model="editDialogVisible"
+      mode="edit"
+      :initial-detail="editDetail"
+      :submitting="actionSubmitting"
+      :uploading="submitUploading"
+      :upload-file="uploadFile"
+      @submit="handleEdit"
     />
 
     <SupplementDialog
@@ -60,12 +73,12 @@
  * - 不在组件内直接调用 request 或拼接 Authorization。
  */
 import { onMounted, ref } from 'vue';
-import { ElMessage } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import { Plus } from '@element-plus/icons-vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 
-import type { SubmitWhitelistPayload, WhitelistItem } from '@/api/modules/whitelist';
+import type { EditWhitelistPayload, SubmitWhitelistPayload, WhitelistItem, WhitelistItemDetail } from '@/api/modules/whitelist';
 import AdminHero from '@/components/admin/AdminHero.vue';
 
 import ResultPanel from './components/ResultPanel.vue';
@@ -97,11 +110,18 @@ const {
   supplementUploading,
   submitSupplement,
   uploadFile,
+  actionSubmitting,
+  editWhitelist,
+  deleteWhitelist,
+  updateWhitelistStatus,
 } = useWhitelistManagement();
 
 const router = useRouter();
 const route = useRoute();
 const submitDialogVisible = ref(false);
+const editDialogVisible = ref(false);
+const editItem = ref<WhitelistItem | null>(null);
+const editDetail = ref<WhitelistItemDetail | null>(null);
 const supplementDialogVisible = ref(false);
 const supplementItem = ref<WhitelistItem | null>(null);
 const { t } = useI18n();
@@ -117,8 +137,60 @@ async function handleSubmit(payload: { business: SubmitWhitelistPayload }) {
   }
 }
 
+async function handleEdit(payload: { business: SubmitWhitelistPayload | Omit<EditWhitelistPayload, 'id'> }) {
+  if (!editItem.value) return;
+  try {
+    await editWhitelist(editItem.value.id, payload.business as Omit<EditWhitelistPayload, 'id'>);
+    ElMessage.success(t('whitelist.editSuccess'));
+    editDialogVisible.value = false;
+    editItem.value = null;
+    editDetail.value = null;
+    await refreshList();
+  } catch {
+    /* 统一请求层已提示后端错误 */
+  }
+}
+
 function openDetail(item: WhitelistItem) {
   void router.push({ name: 'WhitelistDetail', params: { id: item.id } });
+}
+
+async function openEdit(item: WhitelistItem) {
+  try {
+    editItem.value = item;
+    editDetail.value = await fetchDetail(item.id);
+    editDialogVisible.value = true;
+  } catch {
+    editItem.value = null;
+    editDetail.value = null;
+  }
+}
+
+async function toggleWhitelistStatus(item: WhitelistItem) {
+  const nextStatus = item.status === 4 ? 2 : 4;
+  try {
+    await ElMessageBox.confirm(
+      t(nextStatus === 4 ? 'whitelist.disableConfirm' : 'whitelist.enableConfirm'),
+      t(nextStatus === 4 ? 'whitelist.disable' : 'whitelist.enable'),
+      { type: nextStatus === 4 ? 'warning' : 'info' },
+    );
+    await updateWhitelistStatus(item.id, nextStatus);
+    ElMessage.success(t(nextStatus === 4 ? 'whitelist.disableSuccess' : 'whitelist.enableSuccess'));
+    await refreshList();
+  } catch {
+    /* 用户取消或统一请求层已提示后端错误 */
+  }
+}
+
+async function deleteWhitelistItem(item: WhitelistItem) {
+  try {
+    await ElMessageBox.confirm(t('whitelist.deleteConfirm'), t('whitelist.delete'), { type: 'warning' });
+    await deleteWhitelist(item.id);
+    ElMessage.success(t('whitelist.deleteSuccess'));
+    await refreshList();
+  } catch {
+    /* 用户取消或统一请求层已提示后端错误 */
+  }
 }
 
 async function openSupplement(item: WhitelistItem) {

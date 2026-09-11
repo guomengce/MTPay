@@ -28,7 +28,7 @@ import type { WhitelistItemDetail } from '@/api/modules/whitelist';
 const props = defineProps<{ detail: WhitelistItemDetail }>();
 const { t } = useI18n();
 const emit = defineEmits<{ supplement: [] }>();
-const statusMeta = computed(() => WHITELIST_STATUS_MAP[props.detail.status]);
+const statusMeta = computed(() => WHITELIST_STATUS_MAP[props.detail.status] ?? WHITELIST_STATUS_MAP[0]);
 const statusLabel = computed(() =>
   t(
     [
@@ -36,7 +36,10 @@ const statusLabel = computed(() =>
       'whitelistStatus.filesRequired',
       'whitelistStatus.approved',
       'whitelistStatus.rejected',
-    ][props.detail?.status ?? 0]!,
+      'whitelistStatus.disabled',
+    ][props.detail?.status ?? 0] || 'whitelistStatus.pending',
   ),
 );
 </script>
+
+

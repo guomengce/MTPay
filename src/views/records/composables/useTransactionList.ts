@@ -35,7 +35,7 @@ export function useTransactionList() {
   const list = ref<TransactionItem[]>([]);
   const total = ref(0);
   const page = ref(1);
-  const limit = ref(15);
+  const limit = ref(10);
   const query = reactive<TransactionQuery>({ ...INITIAL_QUERY });
 
   function buildParams(): TransactionListParams {

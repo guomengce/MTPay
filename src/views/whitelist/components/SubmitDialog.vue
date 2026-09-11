@@ -2,8 +2,8 @@
   <AgentDialog
     :model-value="modelValue"
     class="whitelist-submit-dialog"
-    :title="t('whitelist.add')"
-    :icon="DocumentAdd"
+    :title="dialogTitle"
+    :icon="dialogIcon"
     width="min(880px, calc(100vw - 32px))"
     top="4vh"
     :close-on-click-modal="false"
@@ -232,13 +232,14 @@
 
             <el-form-item class="upload-form-item">
               <el-upload
-                v-upload-limit="fileList.length >= 5"
+                v-upload-limit="uploadLimitReached"
                 v-model:file-list="fileList"
                 class="submit-form__upload"
                 :auto-upload="false"
                 :multiple="true"
-                :limit="5"
+                :limit="Math.max(0, 5 - retainedFiles.length)"
                 :on-exceed="handleExceed"
+                :show-file-list="false"
                 accept=".pdf,.png,.jpg,.jpeg"
                 drag
                 @change="onFileChange"
@@ -246,6 +247,44 @@
                 <el-icon class="submit-form__upload-icon"><UploadFilled /></el-icon>
                 <strong>{{ t('whitelist.uploadText') }}</strong><small>{{ t('whitelist.uploadHint') }}</small>
               </el-upload>
+              <ul v-if="retainedFiles.length || fileList.length" class="retained-files el-upload-list el-upload-list--text">
+                <li
+                  v-for="file in retainedFiles"
+                  :key="`retained-${file.file_id}`"
+                  class="retained-files__item el-upload-list__item"
+                >
+                  <span class="retained-files__name el-upload-list__item-name" :title="file.original_name">
+                    <el-icon><Document /></el-icon>
+                    <span>{{ file.original_name }}</span>
+                  </span>
+                  <button
+                    class="retained-files__remove"
+                    type="button"
+                    :aria-label="t('whitelist.removeFile')"
+                    @click="removeRetainedFile(file.file_id)"
+                  >
+                    <el-icon><Close /></el-icon>
+                  </button>
+                </li>
+                <li
+                  v-for="file in fileList"
+                  :key="`uploaded-${file.uid}`"
+                  class="retained-files__item el-upload-list__item"
+                >
+                  <span class="retained-files__name el-upload-list__item-name" :title="file.name">
+                    <el-icon><Document /></el-icon>
+                    <span>{{ file.name }}</span>
+                  </span>
+                  <button
+                    class="retained-files__remove"
+                    type="button"
+                    :aria-label="t('whitelist.removeFile')"
+                    @click="removeUploadedFile(file.uid)"
+                  >
+                    <el-icon><Close /></el-icon>
+                  </button>
+                </li>
+              </ul>
             </el-form-item>
           </section>
         </template>
@@ -254,7 +293,7 @@
 
     <template #footer>
       <footer class="submit-dialog__footer">
-          <el-button v-if="activeStep === 0" plain @click="close">{{ t('common.actions.cancel') }}</el-button><el-button v-else plain @click="activeStep = 0">{{ t('whitelist.previous') }}</el-button>
+          <el-button v-if="activeStep === 0 || editing" plain @click="close">{{ t('common.actions.cancel') }}</el-button><el-button v-else plain @click="activeStep = 0">{{ t('whitelist.previous') }}</el-button>
           <el-button
             v-if="activeStep === 0"
             type="primary"
@@ -268,7 +307,7 @@
             :loading="submitting || uploading"
             @click="handleSubmit"
           >
-            {{ t('whitelist.submitApplication') }}
+            {{ submitButtonText }}
           </el-button>
       </footer>
     </template>
@@ -277,33 +316,41 @@
 
 <script setup lang="ts">
 /**
- * 新增白名单弹框
+ * 新增/修改白名单弹框
  * - 只负责表单 UI、弹框开关和提交事件转发；
  * - 表单状态、动态校验、参数组装和附件校验统一由 useWhitelistSubmitForm 管理；
- * - 文件上传与接口提交仍由父级 useWhitelistForm 处理。
+ * - 文件上传与接口提交仍由父级 useWhitelistForm / useWhitelistActions 处理。
  */
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { UploadFile, UploadFiles } from 'element-plus';
 import { vUploadLimit } from '@/directives/uploadLimit';
-import { DocumentAdd, UploadFilled } from '@element-plus/icons-vue';
+import { Close, Document, DocumentAdd, EditPen, UploadFilled } from '@element-plus/icons-vue';
 
-import type { SubmitWhitelistPayload, WhitelistFile, WhitelistItemDetail } from '@/api/modules/whitelist';
+import type { EditWhitelistPayload, SubmitWhitelistPayload, WhitelistFile, WhitelistItemDetail } from '@/api/modules/whitelist';
 import CountrySelect from '@/components/common/CountrySelect.vue';
 import AgentDialog from '@/components/common/AgentDialog.vue';
 import { REMITTANCE_PURPOSE_OPTIONS } from '@/constants/remittancePurposes';
 import { useWhitelistSubmitForm } from '../composables/useWhitelistSubmitForm';
 
-const props = defineProps<{
-  modelValue: boolean;
-  submitting?: boolean;
-  uploading?: boolean;
-  uploadFile: (file: File) => Promise<WhitelistFile>;
-}>();
+const props = withDefaults(
+  defineProps<{
+    modelValue: boolean;
+    submitting?: boolean;
+    uploading?: boolean;
+    uploadFile: (file: File) => Promise<WhitelistFile>;
+    mode?: 'create' | 'edit';
+    initialDetail?: WhitelistItemDetail | null;
+  }>(),
+  {
+    mode: 'create',
+    initialDetail: null,
+  },
+);
 
 const emit = defineEmits<{
   (event: 'update:modelValue', value: boolean): void;
-  (event: 'submit', payload: { business: SubmitWhitelistPayload }): void;
+  (event: 'submit', payload: { business: SubmitWhitelistPayload | Omit<EditWhitelistPayload, 'id'> }): void;
   (event: 'success', detail: WhitelistItemDetail): void;
 }>();
 
@@ -318,10 +365,19 @@ const {
   handleFileChange,
   validateAndBuild,
   resetForm,
+  loadDetail,
+  retainedFiles,
+  uploadLimitReached,
+  removeRetainedFile,
+  removeUploadedFile,
 } = useWhitelistSubmitForm();
 
 const activeStep = ref(0);
 const { t, locale } = useI18n();
+const editing = computed(() => props.mode === 'edit');
+const dialogTitle = computed(() => t(editing.value ? 'whitelist.editTitle' : 'whitelist.add'));
+const dialogIcon = computed(() => (editing.value ? EditPen : DocumentAdd));
+const submitButtonText = computed(() => t(editing.value ? 'whitelist.saveChanges' : 'whitelist.submitApplication'));
 
 function normalizePlaceholderField(field: string) {
   if (locale.value !== 'en-US' || field === 'SWIFT') return field;
@@ -362,14 +418,31 @@ function close() {
   resetForm();
 }
 
+function syncInitialDetail() {
+  if (!props.modelValue) return;
+  if (props.mode === 'edit' && props.initialDetail) {
+    loadDetail(props.initialDetail);
+    activeStep.value = 1;
+    return;
+  }
+  activeStep.value = 0;
+}
+
 watch(
   () => props.modelValue,
   (val) => {
     if (!val) {
       activeStep.value = 0;
       resetForm();
+      return;
     }
+    syncInitialDetail();
   },
+);
+
+watch(
+  () => props.initialDetail,
+  () => syncInitialDetail(),
 );
 
 defineExpose({ close });
@@ -555,6 +628,37 @@ defineExpose({ close });
 .upload-form-item {
   margin-bottom: 18px !important;
 }
+.retained-files {
+  width: 100%;
+
+  &__remove {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    display: inline-flex;
+    width: 20px;
+    height: 20px;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+    border: 1px solid rgb(211 72 72 / 35%);
+    border-radius: 6px;
+    color: #d34848;
+    background: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    transform: translateY(-50%);
+
+    &:hover,
+    &:focus-visible {
+      border-color: #df4b4b;
+      color: #fff;
+      background: #df4b4b;
+      outline: none;
+    }
+  }
+}
 
 .proof-files-tip {
   margin: -4px 0 16px;
@@ -670,3 +774,20 @@ defineExpose({ close });
 
 }
 </style>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

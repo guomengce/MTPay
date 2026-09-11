@@ -3,7 +3,7 @@
  * 字段与状态枚举以《接口文档参数-代理端.md》第 5.9 节和 7.7 节为准。
  * - role：1 付款人 / 2 收款人；
  * - entity_type：1 公司 / 2 个人；
- * - status：0 待审核 / 1 待补充文件 / 2 已通过 / 3 已驳回；
+ * - status：0 待审核 / 1 待补充文件 / 2 已通过 / 3 已驳回 / 4 已停用；
  * - 所有接口按 Token 识别代理，不传 user_id；
  * - 文件上传后保存元数据，提交/补件再绑定 file_ids，最多 5 个且不能重复。
  */
@@ -12,6 +12,8 @@ import type { AxiosResponse } from 'axios';
 import request from '../request';
 
 /* ---------- 公共对象 ---------- */
+
+export type WhitelistStatus = 0 | 1 | 2 | 3 | 4;
 
 /** 列表/详情中的所属代理信息。 */
 export interface WhitelistUser {
@@ -56,7 +58,7 @@ export interface WhitelistItem {
   entity_type_name: string;
   subject_name: string;
   country: string;
-  status: 0 | 1 | 2 | 3;
+  status: WhitelistStatus;
   status_name: string;
   file_count: number;
   submitted_at: string | null;
@@ -76,6 +78,8 @@ export interface WhitelistItemDetail extends WhitelistItem {
   available_actions: {
     can_supplement_whitelist: boolean;
   };
+  files?: WhitelistFile[];
+  records?: WhitelistReviewRecord[];
 }
 
 /* ---------- 请求参数 ---------- */
@@ -84,8 +88,8 @@ export interface WhitelistItemDetail extends WhitelistItem {
 export interface WhitelistListParams {
   page?: number;
   limit?: number;
-  /** 0 待审核 / 1 待补交文件 / 2 通过 / 3 驳回。 */
-  status?: 0 | 1 | 2 | 3;
+  /** 0 待审核 / 1 待补交文件 / 2 通过 / 3 驳回 / 4 停用。 */
+  status?: WhitelistStatus;
   /** 1 付款人 / 2 收款人。 */
   role?: 1 | 2;
   /** 1 公司 / 2 个人。 */
@@ -122,11 +126,22 @@ export interface SubmitWhitelistPayload {
   remark?: string;
 }
 
+/** 修改白名单参数。retained_file_ids 仅编辑附件发生移除时传；file_ids 仅新增附件时传。 */
+export interface EditWhitelistPayload extends SubmitWhitelistPayload {
+  id: number;
+  retained_file_ids?: number[];
+}
+
 /** 补件参数；file_ids 必填 1～5 个，message 可选；仅 status=1 可用。 */
 export interface SupplementWhitelistPayload {
   id: number;
   file_ids: number[];
   message?: string;
+}
+
+export interface EditWhitelistStatusPayload {
+  id: number;
+  status: 2 | 4;
 }
 
 /* ---------- 分页类型 ---------- */
@@ -169,6 +184,21 @@ export function submitWhitelist(payload: SubmitWhitelistPayload) {
   return request.post<unknown, WhitelistItemDetail>('/web/submitWhitelist', payload);
 }
 
+/** 修改当前代理的一笔白名单。 */
+export function editWhitelist(payload: EditWhitelistPayload) {
+  return request.post<unknown, WhitelistItemDetail>('/web/editWhitelist', payload);
+}
+
+/** 删除当前代理的一笔白名单。 */
+export function deleteWhitelist(id: number) {
+  return request.post<unknown, []>('/web/deleteWhitelist', { id });
+}
+
+/** 启用或停用当前代理的一笔白名单。 */
+export function editWhitelistStatus(payload: EditWhitelistStatusPayload) {
+  return request.post<unknown, WhitelistItemDetail>('/web/editWhitelistStatus', payload);
+}
+
 /**
  * 当前代理的白名单分页列表。
  */
@@ -206,3 +236,4 @@ export function downloadWhitelistFile(fileId: number) {
     timeout: 120_000,
   });
 }
+

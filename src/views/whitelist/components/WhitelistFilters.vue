@@ -31,6 +31,7 @@
       <el-option :label="t('whitelistStatus.filesRequired')" :value="1" />
       <el-option :label="t('whitelistStatus.approved')" :value="2" />
       <el-option :label="t('whitelistStatus.rejected')" :value="3" />
+      <el-option :label="t('whitelistStatus.disabled')" :value="4" />
     </el-select>
   </div>
 </template>
@@ -40,7 +41,7 @@ import { useI18n } from 'vue-i18n';
 defineProps<{ loading?: boolean }>();
 const role = defineModel<1 | 2>('role');
 const entityType = defineModel<1 | 2>('entityType');
-const status = defineModel<0 | 1 | 2 | 3>('status');
+const status = defineModel<0 | 1 | 2 | 3 | 4>('status');
 const emit = defineEmits<{ (event: 'change'): void }>();
 const { t } = useI18n();
 </script>
@@ -72,3 +73,5 @@ const { t } = useI18n();
   }
 }
 </style>
+
+
