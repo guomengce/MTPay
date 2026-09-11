@@ -1,10 +1,10 @@
 <template>
   <main class="transaction-detail">
-    <el-button plain :icon="Back" @click="goBack">{{ t('records.back') }}</el-button>
+    <el-button class="app-back-button" plain :icon="Back" @click="goBack">{{ t('records.back') }}</el-button>
     <div v-loading="loading" class="transaction-detail__content">
       <DepositDetailContent v-if="depositDetail" :detail="depositDetail" />
       <ExchangeDetailContent v-else-if="exchangeDetail" :detail="exchangeDetail" />
-      <WithdrawalDetailContent v-else-if="withdrawalDetail" :detail="withdrawalDetail" :file-loading="fileLoading" @preview="openPreview" @download="triggerDownload" />
+      <WithdrawalDetailContent v-else-if="withdrawalDetail" :detail="withdrawalDetail" />
       <ManualAdjustmentDetail v-else-if="manualDetail && info" :transaction="info.transaction" :detail="manualDetail" />
       <el-empty v-else-if="!loading" :description="invalid ? t('records.invalid') : t('records.notFound')" />
     </div>
@@ -25,8 +25,7 @@ import DepositDetailContent from '@/views/deposit/detail/components/DepositDetai
 import ExchangeDetailContent from '@/views/exchange/detail/components/ExchangeDetailContent.vue';
 import WithdrawalDetailContent from '@/views/withdrawal/detail/components/WithdrawalDetailContent.vue';
 import ManualAdjustmentDetail from './ManualAdjustmentDetail.vue';
-import { useWithdrawalFiles } from '@/views/withdrawal/composables/useWithdrawalFiles';
-const route=useRoute();const router=useRouter();const { t }=useI18n();const loading=ref(false);usePageLoading(loading);const invalid=ref(false);const info=ref<TransactionInfoResult|null>(null);const{loading:fileLoading,openPreview,triggerDownload}=useWithdrawalFiles();
+const route=useRoute();const router=useRouter();const { t }=useI18n();const loading=ref(false);usePageLoading(loading);const invalid=ref(false);const info=ref<TransactionInfoResult|null>(null);
 const depositDetail=computed(()=>info.value?.transaction.business_type==='deposit'?info.value.detail as DepositOrderDetail:null);
 const exchangeDetail=computed(()=>info.value?.transaction.business_type==='exchange'?info.value.detail as ExchangeOrderDetail:null);
 const withdrawalDetail=computed(()=>info.value?.transaction.business_type==='withdrawal'?info.value.detail as WithdrawalOrderDetail:null);

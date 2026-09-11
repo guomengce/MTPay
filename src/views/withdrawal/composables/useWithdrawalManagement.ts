@@ -1,11 +1,10 @@
 /**
  * 法币出金模块组合入口
- * - 串联配置 / 列表 / 详情 / 表单 / 补件 / 附件；
+ * - 串联配置 / 列表 / 详情 / 表单 / 补件；
  * - 提交/补件成功后由列表 composable 触发刷新。
  */
 import { useWithdrawalConfig } from './useWithdrawalConfig';
 import { useWithdrawalDetail } from './useWithdrawalDetail';
-import { useWithdrawalFiles } from './useWithdrawalFiles';
 import { useWithdrawalForm } from './useWithdrawalForm';
 import { useWithdrawalList } from './useWithdrawalList';
 import { useWithdrawalSupplement } from './useWithdrawalSupplement';
@@ -16,7 +15,6 @@ export function useWithdrawalManagement() {
   const detail = useWithdrawalDetail();
   const form = useWithdrawalForm();
   const supplement = useWithdrawalSupplement();
-  const files = useWithdrawalFiles();
 
   return {
     config: config.config,
@@ -53,8 +51,5 @@ export function useWithdrawalManagement() {
     uploadSupplementFile: supplement.uploadFile,
     clearSupplementResult: supplement.clearLast,
 
-    fileLoading: files.loading,
-    openFilePreview: files.openPreview,
-    downloadFile: files.triggerDownload,
   };
 }

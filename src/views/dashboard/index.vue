@@ -13,10 +13,6 @@
       <div class="dashboard-page__skeleton-actions">
         <el-skeleton-item v-for="index in 4" :key="index" variant="rect" />
       </div>
-      <div class="dashboard-page__skeleton-rates">
-        <el-skeleton-item variant="rect" />
-        <el-skeleton-item variant="rect" />
-      </div>
       <el-skeleton-item class="dashboard-page__skeleton-table" variant="rect" />
     </div>
 
@@ -52,7 +48,6 @@
     </div>
 
     <div class="dashboard-page__content">
-      <ExchangeRatePanel v-if="authStore.cryptoEnabled" compact :agent="companyName" :rates="rateItems" />
       <RecentTransactions :transactions="recentTransactions" />
     </div>
     </template>
@@ -67,7 +62,6 @@ import { usePageLoading } from '@/composables/usePageLoading';
 import { useAuthStore } from '@/stores/modules/auth';
 import { ArrowDown, BellFilled, Switch, Upload, UserFilled } from '@element-plus/icons-vue';
 import BalanceCard from './components/BalanceCard.vue';
-import ExchangeRatePanel from '@/components/admin/ExchangeRatePanel.vue';
 import QuickActionCard from './components/QuickActionCard.vue';
 import RecentTransactions from './components/RecentTransactions.vue';
 import { useDashboard } from './composables/useDashboard';
@@ -77,9 +71,7 @@ const {
   balances,
   pendingCount,
   pendingScope,
-  companyName,
   recentTransactions,
-  rateItems,
   loadOverview,
 } = useDashboard();
 usePageLoading(loading);
@@ -124,8 +116,7 @@ onMounted(loadOverview);
   }
 
   &__skeleton-metrics,
-  &__skeleton-actions,
-  &__skeleton-rates {
+  &__skeleton-actions {
     display: grid;
     gap: 20px;
 
@@ -142,14 +133,6 @@ onMounted(loadOverview);
 
   &__skeleton-actions .el-skeleton__item {
     height: 82px;
-  }
-
-  &__skeleton-rates {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-
-    .el-skeleton__item {
-      height: 190px;
-    }
   }
 
   &__skeleton-table {
@@ -320,8 +303,7 @@ onMounted(loadOverview);
     &__balances,
     &__actions,
     &__skeleton-metrics,
-    &__skeleton-actions,
-    &__skeleton-rates {
+    &__skeleton-actions {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
@@ -348,8 +330,7 @@ onMounted(loadOverview);
     &__balances,
     &__actions,
     &__skeleton-metrics,
-    &__skeleton-actions,
-    &__skeleton-rates {
+    &__skeleton-actions {
       grid-template-columns: 1fr;
     }
 
@@ -358,13 +339,11 @@ onMounted(loadOverview);
     }
 
     &__skeleton-metrics,
-    &__skeleton-actions,
-    &__skeleton-rates {
+    &__skeleton-actions {
       gap: 12px;
     }
 
-    &__skeleton-metrics .el-skeleton__item,
-    &__skeleton-rates .el-skeleton__item {
+    &__skeleton-metrics .el-skeleton__item {
       height: 124px;
     }
 

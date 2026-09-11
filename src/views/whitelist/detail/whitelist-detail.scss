@@ -1,0 +1,332 @@
+.wl-redesign {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 100%;
+  padding: 22px;
+  color: #142e4e;
+  background: radial-gradient(ellipse at 12% 0%, #eaf8fa80, transparent 50%);
+}
+.wl-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 18px;
+  padding: 4px 2px;
+  border: 0;
+  background: none;
+  color: #456888;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.wl-back:hover {
+  color: #089e9b;
+}
+.wl-overview,
+.wl-subject {
+  min-width: 0;
+  border: 1px solid #e5eef4;
+  border-radius: 17px;
+  background: #fff;
+  box-shadow: 0 8px 30px #28557706;
+}
+.wl-overview {
+  padding: 24px;
+  margin-bottom: 18px;
+}
+.wl-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+}
+.wl-title-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.wl-title-line h1 {
+  margin: 0;
+  font-size: 25px;
+  font-weight: 750;
+  letter-spacing: -0.5px;
+}
+.wl-identity {
+  padding: 5px 11px;
+  border-radius: 20px;
+  background: #eaf1ff;
+  color: #2670ee;
+  font-size: 12px;
+  font-weight: 600;
+}
+.wl-heading__title p {
+  margin: 13px 0 0;
+  color: #6e829c;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.wl-reference {
+  display: grid;
+  justify-items: end;
+  gap: 7px;
+  flex-shrink: 0;
+  max-width: 100%;
+}
+.wl-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 12px;
+  margin-bottom: 3px;
+  border-radius: 20px;
+  background: #fff1d7;
+  color: #ce850f;
+  font-size: 12px;
+  font-weight: 650;
+}
+.wl-status > span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 3px #e7aa2920;
+}
+.wl-status--2 {
+  background: #e0f7ee;
+  color: #009d78;
+}
+.wl-status--3 {
+  background: #fff0ef;
+  color: #d65353;
+}
+.wl-label {
+  color: #8291a8;
+  font-size: 11px;
+}
+.wl-heading__title .wl-number {
+  color: #496783;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  overflow-wrap: anywhere;
+}
+.wl-review {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-top: 22px;
+  padding: 18px 20px;
+  border: 1px solid #e9f0f5;
+  border-radius: 12px;
+  background: linear-gradient(110deg, #f4fafa, #f7faff);
+}
+.wl-review__content {
+  flex: 1;
+  min-width: 0;
+}
+.wl-reference > .status-badge {
+  justify-self: end;
+}
+.wl-review--action {
+  border-color: #f6dfac;
+  background: linear-gradient(110deg, #fff9e9, #fffdf7);
+}
+.wl-review--rejected {
+  border-color: #f2d8d8;
+  background: #fff8f7;
+}
+.wl-review__heading,
+.wl-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+.wl-review__heading h2,
+.wl-section-heading h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+.wl-section-icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 9px;
+  background: #e5f7f5;
+  color: #08a6a4;
+  font-size: 18px;
+}
+.wl-review--action .wl-section-icon {
+  background: #fff0c8;
+  color: #ce880c;
+}
+.wl-supplement-button {
+  margin-left: auto;
+  min-height: 38px;
+  padding: 0 20px;
+  border-radius: 9px;
+  font-weight: 650;
+  box-shadow: 0 5px 14px #e6a22325;
+}
+.wl-supplement-button i {
+  margin-right: 6px;
+}
+.wl-review__message {
+  margin: 13px 0 0 43px;
+  font-size: 14px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.wl-review__message > span {
+  margin-right: 12px;
+  color: #8190a3;
+  font-size: 12px;
+}
+.wl-review__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 36px;
+  margin: 12px 0 0 43px;
+  color: #8190a3;
+  font-size: 12px;
+}
+.wl-review__meta strong {
+  margin-left: 12px;
+  color: #29435f;
+  font-weight: 500;
+}
+.wl-subject {
+  padding: 24px;
+}
+.wl-section-heading {
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+.wl-groups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: flex-start;
+}
+.wl-field-section {
+  box-sizing: border-box;
+  flex: 0 1 520px;
+  width: 520px;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #e8eff3;
+  border-radius: 12px;
+}
+.wl-field-section h3 {
+  margin: 0;
+  padding: 15px 18px;
+  background: #f4f9fa;
+  border-bottom: 1px solid #eaf0f5;
+  font-size: 13px;
+}
+.wl-field-section h3::before {
+  display: inline-block;
+  width: 3px;
+  height: 12px;
+  margin-right: 9px;
+  border-radius: 2px;
+  background: #0eb2ac;
+  content: '';
+  vertical-align: -1px;
+}
+.wl-fields {
+  margin: 0;
+  padding: 0 18px;
+}
+.wl-field {
+  display: grid;
+  grid-template-columns: minmax(120px, 34%) minmax(0, 1fr);
+  align-items: baseline;
+  gap: 20px;
+  min-width: 0;
+  padding: 16px 0;
+  border-bottom: 1px solid #f0f4f7;
+}
+.wl-field:last-child {
+  border-bottom: 0;
+}
+.wl-field dt {
+  color: #7e8fa7;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.wl-field dd {
+  min-width: 0;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 550;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.wl-dialog-requirement {
+  padding: 13px 16px;
+  margin: 0 0 20px;
+  border-radius: 10px;
+  background: #fff8e7;
+  color: #8d681a;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.wl-upload-icon {
+  display: block;
+  margin-bottom: 12px;
+  color: #0aa4a0;
+  font-size: 32px;
+}
+@media (max-width: 600px) {
+  .wl-redesign {
+    padding: 12px;
+  }
+  .wl-overview,
+  .wl-subject {
+    padding: 18px;
+    border-radius: 13px;
+  }
+  .wl-heading {
+    flex-direction: column;
+    gap: 18px;
+  }
+  .wl-title-line h1 {
+    font-size: 22px;
+  }
+  .wl-reference {
+    width: 100%;
+    justify-items: start;
+  }
+  .wl-review {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 14px;
+  }
+  .wl-review__heading {
+    flex-wrap: wrap;
+  }
+  .wl-review__heading h2 {
+    flex: 1;
+  }
+  .wl-supplement-button {
+    width: 100%;
+    margin: 5px 0 0;
+  }
+  .wl-review__message,
+  .wl-review__meta {
+    margin-left: 0;
+  }
+  .wl-field {
+    padding: 14px 0;
+    grid-template-columns: minmax(90px, 38%) minmax(0, 1fr);
+    gap: 12px;
+  }
+}

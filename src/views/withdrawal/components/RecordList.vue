@@ -115,12 +115,12 @@
               >
               <el-button
                 v-if="row.risk?.can_supplement_risk === true"
-                type="danger"
+                type="warning"
                 plain
                 size="small"
                 :icon="Upload"
                 @click="emit('risk-supplement', row)"
-                >{{ t('withdrawal.riskSupplement') }}</el-button
+                >{{ t('withdrawal.supplement') }}</el-button
               >
             </div>
           </template>
@@ -251,9 +251,9 @@ const cardItems = computed<ResponsiveCardItem[]>(() =>
       },
       {
         key: 'risk-supplement',
-        label: t('withdrawal.riskSupplement'),
+        label: t('withdrawal.supplement'),
         icon: Upload,
-        type: 'danger',
+        type: 'warning',
         plain: true,
         visible: row.risk?.can_supplement_risk === true,
       },

@@ -1,49 +1,7 @@
 import type { ComposerTranslation } from 'vue-i18n';
-import type { WithdrawalPartySummary } from '@/api/modules/withdrawal';
 import { getCountryLabel } from '@/constants/countries';
 import { getRemittancePurposeLabel } from '@/constants/remittancePurposes';
-
 export type PartyField = { key: string; label: string; value: string; mono?: boolean };
-export const PAYER_PERSON_KEYS = [
-  'given_name',
-  'surname',
-  'nationality',
-  'residence_country',
-  'city',
-  'address',
-  'birth_date',
-  'document_type',
-  'document_no',
-];
-/** 與管理端付款方公司資料保持完全相同的展示及複製順序。 */
-export const PAYER_COMPANY_KEYS = [
-  'company_name',
-  'registration_country',
-  'operating_country',
-  'city',
-  'address',
-  'registration_date',
-  'company_type',
-  'document_no',
-];
-export const PAYEE_PERSON_KEYS = [
-  'given_name',
-  'surname',
-  'nationality',
-  'residence_country',
-  'city',
-  'address',
-];
-export const PAYEE_COMPANY_KEYS = ['company_name', 'operating_country', 'city', 'address'];
-export const PAYEE_BANK_KEYS = [
-  'bank_name',
-  'bank_account',
-  'swift',
-  'intermediary_swift',
-  'remittance_purpose',
-  'remark',
-];
-
 const labels: Record<string, string> = {
   company_name: 'companyName',
   company_type: 'companyType',
@@ -72,28 +30,13 @@ function hasPartyValue(raw: unknown) {
   return raw !== null && raw !== undefined && (typeof raw !== 'string' || raw.trim() !== '');
 }
 
-export function partyData(party: WithdrawalPartySummary) {
-  const raw = party.data ?? party.snapshot ?? {};
-  const merged: Record<string, unknown> = { ...raw };
-  if (
-    raw.business_data &&
-    typeof raw.business_data === 'object' &&
-    !Array.isArray(raw.business_data)
-  )
-    Object.assign(merged, raw.business_data);
-  if (!merged.bank_account && merged.account_no) merged.bank_account = merged.account_no;
-  if (!merged.swift && merged.swift_code) merged.swift = merged.swift_code;
-  if (!merged.company_name) merged.company_name = party.name;
-  return merged;
-}
-
-export function buildPartyFields(
-  party: WithdrawalPartySummary,
+export function formatPartyFields(
+  data: Record<string, unknown>,
   keys: string[],
   t: ComposerTranslation,
   locale: string,
+  company = false,
 ): PartyField[] {
-  const data = partyData(party);
   return keys
     .filter((key) => !OPTIONAL_PARTY_FIELDS.has(key) || hasPartyValue(data[key]))
     .map((key) => {
@@ -112,8 +55,7 @@ export function buildPartyFields(
       ) {
         value = getCountryLabel(raw, locale);
       }
-      const labelKey =
-        key === 'document_no' && keys === PAYER_COMPANY_KEYS ? 'companyNo' : labels[key];
+      const labelKey = key === 'document_no' && company ? 'companyNo' : labels[key];
       return {
         key,
         label: t(`whitelist.${labelKey}`),

@@ -27,7 +27,7 @@
           ></span>
           <h1>{{ t('publicAuth.activationInvalid') }}</h1>
           <p>{{ t('publicAuth.activationInvalidDescription') }}</p>
-          <el-button plain @click="goLogin">{{ t('publicAuth.backToLoginPage') }}</el-button>
+          <el-button class="app-back-button" plain @click="goLogin">{{ t('publicAuth.backToLoginPage') }}</el-button>
         </div>
       </template>
 

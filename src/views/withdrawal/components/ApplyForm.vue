@@ -37,39 +37,25 @@
             </el-form-item>
             <div class="apply-form__party-fields">
               <el-form-item :label="t('withdrawal.payer')" prop="payer_whitelist_id">
-                <el-select
-                  v-model="formState.payer_whitelist_id"
-                  :placeholder="t('withdrawal.selectPayer')"
-                  :loading="configLoading"
-                  filterable
-                >
-                  <el-option
-                    v-for="item in payers"
-                    :key="item.id"
-                    :value="item.id"
-                    :label="`${item.subject_name}`"
-                  />
-                </el-select>
+                <div class="apply-form__party-select">
+                  <el-select v-model="formState.payer_whitelist_id" :placeholder="t('withdrawal.selectPayer')" :loading="configLoading" filterable>
+                    <el-option v-for="item in payers" :key="item.id" :value="item.id" :label="`${item.id} · ${item.subject_name}`" />
+                  </el-select>
+                  <el-button circle plain type="primary" :aria-label="t('withdrawal.whitelistDetails')" :title="t('withdrawal.whitelistDetails')" :disabled="formState.payer_whitelist_id == null" @click="showPartyDetails(selectedPayer)">
+                    <i class="ri-eye-line" aria-hidden="true" />
+                  </el-button>
+                </div>
               </el-form-item>
 
-              <span class="apply-form__direction" aria-hidden="true">
-                <el-icon><Right /></el-icon>
-              </span>
-
               <el-form-item :label="t('withdrawal.payee')" prop="payee_whitelist_id">
-                <el-select
-                  v-model="formState.payee_whitelist_id"
-                  :placeholder="t('withdrawal.selectPayee')"
-                  :loading="configLoading"
-                  filterable
-                >
-                  <el-option
-                    v-for="item in payees"
-                    :key="item.id"
-                    :value="item.id"
-                    :label="`${item.subject_name}`"
-                  />
-                </el-select>
+                <div class="apply-form__party-select">
+                  <el-select v-model="formState.payee_whitelist_id" :placeholder="t('withdrawal.selectPayee')" :loading="configLoading" filterable>
+                    <el-option v-for="item in payees" :key="item.id" :value="item.id" :label="`${item.id} · ${item.subject_name}`" />
+                  </el-select>
+                  <el-button circle plain type="primary" :aria-label="t('withdrawal.whitelistDetails')" :title="t('withdrawal.whitelistDetails')" :disabled="formState.payee_whitelist_id == null" @click="showPartyDetails(selectedPayee)">
+                    <i class="ri-eye-line" aria-hidden="true" />
+                  </el-button>
+                </div>
               </el-form-item>
             </div>
             <el-form-item
@@ -82,6 +68,7 @@
                 placeholder="0.00"
                 :prefix-icon="Money"
                 inputmode="decimal"
+                maxlength="10"
               >
                 <template #append>
                   <span class="apply-form__unit">{{ currencyCode }}</span>
@@ -89,21 +76,7 @@
               </el-input>
             </el-form-item>
             <div class="apply-form__balance-tip">
-              <span class="apply-form__maximum">
-                {{ t('withdrawal.maximum') }}
-                <strong>{{ formatMoney(maximumAmount) }} {{ currencyCode }}</strong>
-                <small
-                  >（{{
-                    t('withdrawal.feeReserved', {
-                      fee: formatMoney(formatFixedFee(feeAmount) || '—'),
-                      currency: currencyCode,
-                    })
-                  }}）</small
-                >
-              </span>
-              <el-button link type="primary" :disabled="maximumAmount === '—'" @click="fillMaximum">
-                {{ t('withdrawal.withdrawAll') }}
-              </el-button>
+              <span>{{ t('withdrawal.remittanceLimit') }}</span>
             </div>
           </section>
 
@@ -115,14 +88,16 @@
               </h4>
             </header>
             <el-upload
+              v-upload-limit="fileList.length >= (fileRules.max_files_per_round || 5)"
               v-model:file-list="fileList"
               :auto-upload="false"
               :multiple="true"
-              :limit="fileRules.max_files_per_round || undefined"
+              :limit="fileRules.max_files_per_round || 5"
+              :on-exceed="() => ElMessage.warning(t('fiatDeposit.maxFiles', { count: fileRules.max_files_per_round || 5 }))"
               :accept="acceptedExtensions"
               @change="handleFileChange"
             >
-              <el-button plain :icon="Upload">{{ t('withdrawal.chooseFile') }}</el-button>
+              <el-button plain :icon="Upload" :disabled="fileList.length >= (fileRules.max_files_per_round || 5)">{{ t('withdrawal.chooseFile') }}</el-button>
               <template #tip>
                 <p class="apply-form__file-tip">
                   {{
@@ -187,6 +162,7 @@
         </aside>
       </div>
     </el-form>
+    <WhitelistOptionDetailDialog v-model="detailDialogVisible" :option="detailOption" />
   </section>
 </template>
 
@@ -201,10 +177,13 @@ import { formatMoney } from '@/utils/formatMoney';
  */
 import { computed, reactive, ref as refHook, watch } from 'vue';
 import type { FormInstance, FormRules } from 'element-plus';
+import { ElMessage } from 'element-plus';
+import { vUploadLimit } from '@/directives/uploadLimit';
 import type { UploadFile, UploadFiles, UploadUserFile } from 'element-plus';
-import { Money, Right, Upload } from '@element-plus/icons-vue';
+import { Money, Upload } from '@element-plus/icons-vue';
 import { useI18n } from 'vue-i18n';
 import { formatFixedFee } from '@/utils/decimal';
+import WhitelistOptionDetailDialog from './WhitelistOptionDetailDialog.vue';
 
 import type {
   WithdrawalCurrencyOption,
@@ -264,6 +243,10 @@ const fileRules = computed<WithdrawalFileRules>(
 const payers = computed(() => props.payers ?? []);
 const payees = computed(() => props.payees ?? []);
 const currencyOptions = computed(() => props.currencyOptions ?? []);
+const selectedPayer = computed(() => payers.value.find((item) => item.id === formState.payer_whitelist_id) ?? null);
+const selectedPayee = computed(() => payees.value.find((item) => item.id === formState.payee_whitelist_id) ?? null);
+const detailDialogVisible = refHook(false);
+const detailOption = refHook<WithdrawalWhitelistOption | null>(null);
 const selectedCurrency = computed(() =>
   currencyOptions.value.find((item) => item.currency.id === formState.currency_id),
 );
@@ -279,9 +262,6 @@ const totalPreview = computed(() => {
   return addDecimalStrings(formState.amount, feeAmount.value, currencyScale.value);
 });
 const amountPreview = computed(() => addDecimalStrings(formState.amount, '0', currencyScale.value));
-const maximumAmount = computed(() =>
-  subtractDecimalStrings(balance.value?.available_balance, feeAmount.value, currencyScale.value),
-);
 const remainingPreview = computed(() => {
   if (totalPreview.value === '—') return '—';
   const value = subtractDecimalStrings(
@@ -306,11 +286,12 @@ const rules: FormRules = {
         const pattern = new RegExp(
           `^(?!0+(?:\\.0+)?$)\\d{1,20}(?:\\.\\d{1,${currencyScale.value}})?$`,
         );
-        callback(
-          pattern.test(value)
-            ? undefined
-            : new Error(t('withdrawal.amountInvalid', { scale: currencyScale.value })),
-        );
+        if (!pattern.test(value)) {
+          callback(new Error(t('withdrawal.amountInvalid', { scale: currencyScale.value })));
+          return;
+        }
+        const normalized = Number(value);
+        callback(normalized >= 20 && normalized <= 1_000_000 ? undefined : new Error(t('withdrawal.amountOutOfRange')));
       },
       trigger: 'blur',
     },
@@ -426,9 +407,10 @@ function subtractDecimalStrings(
   return `${integer}.${raw.slice(-scale)}`;
 }
 
-function fillMaximum() {
-  if (props.locked) return;
-  if (maximumAmount.value !== '—') formState.amount = maximumAmount.value;
+function showPartyDetails(option: WithdrawalWhitelistOption | null) {
+  if (!option) return;
+  detailOption.value = option;
+  detailDialogVisible.value = true;
 }
 
 async function handleSubmit() {
@@ -541,27 +523,39 @@ defineExpose({ reset });
 
   &__party-fields {
     display: grid;
-    align-items: center;
-    grid-template-columns: minmax(0, 1fr) 38px minmax(0, 1fr);
-    gap: 10px;
+    align-items: start;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
 
     :deep(.el-form-item) {
       margin-bottom: 18px;
     }
   }
 
-  &__direction {
-    display: inline-flex;
-    width: 34px;
-    height: 34px;
+  &__party-select {
+    display: grid;
+    min-width: 0;
+    width: 100%;
     align-items: center;
-    justify-content: center;
-    align-self: center;
-    margin-top: 28px;
-    border: 1px solid #d8e5ed;
-    border-radius: 50%;
-    color: #159d98;
-    background: #fff;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+
+    :deep(.el-select) { width: 100%; }
+
+    .el-button {
+      --el-button-size: 32px;
+
+      width: 32px;
+      min-width: 32px;
+      max-width: 32px;
+      height: 32px;
+      min-height: 32px;
+      max-height: 32px;
+      flex: 0 0 32px;
+      padding: 0;
+      border-radius: 50%;
+      font-size: 15px;
+    }
   }
 
   &__amount-field {
@@ -575,34 +569,14 @@ defineExpose({ reset });
 
   &__balance-tip {
     display: flex;
-    width: 100%;
+    width: fit-content;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
     margin-top: -4px;
-    color: #42677a;
+    color: #087f79;
     font-size: 14px;
-  }
-
-  &__maximum {
-    display: inline-flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 5px;
-    font-weight: 600;
-
-    strong {
-      color: #078f89;
-      font-size: 16px;
-      font-weight: 800;
-      font-variant-numeric: tabular-nums;
-    }
-
-    small {
-      color: #6f8091;
-      font-size: 13px;
-      font-weight: 500;
-    }
+    font-weight: 700;
   }
 
   &__notice,
@@ -819,11 +793,6 @@ defineExpose({ reset });
 
     &__party-fields {
       grid-template-columns: minmax(0, 1fr);
-    }
-
-    &__direction {
-      margin: 0 auto;
-      transform: rotate(90deg);
     }
 
     &__balance-tip {

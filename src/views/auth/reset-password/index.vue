@@ -6,7 +6,7 @@
 
     <section class="reset-card">
       <header class="reset-card__brand">
-        <img src="/assets/mtpay-logo.png" alt="MTPay" />
+        <img src="/assets/mtpay-logo.svg" alt="MTPay" />
       </header>
 
       <div v-if="resetProfile" class="reset-card__result">
@@ -28,7 +28,7 @@
         </span>
         <h1>{{ t('publicAuth.resetInvalid') }}</h1>
         <p>{{ t('publicAuth.resetInvalidDescription') }}</p>
-        <el-button plain @click="goLogin">{{ t('publicAuth.backToLoginPage') }}</el-button>
+        <el-button class="app-back-button" plain @click="goLogin">{{ t('publicAuth.backToLoginPage') }}</el-button>
       </div>
 
       <template v-else>

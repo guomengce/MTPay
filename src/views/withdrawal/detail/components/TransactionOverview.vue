@@ -1,7 +1,10 @@
 <template>
   <section class="transaction-overview">
     <div class="amounts">
-      <header class="section-title"><i />{{ t('withdrawal.amountDetails') }}</header>
+      <header class="section-title">
+        <span class="section-title__icon"><i class="ri-wallet-3-line" /></span>
+        <h2>{{ t('withdrawal.amountDetails') }}</h2>
+      </header>
       <div class="amounts__rows">
         <div>
           <span><i class="is-debit" />{{ t('withdrawal.accountDeduction') }}</span
@@ -13,8 +16,7 @@
         <div>
           <span><i class="is-fee" />{{ t('withdrawal.fixedFee') }}</span
           ><strong
-            >{{ formatMoney(formatFixedFee(detail.fee_amount)) }}
-            <small>{{ detail.currency.code }}</small></strong
+            >{{ formatMoney(detail.fee_amount) }} <small>{{ detail.currency.code }}</small></strong
           >
         </div>
         <div class="is-result">
@@ -26,29 +28,54 @@
       </div>
     </div>
     <div class="parties">
-      <header class="section-title"><i />{{ t('withdrawal.transactionParties') }}</header>
+      <header class="section-title">
+        <span class="section-title__icon"><i class="ri-group-line" /></span>
+        <h2>{{ t('withdrawal.transactionParties') }}</h2>
+      </header>
       <div class="parties__grid">
-        <PayerCompanyCard v-if="detail.payer.entity_type === 1" :party="detail.payer" />
-        <PayerPersonCard v-else-if="detail.payer.entity_type === 2" :party="detail.payer" />
+        <CompanyInfoCard
+          v-if="detail.payer.entity_type === 1"
+          :data="detail.payer.data ?? {}"
+          :role="1"
+          :title="t('withdrawal.payerCompany')"
+        />
+        <IndividualInfoCard
+          v-else-if="detail.payer.entity_type === 2"
+          :data="detail.payer.data ?? {}"
+          :role="1"
+          :title="t('withdrawal.payerPerson')"
+        />
         <div class="parties__payee-group">
-          <PayeeCompanyCard v-if="detail.payee.entity_type === 1" :party="detail.payee" />
-          <PayeePersonCard v-else-if="detail.payee.entity_type === 2" :party="detail.payee" />
-          <PayeeBankCard :party="detail.payee" />
+          <CompanyInfoCard
+            v-if="detail.payee.entity_type === 1"
+            :data="detail.payee.data ?? {}"
+            :role="2"
+            :title="t('withdrawal.payeeCompany')"
+          />
+          <IndividualInfoCard
+            v-else-if="detail.payee.entity_type === 2"
+            :data="detail.payee.data ?? {}"
+            :role="2"
+            :title="t('withdrawal.payeePerson')"
+          />
+          <BankInfoCard
+            :data="detail.payee.data ?? {}"
+            :role="2"
+            :title="t('withdrawal.bankDetails')"
+          />
         </div>
       </div>
     </div>
   </section>
 </template>
 <script setup lang="ts">
+import CompanyInfoCard from '@/components/party-info/CompanyInfoCard.vue';
+import IndividualInfoCard from '@/components/party-info/IndividualInfoCard.vue';
+import BankInfoCard from '@/components/party-info/BankInfoCard.vue';
 import { useI18n } from 'vue-i18n';
 import type { WithdrawalOrderDetail } from '@/api/modules/withdrawal';
 import { formatMoney } from '@/utils/formatMoney';
-import { formatFixedFee } from '@/utils/decimal';
-import PayerCompanyCard from './PayerCompanyCard.vue';
-import PayerPersonCard from './PayerPersonCard.vue';
-import PayeeCompanyCard from './PayeeCompanyCard.vue';
-import PayeePersonCard from './PayeePersonCard.vue';
-import PayeeBankCard from './PayeeBankCard.vue';
+
 defineProps<{ detail: WithdrawalOrderDetail }>();
 const { t } = useI18n();
 </script>
@@ -66,20 +93,27 @@ const { t } = useI18n();
 .section-title {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 11px 14px;
-  color: #29445e;
-  border-bottom: 1px solid #e2e9ef;
-  background: #f5f8fb;
-  font-size: 13px;
-  font-weight: 700;
+  gap: 11px;
+  padding: 18px 20px 10px;
+  color: #142e4e;
+  background: #fff;
 
-  i {
-    width: 3px;
-    height: 18px;
-    border-radius: 99px;
-    background: #0aa49a;
-    box-shadow: 0 0 0 3px rgb(10 164 154 / 8%);
+  h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  &__icon {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    flex: none;
+    border-radius: 9px;
+    color: #08a6a4;
+    background: #e5f7f5;
+    font-size: 18px;
   }
 }
 

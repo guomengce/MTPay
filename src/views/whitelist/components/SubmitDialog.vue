@@ -66,7 +66,7 @@
                 <el-form-item v-else :label="t('whitelist.operatingCountry')" prop="operating_country">
                   <CountrySelect
                     v-model="formState.operating_country"
-                    :placeholder="t('common.messages.selectField', { field: t('whitelist.operatingCountry') })"
+                    :placeholder="selectPlaceholder(t('whitelist.operatingCountry'))"
                   />
                 </el-form-item>
               </div>
@@ -75,13 +75,13 @@
                 <el-form-item :label="t('whitelist.registrationCountry')" prop="registration_country">
                   <CountrySelect
                     v-model="formState.registration_country"
-                    :placeholder="t('common.messages.selectField', { field: t('whitelist.registrationCountry') })"
+                    :placeholder="selectPlaceholder(t('whitelist.registrationCountry'))"
                   />
                 </el-form-item>
                 <el-form-item :label="t('whitelist.operatingCountry')" prop="operating_country">
                   <CountrySelect
                     v-model="formState.operating_country"
-                    :placeholder="t('common.messages.selectField', { field: t('whitelist.operatingCountry') })"
+                    :placeholder="selectPlaceholder(t('whitelist.operatingCountry'))"
                   />
                 </el-form-item>
               </div>
@@ -90,20 +90,20 @@
             <template v-else>
               <div class="submit-form__row">
                 <el-form-item :label="t('whitelist.givenName')" prop="given_name">
-                  <el-input v-model="formState.given_name" :placeholder="t('common.messages.enterField', { field: t('whitelist.givenName') })" />
+                  <el-input v-model="formState.given_name" :placeholder="enterPlaceholder(t('whitelist.givenName'))" />
                 </el-form-item>
                 <el-form-item :label="t('whitelist.surname')" prop="surname">
-                  <el-input v-model="formState.surname" :placeholder="t('common.messages.enterField', { field: t('whitelist.surname') })" />
+                  <el-input v-model="formState.surname" :placeholder="enterPlaceholder(t('whitelist.surname'))" />
                 </el-form-item>
               </div>
               <div class="submit-form__row">
                 <el-form-item :label="t('whitelist.nationality')" prop="nationality">
-                  <CountrySelect v-model="formState.nationality" :placeholder="t('common.messages.selectField', { field: t('whitelist.nationality') })" />
+                  <CountrySelect v-model="formState.nationality" :placeholder="selectPlaceholder(t('whitelist.nationality'))" />
                 </el-form-item>
                 <el-form-item :label="t('whitelist.residenceCountry')" prop="residence_country">
                   <CountrySelect
                     v-model="formState.residence_country"
-                    :placeholder="t('common.messages.selectField', { field: t('whitelist.residenceCountry') })"
+                    :placeholder="selectPlaceholder(t('whitelist.residenceCountry'))"
                   />
                 </el-form-item>
               </div>
@@ -111,10 +111,10 @@
 
             <div class="submit-form__row">
               <el-form-item :label="t('whitelist.city')" prop="city">
-                <el-input v-model="formState.city" :placeholder="t('common.messages.enterField', { field: t('whitelist.city') })" />
+                <el-input v-model="formState.city" :placeholder="enterPlaceholder(t('whitelist.city'))" />
               </el-form-item>
               <el-form-item :label="t('whitelist.address')" prop="address">
-                <el-input v-model="formState.address" :placeholder="t('common.messages.enterField', { field: t('whitelist.address') })" />
+                <el-input v-model="formState.address" :placeholder="enterPlaceholder(t('whitelist.address'))" />
               </el-form-item>
             </div>
 
@@ -125,11 +125,11 @@
                     v-model="formState.registration_date"
                     type="date"
                     value-format="YYYY-MM-DD"
-                    :placeholder="t('common.messages.selectField', { field: t('whitelist.registrationDate') })"
+                    :placeholder="selectPlaceholder(t('whitelist.registrationDate'))"
                   />
                 </el-form-item>
                 <el-form-item :label="t('whitelist.companyNo')" prop="document_no">
-                  <el-input v-model="formState.document_no" :placeholder="t('common.messages.enterField', { field: t('whitelist.companyNo') })" />
+                  <el-input v-model="formState.document_no" :placeholder="enterPlaceholder(t('whitelist.companyNo'))" />
                 </el-form-item>
               </div>
               <div v-else class="submit-form__row submit-form__row--three">
@@ -138,16 +138,16 @@
                     v-model="formState.birth_date"
                     type="date"
                     value-format="YYYY-MM-DD"
-                    :placeholder="t('common.messages.selectField', { field: t('whitelist.birthDate') })"
+                    :placeholder="selectPlaceholder(t('whitelist.birthDate'))"
                   />
                 </el-form-item>
                 <el-form-item :label="t('whitelist.documentType')" prop="document_type">
-                  <el-select v-model="formState.document_type" :placeholder="t('common.messages.selectField', { field: t('whitelist.documentType') })">
+                  <el-select v-model="formState.document_type" :placeholder="selectPlaceholder(t('whitelist.documentType'))">
                     <el-option :value="1" :label="t('whitelist.identityDocument')" /><el-option :value="2" :label="t('whitelist.passport')" />
                   </el-select>
                 </el-form-item>
                 <el-form-item :label="t('whitelist.documentNo')" prop="document_no">
-                  <el-input v-model="formState.document_no" :placeholder="t('common.messages.enterField', { field: t('whitelist.documentNo') })" />
+                  <el-input v-model="formState.document_no" :placeholder="enterPlaceholder(t('whitelist.documentNo'))" />
                 </el-form-item>
               </div>
             </template>
@@ -163,15 +163,15 @@
 
             <div class="submit-form__row">
               <el-form-item :label="t('whitelist.bankName')" prop="bank_name">
-                <el-input v-model="formState.bank_name" :placeholder="t('common.messages.enterField', { field: t('whitelist.bankName') })" />
+                <el-input v-model="formState.bank_name" :placeholder="enterPlaceholder(t('whitelist.bankName'))" />
               </el-form-item>
               <el-form-item :label="t('whitelist.bankAccount')" prop="bank_account">
-                <el-input v-model="formState.bank_account" :placeholder="t('common.messages.enterField', { field: t('whitelist.bankAccount') })" />
+                <el-input v-model="formState.bank_account" :placeholder="enterPlaceholder(t('whitelist.bankAccount'))" />
               </el-form-item>
             </div>
             <div class="submit-form__row">
               <el-form-item label="SWIFT" prop="swift">
-                <el-input v-model="formState.swift" :placeholder="t('common.messages.enterField', { field: 'SWIFT' })" />
+                <el-input v-model="formState.swift" :placeholder="enterPlaceholder('SWIFT')" />
               </el-form-item>
               <el-form-item :label="t('whitelist.intermediarySwift')" prop="intermediary_swift">
                 <el-input v-model="formState.intermediary_swift" :placeholder="t('whitelist.optional')" />
@@ -182,7 +182,7 @@
                 <el-select
                   v-model="formState.remittance_purpose"
                   filterable
-                  :placeholder="t('common.messages.selectField', { field: t('whitelist.remittancePurpose') })"
+                  :placeholder="selectPlaceholder(t('whitelist.remittancePurpose'))"
                 >
                   <el-option
                     v-for="option in REMITTANCE_PURPOSE_OPTIONS"
@@ -197,7 +197,12 @@
                 </el-select>
               </el-form-item>
               <el-form-item :label="t('whitelist.remark')" prop="remark">
-                <el-input v-model="formState.remark" :placeholder="t('whitelist.remark')" />
+                <el-input
+                  v-model="formState.remark"
+                  maxlength="64"
+                  show-word-limit
+                  :placeholder="t('whitelist.remarkPlaceholder')"
+                />
               </el-form-item>
             </div>
           </section>
@@ -210,8 +215,24 @@
               </div>
             </header>
 
+            <div v-if="formState.role === 1" class="proof-files-tip">
+              <strong>{{ t(formState.entity_type === 1 ? 'whitelist.companyProofTitle' : 'whitelist.individualProofTitle') }}</strong>
+              <ol v-if="formState.entity_type === 1">
+                <li>{{ t('whitelist.companyProofBusinessRegistration') }}</li>
+                <li>{{ t('whitelist.companyProofCertificate') }}</li>
+                <li>{{ t('whitelist.companyProofAnnualReturn') }}</li>
+                <li>{{ t('whitelist.companyProofDirectorIdentity') }}</li>
+                <li>{{ t('whitelist.companyProofBankStatement') }}</li>
+              </ol>
+              <ul v-else>
+                <li>{{ t('whitelist.individualProofPassport') }}</li>
+                <li>{{ t('whitelist.individualProofBankStatement') }}</li>
+              </ul>
+            </div>
+
             <el-form-item class="upload-form-item">
               <el-upload
+                v-upload-limit="fileList.length >= 5"
                 v-model:file-list="fileList"
                 class="submit-form__upload"
                 :auto-upload="false"
@@ -264,6 +285,7 @@
 import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { UploadFile, UploadFiles } from 'element-plus';
+import { vUploadLimit } from '@/directives/uploadLimit';
 import { DocumentAdd, UploadFilled } from '@element-plus/icons-vue';
 
 import type { SubmitWhitelistPayload, WhitelistFile, WhitelistItemDetail } from '@/api/modules/whitelist';
@@ -299,7 +321,20 @@ const {
 } = useWhitelistSubmitForm();
 
 const activeStep = ref(0);
-const { t } = useI18n();
+const { t, locale } = useI18n();
+
+function normalizePlaceholderField(field: string) {
+  if (locale.value !== 'en-US' || field === 'SWIFT') return field;
+  return field.charAt(0).toLocaleLowerCase('en-US') + field.slice(1);
+}
+
+function enterPlaceholder(field: string) {
+  return t('common.messages.enterField', { field: normalizePlaceholderField(field) });
+}
+
+function selectPlaceholder(field: string) {
+  return t('common.messages.selectField', { field: normalizePlaceholderField(field) });
+}
 
 async function goNext() {
   if (!formRef.value) return;
@@ -521,6 +556,52 @@ defineExpose({ close });
   margin-bottom: 18px !important;
 }
 
+.proof-files-tip {
+  margin: -4px 0 16px;
+  padding: 14px 16px;
+  border: 1px solid #d3e8e7;
+  border-radius: 12px;
+  color: #52667d;
+  background: linear-gradient(90deg, #f1faf9 0%, #f8fbfc 100%);
+  font-size: 13px;
+  line-height: 1.55;
+
+  strong {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 10px;
+    color: #087f79;
+    font-weight: 700;
+    white-space: nowrap;
+
+    &::before {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      flex: 0 0 7px;
+      border-radius: 50%;
+      background: #18a89f;
+      content: '';
+      box-shadow: 0 0 0 4px rgb(24 168 159 / 10%);
+    }
+  }
+
+  ol,
+  ul {
+    display: grid;
+    margin: 0;
+    padding-left: 22px;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 8px 28px;
+  }
+
+  li {
+    padding-left: 2px;
+    color: #435b72;
+  }
+}
+
 .remittance-option {
   display: flex;
   min-width: 0;
@@ -578,6 +659,13 @@ defineExpose({ close });
   .identity-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
+  }
+
+  .proof-files-tip {
+    ol,
+    ul {
+      grid-template-columns: 1fr;
+    }
   }
 
 }

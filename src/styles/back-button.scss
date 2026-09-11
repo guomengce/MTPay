@@ -1,0 +1,48 @@
+// 原生按钮和 Element Plus 按钮共用，优先于各页面原有的局部按钮样式。
+:root button.app-back-button.app-back-button {
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 36px;
+  height: auto;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  box-sizing: border-box;
+  padding: 8px 16px;
+  border: 1px solid #d6e4ee;
+  border-radius: 999px;
+  background: #fff;
+  color: #426482;
+  box-shadow: 0 3px 10px rgb(31 66 102 / 4%);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-decoration: none;
+  white-space: normal;
+  cursor: pointer;
+  transition: color .2s, background-color .2s, border-color .2s, box-shadow .2s;
+
+  &:hover:not(:disabled) {
+    color: #088f89;
+    border-color: #a4d9d4;
+    background: #f1faf8;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #0a9b92;
+    outline-offset: 3px;
+  }
+
+  &:active:not(:disabled) {
+    background: #e6f5f2;
+    box-shadow: none;
+  }
+
+  &:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+  }
+}

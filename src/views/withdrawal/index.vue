@@ -1,6 +1,6 @@
 <template>
   <main class="withdrawal-page">
-    <AdminHero :title="t('withdrawal.title')" icon="ri-bank-card-line" />
+    <AdminHero :title="t('withdrawal.title')" icon="ri-hand-coin-line" />
 
     <section class="withdrawal-page__content">
       <section v-if="twoFactorEnabled === false" class="withdrawal-security-gate" role="alert">
@@ -204,17 +204,13 @@ function openRiskSupplement(row: WithdrawalOrder) {
   supplementItem.value = row;
   supplementMode.value = 'risk';
   supplementRequirement.value =
-    row.risk?.risk_supplement_request || t('withdrawal.defaultRiskSupplement');
+    row.risk?.risk_supplement_request || t('withdrawal.defaultSupplement');
   supplementDialogVisible.value = true;
 }
 
 function extractSupplementRequirement(d: WithdrawalOrderDetail | null) {
   if (!d) return t('withdrawal.defaultSupplement');
-  if (d.review?.note) return d.review.note;
-  const request = (d.records ?? []).find((record) => {
-    return /要求|补充|补件|supplement/i.test(record.action_name);
-  });
-  return request?.message || t('withdrawal.defaultSupplement');
+  return d.supplement_request || t('withdrawal.defaultSupplement');
 }
 
 async function handleSupplement(payload: { file_ids: number[]; message?: string }) {
@@ -228,7 +224,7 @@ async function handleSupplement(payload: { file_ids: number[]; message?: string 
     });
     ElMessage.success(
       t(
-        supplementMode.value === 'risk' ? 'withdrawal.riskSupplemented' : 'withdrawal.supplemented',
+        'withdrawal.supplemented',
       ),
     );
     supplementDialogVisible.value = false;

@@ -2,7 +2,7 @@
   <main class="exchange-page">
     <AdminHero
       :title="t('exchange.title')"
-      icon="ri-swap-2-line"
+      icon="ri-exchange-dollar-line"
     />
 
     <section class="exchange-page__content">

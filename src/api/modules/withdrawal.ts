@@ -122,6 +122,7 @@ export interface WithdrawalOrder {
 }
 
 export interface WithdrawalOrderDetail extends WithdrawalOrder {
+  supplement_request?: string | null;
   review: {
     admin_id: number | null;
     admin_name: string | null;
@@ -136,19 +137,9 @@ export interface WithdrawalOrderDetail extends WithdrawalOrder {
     completed_at: string | null;
     failed_at: string | null;
   };
-  fund_times: { frozen_at: string | null; released_at: string | null; rejected_at: string | null };
   application_files: WithdrawalFile[];
   payment_files: WithdrawalFile[];
-  records: WithdrawalRecord[];
-  available_actions: WithdrawalAvailableActions & {
-    agent_can_supplement: boolean;
-    admin_can_request_supplement: boolean;
-    admin_can_approve: boolean;
-    admin_can_reject: boolean;
-    admin_can_process_payment: boolean;
-    admin_can_append_payment_files: boolean;
-    payment_retry_allowed: boolean;
-  };
+  available_actions: WithdrawalAvailableActions;
 }
 
 /* ---------- 请求参数 ---------- */

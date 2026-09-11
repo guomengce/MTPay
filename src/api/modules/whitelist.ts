@@ -63,7 +63,7 @@ export interface WhitelistItem {
   updated_at: string | null;
 }
 
-/** 详情在列表字段上额外返回 business_data / review / records。 */
+/** 代理端详情只消费主体资料、审核信息、补件要求和操作权限。 */
 export interface WhitelistItemDetail extends WhitelistItem {
   business_data: Record<string, unknown>;
   review: {
@@ -72,7 +72,10 @@ export interface WhitelistItemDetail extends WhitelistItem {
     note: string | null;
     reviewed_at: string | null;
   };
-  records: WhitelistReviewRecord[];
+  supplement_request: string | null;
+  available_actions: {
+    can_supplement_whitelist: boolean;
+  };
 }
 
 /* ---------- 请求参数 ---------- */
@@ -160,7 +163,7 @@ export function uploadWhitelistFile(formData: FormData) {
 
 /**
  * 提交白名单申请。后端按 role + entity_type 校验条件字段并落库；file_ids 可选。
- * 成功后返回完整详情（含 review 初始态和 records）。
+ * 成功后返回完整详情。
  */
 export function submitWhitelist(payload: SubmitWhitelistPayload) {
   return request.post<unknown, WhitelistItemDetail>('/web/submitWhitelist', payload);
@@ -180,7 +183,7 @@ export function fetchWhitelistDetail(id: number) {
 
 /**
  * 待补件状态下提交新一轮文件。后端重新进入待审核；返回更新后的详情。
- * 文档明确该接口仅 status=1 时可用，前端按状态控制按钮可见性。
+ * 详情补件入口由 available_actions.can_supplement_whitelist 控制。
  */
 export function supplementWhitelist(payload: SupplementWhitelistPayload) {
   return request.post<unknown, WhitelistItemDetail>('/web/supplementWhitelist', payload);

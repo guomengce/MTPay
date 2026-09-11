@@ -1,6 +1,6 @@
 <template>
   <main class="business-detail">
-    <el-button plain :icon="Back" @click="router.go(-1)">{{ t('fiatDepositDetail.back') }}</el-button>
+    <el-button class="app-back-button" plain :icon="Back" @click="router.go(-1)">{{ t('fiatDepositDetail.back') }}</el-button>
     <div v-loading="loading" class="business-detail__content">
       <FiatDepositDetailContent v-if="detail" :detail="detail" @preview="preview" @download="download" />
       <el-empty v-else-if="!loading" :description="t('fiatDepositDetail.notFound')" />

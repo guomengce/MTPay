@@ -1,7 +1,7 @@
 <template>
   <main class="two-factor-page">
     <BrandPanel />
-    <header><div class="brand"><img src="/assets/mtpay-logo.png" alt="MTPay" /></div><LanguageSwitcher /></header>
+    <header><div class="brand"><img src="/assets/mtpay-logo.svg" alt="MTPay" /></div><LanguageSwitcher /></header>
     <section class="content">
       <article class="two-factor-card">
         <span class="shield"><i class="ri-shield-keyhole-line" /></span>
@@ -13,7 +13,7 @@
           <el-alert v-if="error" :title="error" type="error" :closable="false" />
         <el-button type="primary" native-type="submit" :loading="submitting" :disabled="submitting || expired">{{ t('twoFactor.verify') }}</el-button>
         </el-form>
-        <div class="actions"><button type="button" @click="back"><i class="ri-arrow-left-line" />{{ t('twoFactor.back') }}</button><button type="button" @click="help">{{ t('twoFactor.cannotAccess') }}</button></div>
+        <div class="actions"><button class="app-back-button" type="button" @click="back"><i class="ri-arrow-left-line" />{{ t('twoFactor.back') }}</button><button type="button" @click="help">{{ t('twoFactor.cannotAccess') }}</button></div>
         <p v-if="expired" class="notice" role="status">{{ t('twoFactor.expired') }}</p>
       </article>
     </section>

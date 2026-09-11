@@ -124,7 +124,7 @@ export const featureRoutes: RouteRecordRaw[] = [
       title: 'menu.account',
       icon: 'User',
       requiresAuth: true,
-      hidden: false,
+      hidden: true,
     },
   },
   {

@@ -6,7 +6,6 @@
         <div><small>{{ t('deposit.declaredAmount') }}</small><p><strong>{{ formatMoney(detail.amount) }}</strong><span>{{ detail.currency.code }}</span></p><em>{{ detail.currency.name }} · {{ detail.network.name }}（{{ detail.network.code }}）</em></div>
       </div>
       <template #meta>
-        <div class="meta"><small>{{ t('deposit.applicant') }}</small><strong>{{ detail.user.company_name }}</strong><span>{{ detail.user.email }}</span></div>
         <div class="meta"><small>{{ t('deposit.submittedAt') }}</small><strong>{{ detail.submitted_at || '—' }}</strong></div>
       </template>
     </DetailOrderHero>

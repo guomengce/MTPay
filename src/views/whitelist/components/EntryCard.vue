@@ -5,8 +5,8 @@
       <div class="entry-card__heading">
         <h3>{{ item.subject_name }}</h3>
         <div class="entry-card__meta">
-          <IdentityBadge :role="item.role" :entity-type="item.entity_type" />
           <span class="entry-card__country">{{ countryName }}</span>
+          <IdentityBadge :role="item.role" :entity-type="item.entity_type" />
         </div>
       </div>
     </header>

@@ -1,0 +1,138 @@
+.wd-page {
+  min-width: 0;
+  padding: 22px;
+  color: #142e4e;
+}
+.wd-back {
+  margin-bottom: 18px;
+}
+.wd-panel {
+  min-width: 0;
+  padding: 24px;
+  margin-bottom: 18px;
+  border: 1px solid #e5eef4;
+  border-radius: 17px;
+  background: #fff;
+  box-shadow: 0 8px 30px #28557706;
+}
+.wd-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+}
+.wd-heading h1 {
+  margin: 0;
+  font-size: 25px;
+  letter-spacing: -0.5px;
+}
+.wd-number {
+  margin: 13px 0 0;
+  color: #496783;
+  font-size: 14px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.wd-reference {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+.wd-reference > span:last-child {
+  color: #8291a8;
+  font-size: 11px;
+}
+.wd-request {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 18px 20px;
+  margin-top: 18px;
+  border: 1px solid #f6dfac;
+  border-radius: 12px;
+  background: #fffbf0;
+}
+.wd-request__copy {
+  min-width: 0;
+  flex: 1;
+}
+.wd-request h2,
+.wd-review h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 15px;
+}
+.wd-request h2 i {
+  color: #d29115;
+}
+.wd-request p {
+  margin: 12px 0 0 26px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 14px;
+  line-height: 1.7;
+}
+.wd-review {
+  padding: 18px 20px;
+  margin-top: 18px;
+  border: 1px solid #e8eff4;
+  border-radius: 12px;
+  background: #f7fafc;
+}
+.wd-review h2 i {
+  color: #0a9e98;
+}
+.wd-review--failed {
+  background: #fff7f6;
+  border-color: #f1d9d7;
+}
+.wd-review__fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 36px;
+  margin: 14px 0 0;
+}
+.wd-review__fields > div {
+  display: flex;
+  gap: 12px;
+  min-width: 0;
+}
+.wd-review dt {
+  color: #8190a3;
+  font-size: 12px;
+}
+.wd-review dd {
+  margin: 0;
+  font-size: 13px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 600px) {
+  .wd-page {
+    padding: 12px;
+  }
+  .wd-panel {
+    padding: 18px;
+  }
+  .wd-heading {
+    flex-direction: column;
+    gap: 18px;
+  }
+  .wd-reference {
+    align-items: flex-start;
+  }
+  .wd-request {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .wd-request .el-button {
+    width: 100%;
+  }
+  .wd-review__fields > div {
+    flex-direction: column;
+    gap: 5px;
+  }
+}

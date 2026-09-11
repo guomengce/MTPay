@@ -20,6 +20,7 @@
     <el-form label-position="top">
       <el-form-item :label="t('whitelist.supplementFiles')" required>
         <el-upload
+          v-upload-limit="fileList.length >= 5"
           v-model:file-list="fileList"
           class="supplement-dialog__upload"
           drag
@@ -70,6 +71,7 @@
 import { ref, watch } from 'vue';
 import { ElMessage } from 'element-plus';
 import type { UploadFile, UploadFiles, UploadUserFile } from 'element-plus';
+import { vUploadLimit } from '@/directives/uploadLimit';
 import { UploadFilled } from '@element-plus/icons-vue';
 import { useI18n } from 'vue-i18n';
 

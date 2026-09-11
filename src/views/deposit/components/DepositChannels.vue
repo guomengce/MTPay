@@ -31,6 +31,18 @@
         </div>
       </div>
     </div>
+
+    <aside class="deposit-channels__notice">
+      <strong>{{ t('deposit.warmReminder') }}</strong>
+      <ul>
+        <li>{{ t('deposit.depositNoticeUnsupportedNetworks') }}</li>
+        <li>{{ t('deposit.depositNoticeAsset') }}</li>
+        <li>{{ t('deposit.depositNoticeConfirmations') }}</li>
+        <li>{{ t('deposit.depositNoticeMinimum') }}</li>
+        <li>{{ t('deposit.depositNoticeAddress') }}</li>
+        <li>{{ t('deposit.depositNoticeSecurity') }}</li>
+      </ul>
+    </aside>
   </section>
 </template>
 
@@ -141,6 +153,31 @@ async function copyAddress() {
 
     &:hover:not(:disabled), &:focus-visible { color: #fff; background: #263456; }
     &:disabled { color: #8c96aa; background: #e5e9f1; }
+  }
+
+  &__notice {
+    padding: 16px 20px;
+    border: 1px solid #dce7ef;
+    border-radius: 12px;
+    color: #52667d;
+    background: #f8fbfd;
+    font-size: 13px;
+    line-height: 1.7;
+
+    strong {
+      color: #087f79;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    ul {
+      margin: 6px 0 0;
+      padding-left: 20px;
+    }
+
+    li::marker {
+      color: #18a89f;
+    }
   }
 }
 

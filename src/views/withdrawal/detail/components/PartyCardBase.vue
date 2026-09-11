@@ -1,12 +1,13 @@
 <template>
   <article class="party-card" :class="[tone, { 'is-english': locale === 'en-US' }]">
-    <header>
+    <header v-if="showHeader">
       <div class="party-card__title">
         <i />
         <h3>{{ title }}</h3>
       </div>
       <div class="party-card__actions">
         <IdentityBadge v-if="role && entityType" :role="role" :entity-type="entityType" /><el-button
+          v-if="showCopy"
           circle
           plain
           size="small"
@@ -29,15 +30,17 @@ import { ElMessage } from 'element-plus';
 import { DocumentCopy } from '@element-plus/icons-vue';
 import { useI18n } from 'vue-i18n';
 import IdentityBadge from '@/components/admin/IdentityBadge.vue';
-import type { PartyField } from './partyCardFields';
-const props = defineProps<{
+import type { PartyField } from '@/components/party-info/fields';
+const props = withDefaults(defineProps<{
   title: string;
   fields: PartyField[];
   copyFields?: PartyField[];
   role?: 1 | 2;
   entityType?: 1 | 2;
   tone: 'is-payer' | 'is-payee' | 'is-bank';
-}>();
+  showCopy?: boolean;
+  showHeader?: boolean;
+}>(), { showCopy: true, showHeader: true });
 const { t, locale } = useI18n();
 async function copyAll() {
   const fields = props.copyFields ?? props.fields;

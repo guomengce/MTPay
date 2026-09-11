@@ -1,7 +1,7 @@
 <template>
   <div class="fiat-uploader">
-    <el-upload :auto-upload="false" :show-file-list="false" :multiple="true" :accept="accept" :disabled="uploading" :on-change="selectFile">
-      <el-button plain :icon="Upload" :loading="uploading">{{ t('fiatDeposit.selectFile') }}</el-button>
+    <el-upload :auto-upload="false" :show-file-list="false" :multiple="true" :accept="accept" :disabled="uploading || files.length >= rules.max_files" :on-change="selectFile">
+      <el-button plain :icon="Upload" :loading="uploading" :disabled="files.length >= rules.max_files">{{ t('fiatDeposit.selectFile') }}</el-button>
       <template #tip>
         <p class="fiat-uploader__tip">{{ t('fiatDeposit.fileTip', { formats, count: rules.max_files, size: rules.max_file_size_mb }) }}</p>
       </template>

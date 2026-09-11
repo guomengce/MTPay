@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <main class="forgot-page">
     <LanguageSwitcher class="public-language" />
     <section class="forgot-card">
@@ -7,7 +7,7 @@
         <el-icon class="forgot-card__result-icon"><CircleCheckFilled /></el-icon>
         <h1>{{ t('publicAuth.checkEmailTitle') }}</h1>
         <p>{{ t('publicAuth.checkEmailDescription') }}</p>
-        <el-button type="primary" @click="goToLogin">{{ t('publicAuth.backToLogin') }}</el-button>
+        <el-button class="app-back-button" type="primary" @click="goToLogin">{{ t('publicAuth.backToLogin') }}</el-button>
       </template>
 
       <template v-else>
@@ -39,7 +39,7 @@
           </el-button>
         </el-form>
 
-        <button class="forgot-card__back" type="button" @click="goToLogin">
+        <button class="app-back-button forgot-card__back" type="button" @click="goToLogin">
           <el-icon><ArrowLeft /></el-icon>
           {{ t('publicAuth.backToLogin') }}
         </button>
