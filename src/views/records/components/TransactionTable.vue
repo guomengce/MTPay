@@ -1,11 +1,21 @@
 <template>
   <div class="transaction-table">
     <el-table v-loading="loading" :data="data" class="transaction-table__table" stripe>
-      <el-table-column :label="t('records.orderNo')" min-width="250" class-name="transaction-order-cell">
+      <el-table-column
+        :label="t('records.orderNo')"
+        min-width="250"
+        class-name="transaction-order-cell"
+      >
         <template #default="{ row }">
-          <a class="transaction-table__link" href="javascript:void(0)" @click.prevent="emit('view', row)">
+          <a
+            v-if="hasTransactionDetailRoute(row)"
+            class="transaction-table__link"
+            href="javascript:void(0)"
+            @click.prevent="emit('view', row)"
+          >
             {{ row.order_no }}
           </a>
+          <span v-else class="transaction-table__order-no">{{ row.order_no }}</span>
           <small class="transaction-table__time">{{ row.submitted_at || '—' }}</small>
         </template>
       </el-table-column>
@@ -16,7 +26,12 @@
           </span>
         </template>
       </el-table-column>
-      <el-table-column :label="t('records.content')" min-width="320" align="center" header-align="center">
+      <el-table-column
+        :label="t('records.content')"
+        min-width="320"
+        align="center"
+        header-align="center"
+      >
         <template #default="{ row }">
           <WithdrawalPartyFlow
             v-if="row.business_type === 'withdrawal'"
@@ -25,13 +40,20 @@
             :payee-name="row.payee_name"
             :payee-type="row.payee_entity_type ?? entityTypeLabel(row.payee_entity_type_name)"
           />
-          <div v-else-if="row.business_type === 'exchange'" class="transaction-table__content is-exchange">
+          <div
+            v-else-if="row.business_type === 'exchange'"
+            class="transaction-table__content is-exchange"
+          >
             <div class="transaction-table__exchange-flow">
               <strong>{{ row.currency_code }}</strong>
               <FlowArrow />
               <strong>{{ row.target_currency_code || '—' }}</strong>
             </div>
-            <small>{{ t('records.exchangeRate') }}：{{ formatExchangeRate(row.exchange_rate) || '—' }}</small>
+            <small
+              >{{ t('records.exchangeRate') }}：{{
+                formatExchangeRate(row.exchange_rate) || '—'
+              }}</small
+            >
           </div>
           <span v-else class="transaction-table__content">{{ contentLabel(row) }}</span>
         </template>
@@ -41,10 +63,12 @@
           <div class="transaction-table__amount-block">
             <strong>{{ amountLabel(row) }}</strong>
             <small v-if="row.business_type === 'withdrawal'">
-              {{ t('records.totalDeduction') }} {{ formatMoney(row.total_amount || '—') }} {{ row.currency_code }}
+              {{ t('records.totalDeduction') }} {{ formatMoney(row.total_amount || '—') }}
+              {{ row.currency_code }}
             </small>
             <small v-else-if="row.business_type === 'exchange'">
-              {{ t('records.received') }} {{ formatMoney(row.target_amount || '—') }} {{ row.target_currency_code || '' }}
+              {{ t('records.received') }} {{ formatMoney(row.target_amount || '—') }}
+              {{ row.target_currency_code || '' }}
             </small>
           </div>
         </template>
@@ -60,7 +84,14 @@
       </el-table-column>
       <el-table-column :label="t('records.actions')" min-width="100" fixed="right" align="center">
         <template #default="{ row }">
-          <el-button type="primary" plain size="small" :icon="View" @click="emit('view', row)">
+          <el-button
+            v-if="hasTransactionDetailRoute(row)"
+            type="primary"
+            plain
+            size="small"
+            :icon="View"
+            @click="emit('view', row)"
+          >
             {{ t('records.details') }}
           </el-button>
         </template>
@@ -81,15 +112,22 @@ import FlowArrow from '@/components/common/FlowArrow.vue';
 import { formatExchangeRate } from '@/utils/decimal';
 import WithdrawalPartyFlow from '@/views/withdrawal/components/WithdrawalPartyFlow.vue';
 import { transactionAmount, transactionBusinessLabel } from '../transactionPresentation';
+import { hasTransactionDetailRoute } from '../transactionRoutes';
 
 defineProps<{ data: TransactionItem[]; loading?: boolean }>();
 const emit = defineEmits<{ (e: 'view', row: TransactionItem): void }>();
 const { t } = useI18n();
-function businessLabel(type: TransactionItem['business_type']) { return transactionBusinessLabel(type, t); }
-function statusLabel(row: TransactionItem) { const key = row.status_group === 'needs_supplement' ? 'supplement' : row.status_group; return t(`records.${key}`); }
+function businessLabel(type: TransactionItem['business_type']) {
+  return transactionBusinessLabel(type, t);
+}
+function statusLabel(row: TransactionItem) {
+  const key = row.status_group === 'needs_supplement' ? 'supplement' : row.status_group;
+  return t(`records.${key}`);
+}
 
 function contentLabel(row: TransactionItem) {
-  if (row.business_type === 'manual_increase' || row.business_type === 'manual_decrease') return '—';
+  if (row.business_type === 'manual_increase' || row.business_type === 'manual_decrease')
+    return '—';
   if (row.business_type === 'deposit') {
     return [row.currency_code, row.network_code].filter(Boolean).join(' · ');
   }
@@ -127,8 +165,18 @@ function statusEffect(row: TransactionItem) {
 </script>
 
 <style scoped lang="scss">
-:deep(.transaction-order-cell .cell) { white-space: nowrap; }
-.transaction-table__link { display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;vertical-align:bottom;white-space:nowrap }
+:deep(.transaction-order-cell .cell) {
+  white-space: nowrap;
+}
+.transaction-table__link,
+.transaction-table__order-no {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
+  white-space: nowrap;
+}
 </style>
 
 <style scoped lang="scss">
@@ -164,12 +212,30 @@ function statusEffect(row: TransactionItem) {
     font-weight: 700;
     white-space: nowrap;
 
-    &.is-deposit { color: #07835d; background: #e3f7ee; }
-    &.is-fiat_deposit { color: #1267a8; background: #e8f3fb; }
-    &.is-exchange { color: #b45309; background: #fef3c7; }
-    &.is-withdrawal { color: #0a7f7a; background: #e4f6f2; }
-    &.is-manual_increase { color: #047857; background: #dff7ec; }
-    &.is-manual_decrease { color: #dc2626; background: #fee2e2; }
+    &.is-deposit {
+      color: #07835d;
+      background: #e3f7ee;
+    }
+    &.is-fiat_deposit {
+      color: #1267a8;
+      background: #e8f3fb;
+    }
+    &.is-exchange {
+      color: #b45309;
+      background: #fef3c7;
+    }
+    &.is-withdrawal {
+      color: #0a7f7a;
+      background: #e4f6f2;
+    }
+    &.is-manual_increase {
+      color: #047857;
+      background: #dff7ec;
+    }
+    &.is-manual_decrease {
+      color: #dc2626;
+      background: #fee2e2;
+    }
   }
 
   &__content {
@@ -182,7 +248,10 @@ function statusEffect(row: TransactionItem) {
       display: grid;
       gap: 5px;
 
-      small { color: #7b8b9f; font-size: 11px; }
+      small {
+        color: #7b8b9f;
+        font-size: 11px;
+      }
     }
   }
 
@@ -193,9 +262,16 @@ function statusEffect(row: TransactionItem) {
     grid-template-columns: minmax(48px, auto) 32px minmax(48px, auto);
     gap: 10px;
 
-    strong { font-size: 13px; font-weight: 600; }
-    > strong:first-child { text-align: right; }
-    > strong:last-child { text-align: left; }
+    strong {
+      font-size: 13px;
+      font-weight: 600;
+    }
+    > strong:first-child {
+      text-align: right;
+    }
+    > strong:last-child {
+      text-align: left;
+    }
   }
 
   &__amount-block {

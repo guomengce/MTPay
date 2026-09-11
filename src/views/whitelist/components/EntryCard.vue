@@ -1,19 +1,5 @@
 <template>
   <article class="entry-card">
-    <el-dropdown class="entry-card__menu" trigger="click" @command="handleCommand">
-      <el-button class="entry-card__menu-button" text :aria-label="t('whitelist.moreActions')">
-        <el-icon><MoreFilled /></el-icon>
-        <span>{{ t('whitelist.actionMenu') }}</span>
-      </el-button>
-      <template #dropdown>
-        <el-dropdown-menu>
-          <el-dropdown-item command="edit" :icon="EditPen">{{ t('whitelist.edit') }}</el-dropdown-item>
-          <el-dropdown-item command="toggle" :icon="SwitchButton">{{ toggleStatusLabel }}</el-dropdown-item>
-          <el-dropdown-item command="delete" :icon="Delete" divided>{{ t('whitelist.delete') }}</el-dropdown-item>
-        </el-dropdown-menu>
-      </template>
-    </el-dropdown>
-
     <header class="entry-card__header">
       <span class="entry-card__avatar">{{ avatarText }}</span>
       <div class="entry-card__heading">
@@ -23,6 +9,25 @@
           <IdentityBadge :role="item.role" :entity-type="item.entity_type" />
         </div>
       </div>
+      <el-dropdown class="entry-card__menu" trigger="click" @command="handleCommand">
+        <el-button class="entry-card__menu-button" text :aria-label="t('whitelist.moreActions')">
+          <el-icon><MoreFilled /></el-icon>
+          <span>{{ t('whitelist.actionMenu') }}</span>
+        </el-button>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item command="edit" :icon="EditPen">{{
+              t('whitelist.edit')
+            }}</el-dropdown-item>
+            <el-dropdown-item v-if="canToggleStatus" command="toggle" :icon="SwitchButton">{{
+              toggleStatusLabel
+            }}</el-dropdown-item>
+            <el-dropdown-item command="delete" :icon="Delete" divided>{{
+              t('whitelist.delete')
+            }}</el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
     </header>
 
     <div class="entry-card__divider" aria-hidden="true" />
@@ -61,7 +66,17 @@
 <script setup lang="ts">
 import { computed, type Component } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { ArrowRight, Calendar, Delete, Document, EditPen, Files, MoreFilled, SwitchButton, Upload } from '@element-plus/icons-vue';
+import {
+  ArrowRight,
+  Calendar,
+  Delete,
+  Document,
+  EditPen,
+  Files,
+  MoreFilled,
+  SwitchButton,
+  Upload,
+} from '@element-plus/icons-vue';
 
 import StatusBadge from '@/components/admin/StatusBadge.vue';
 import IdentityBadge from '@/components/admin/IdentityBadge.vue';
@@ -80,17 +95,23 @@ const emit = defineEmits<{
   (event: 'delete', item: WhitelistItem): void;
 }>();
 
-const statusMeta = computed(() => WHITELIST_STATUS_MAP[props.item.status as WhitelistStatus] ?? WHITELIST_STATUS_MAP[0]);
-const statusLabel = computed(() =>
-  [
-    t('whitelistStatus.pending'),
-    t('whitelistStatus.filesRequired'),
-    t('whitelistStatus.approved'),
-    t('whitelistStatus.rejected'),
-    t('whitelistStatus.disabled'),
-  ][props.item.status] || props.item.status_name,
+const statusMeta = computed(
+  () => WHITELIST_STATUS_MAP[props.item.status as WhitelistStatus] ?? WHITELIST_STATUS_MAP[0],
 );
-const toggleStatusLabel = computed(() => t(props.item.status === 4 ? 'whitelist.enable' : 'whitelist.disable'));
+const statusLabel = computed(
+  () =>
+    [
+      t('whitelistStatus.pending'),
+      t('whitelistStatus.filesRequired'),
+      t('whitelistStatus.approved'),
+      t('whitelistStatus.rejected'),
+      t('whitelistStatus.disabled'),
+    ][props.item.status] || props.item.status_name,
+);
+const canToggleStatus = computed(() => props.item.status === 2);
+const toggleStatusLabel = computed(() =>
+  t(props.item.status === 4 ? 'whitelist.enable' : 'whitelist.disable'),
+);
 const countryName = computed(() => getCountryLabel(props.item.country, locale.value));
 
 interface InfoRow {
@@ -103,7 +124,11 @@ interface InfoRow {
 /** 卡片只展示识别与追踪所需信息，完整业务资料统一进入详情页查看。 */
 const infoRows = computed<InfoRow[]>(() => [
   { label: t('whitelist.number'), value: props.item.whitelist_no, icon: Document, code: true },
-  { label: t('whitelist.fileCount'), value: `${props.item.file_count} ${t('whitelist.filesUnit')}`, icon: Files },
+  {
+    label: t('whitelist.fileCount'),
+    value: `${props.item.file_count} ${t('whitelist.filesUnit')}`,
+    icon: Files,
+  },
   { label: t('whitelist.submittedAt'), value: props.item.submitted_at || '—', icon: Calendar },
 ]);
 
@@ -114,7 +139,7 @@ const avatarText = computed(() => {
 
 function handleCommand(command: string | number | object) {
   if (command === 'edit') emit('edit', props.item);
-  if (command === 'toggle') emit('toggle-status', props.item);
+  if (command === 'toggle' && canToggleStatus.value) emit('toggle-status', props.item);
   if (command === 'delete') emit('delete', props.item);
 }
 </script>
@@ -142,10 +167,9 @@ function handleCommand(command: string | number | object) {
   }
 
   &__menu {
-    position: absolute;
-    top: 14px;
-    right: 14px;
-    z-index: 2;
+    flex: 0 0 auto;
+    align-self: center;
+    margin-left: auto;
   }
 
   &__menu-button {
@@ -180,7 +204,6 @@ function handleCommand(command: string | number | object) {
     min-width: 0;
     align-items: center;
     gap: 14px;
-    padding-right: 34px;
   }
 
   &__avatar {
@@ -329,8 +352,7 @@ function handleCommand(command: string | number | object) {
     padding: 18px;
 
     &__menu {
-      top: 11px;
-      right: 11px;
+      margin-left: auto;
     }
 
     &__avatar {
@@ -359,4 +381,3 @@ function handleCommand(command: string | number | object) {
   }
 }
 </style>
-

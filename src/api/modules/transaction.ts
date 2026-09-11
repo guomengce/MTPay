@@ -5,17 +5,8 @@
  * 代理端根据 Token 识别身份，不传 user_id / keyword。
  */
 import request from '../request';
-import type { DepositOrderDetail } from './deposit';
-import type { ExchangeOrderDetail } from './exchange';
-import type { WithdrawalOrderDetail } from './withdrawal';
-
 export type TransactionBusinessType =
-  | 'deposit'
-  | 'fiat_deposit'
-  | 'exchange'
-  | 'withdrawal'
-  | 'manual_increase'
-  | 'manual_decrease';
+  'deposit' | 'fiat_deposit' | 'exchange' | 'withdrawal' | 'manual_increase' | 'manual_decrease';
 
 export interface TransactionUserRef {
   id: number;
@@ -77,37 +68,7 @@ export interface TransactionPageResult {
   last_page: number;
 }
 
-export interface TransactionInfoResult {
-  transaction: TransactionItem;
-  detail: DepositOrderDetail | ExchangeOrderDetail | WithdrawalOrderDetail | ManualBalanceAdjustmentDetail;
-}
-
-export interface ManualBalanceAdjustmentDetail {
-  id?: number;
-  user_id?: number;
-  currency_code?: string;
-  direction?: 'increase' | 'decrease' | 1 | 2;
-  amount?: string;
-  balance_before?: string | null;
-  balance_after?: string | null;
-  reason?: string | null;
-  admin_name?: string | null;
-  admin?: { id: number; name: string } | null;
-  adjusted_at?: string | null;
-  created_at?: string | null;
-}
-
 /** 当前代理的统一交易分页列表。 */
 export function fetchTransactionList(params: TransactionListParams = {}) {
   return request.get<unknown, TransactionPageResult>('/web/getTransactionList', { params });
-}
-
-/** 统一交易详情（只读）。 */
-export function fetchTransactionInfo(payload: {
-  business_type: TransactionBusinessType;
-  business_id: number;
-}) {
-  return request.get<unknown, TransactionInfoResult>('/web/getTransactionInfo', {
-    params: payload,
-  });
 }

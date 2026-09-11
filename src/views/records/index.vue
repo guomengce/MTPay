@@ -1,9 +1,6 @@
 <template>
   <section class="records-page">
-    <AdminHero
-      :title="t('records.title')"
-      icon="ri-file-list-3-line"
-    />
+    <AdminHero :title="t('records.title')" icon="ri-file-list-3-line" />
 
     <el-card class="records-page__card" shadow="never">
       <TransactionFilters
@@ -43,6 +40,7 @@ import TransactionFilters from './components/TransactionFilters.vue';
 import TransactionCardList from './components/TransactionCardList.vue';
 import TransactionTable from './components/TransactionTable.vue';
 import { useTransactionList } from './composables/useTransactionList';
+import { transactionDetailRoute } from './transactionRoutes';
 
 const router = useRouter();
 const { t } = useI18n();
@@ -50,11 +48,8 @@ const { loading, list, total, page, limit, query, loadList, search, reset, setPa
   useTransactionList();
 
 function openDetail(row: TransactionItem) {
-  if (row.detail_type === 'fiat_deposit') { void router.push({ name: 'FiatDepositDetail', params: { id: row.detail_id } }); return; }
-  void router.push({
-    name: 'TransactionDetail',
-    params: { businessType: row.detail_type, businessId: row.detail_id },
-  });
+  const target = transactionDetailRoute(row);
+  if (target) void router.push(target);
 }
 
 onMounted(loadList);
@@ -72,7 +67,7 @@ onMounted(loadList);
     border-color: #dfe7ef;
     border-radius: 16px;
     box-shadow: 0 16px 42px rgb(16 30 54 / 7%);
-    padding: 20px;;
+    padding: 20px;
     :deep(.el-card__body) {
       display: grid;
       padding: 0;
@@ -100,11 +95,11 @@ onMounted(loadList);
       padding: 16px;
     }
 
-    &__card{
-      padding:16px;
+    &__card {
+      padding: 16px;
     }
-    .transaction-filters{
-      margin-bottom:10px;
+    .transaction-filters {
+      margin-bottom: 10px;
     }
 
     // &__card :deep(.transaction-filters) { padding: 16px; }

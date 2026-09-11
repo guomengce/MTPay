@@ -112,7 +112,7 @@ function handleContact() {
 
   &__logo {
     display: block;
-    width: 154px;
+    width: 188px;
     height: auto;
   }
 
@@ -256,9 +256,8 @@ function handleContact() {
     }
 
     &__logo {
-      width: 34px;
-      height: 34px;
-      font-size: 17px;
+      width: 148px;
+      height: auto;
     }
 
     &__form {

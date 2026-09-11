@@ -24,8 +24,18 @@ export const featureRoutes: RouteRecordRaw[] = [
       cryptoOnly: true,
     },
   },
-  { path:'/fiat-deposit',name:'FiatDeposit',component:()=>import('@/views/fiat-deposit/index.vue'),meta:{title:'menu.fiatDeposit',icon:'Upload',requiresAuth:true,hidden:true}},
-  { path:'/fiat-deposit/detail/:id',name:'FiatDepositDetail',component:()=>import('@/views/fiat-deposit/detail/index.vue'),meta:{title:'menu.fiatDepositDetail',icon:'',requiresAuth:true,hidden:true}},
+  {
+    path: '/fiat-deposit',
+    name: 'FiatDeposit',
+    component: () => import('@/views/fiat-deposit/index.vue'),
+    meta: { title: 'menu.fiatDeposit', icon: 'Upload', requiresAuth: true, hidden: true },
+  },
+  {
+    path: '/fiat-deposit/detail/:id',
+    name: 'FiatDepositDetail',
+    component: () => import('@/views/fiat-deposit/detail/index.vue'),
+    meta: { title: 'menu.fiatDepositDetail', icon: '', requiresAuth: true, hidden: true },
+  },
   {
     path: '/exchange',
     name: 'Exchange',
@@ -42,13 +52,25 @@ export const featureRoutes: RouteRecordRaw[] = [
     path: '/deposit/detail/:id',
     name: 'DepositDetail',
     component: () => import('@/views/deposit/detail/index.vue'),
-    meta: { title: 'menu.depositDetail', icon: '', requiresAuth: true, hidden: true, cryptoOnly: true },
+    meta: {
+      title: 'menu.depositDetail',
+      icon: '',
+      requiresAuth: true,
+      hidden: true,
+      cryptoOnly: true,
+    },
   },
   {
     path: '/exchange/detail/:id',
     name: 'ExchangeDetail',
     component: () => import('@/views/exchange/detail/index.vue'),
-    meta: { title: 'menu.exchangeDetail', icon: '', requiresAuth: true, hidden: true, cryptoOnly: true },
+    meta: {
+      title: 'menu.exchangeDetail',
+      icon: '',
+      requiresAuth: true,
+      hidden: true,
+      cryptoOnly: true,
+    },
   },
   {
     path: '/whitelist',
@@ -106,17 +128,6 @@ export const featureRoutes: RouteRecordRaw[] = [
     },
   },
   {
-    path: '/records/detail/:businessType/:businessId',
-    name: 'TransactionDetail',
-    component: () => import('@/views/records/detail/index.vue'),
-    meta: {
-      title: 'menu.transactionDetail',
-      icon: '',
-      requiresAuth: true,
-      hidden: true,
-    },
-  },
-  {
     path: '/account',
     name: 'Account',
     component: () => import('@/views/account/index.vue'),
@@ -128,7 +139,9 @@ export const featureRoutes: RouteRecordRaw[] = [
     },
   },
   {
-    path: '/notifications', name: 'Notifications', component: () => import('@/views/notifications/index.vue'),
+    path: '/notifications',
+    name: 'Notifications',
+    component: () => import('@/views/notifications/index.vue'),
     meta: { title: 'notifications.title', icon: '', requiresAuth: true, hidden: true },
   },
 ];
