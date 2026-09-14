@@ -79,9 +79,19 @@ test('transaction record detail entries route to business module details', () =>
   );
   const routes = readFileSync(new URL('../src/router/modules/index.ts', import.meta.url), 'utf8');
   const routing = loadTs('../src/views/records/transactionRoutes.ts');
+  const table = readFileSync(
+    new URL('../src/views/records/components/TransactionTable.vue', import.meta.url),
+    'utf8',
+  );
+  assert.match(table, /function canViewDetail\(row: TransactionItem\)/);
+  assert.match(table, /row\.business_type === 'manual_increase'/);
+  assert.match(table, /row\.business_type === 'manual_decrease'/);
   for (const type of ['manual_increase', 'manual_decrease']) {
     assert.match(filters, new RegExp(`value="${type}"`));
-    assert.equal(routing.transactionDetailRoute({ detail_type: type, detail_id: 8 }), null);
+    assert.deepEqual(routing.transactionDetailRoute({ detail_type: type, detail_id: 8 }), {
+      name: 'TransactionDetail',
+      params: { businessType: type, businessId: '8' },
+    });
   }
   assert.deepEqual(routing.transactionDetailRoute({ detail_type: 'deposit', detail_id: 4 }), {
     name: 'DepositDetail',
@@ -99,11 +109,18 @@ test('transaction record detail entries route to business module details', () =>
     name: 'WithdrawalDetail',
     params: { id: '7' },
   });
-  assert.doesNotMatch(routes, /name:\s*'TransactionDetail'/);
-  assert.doesNotMatch(routes, /records\/detail/);
+  assert.deepEqual(
+    routing.transactionDetailRoute({ business_type: 'manual_decrease', business_id: 9 }),
+    {
+      name: 'TransactionDetail',
+      params: { businessType: 'manual_decrease', businessId: '9' },
+    },
+  );
+  assert.match(routes, /name:\s*'TransactionDetail'/);
+  assert.match(routes, /records\/detail\/:businessType\/:businessId/);
   assert.equal(
     existsSync(new URL('../src/views/records/detail/index.vue', import.meta.url)),
-    false,
+    true,
   );
 });
 test('long English text styles wrap and all changed component styles compile', () => {
@@ -126,6 +143,7 @@ test('long English text styles wrap and all changed component styles compile', (
     new URL('../src/views/records/components/TransactionTable.vue', import.meta.url),
     'utf8',
   );
+
   assert.match(balance, /font-size: clamp\(24px/);
   assert.match(balance, /overflow-wrap: anywhere/);
   assert.match(table, /min-width="170"/);

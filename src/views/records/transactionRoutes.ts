@@ -6,12 +6,22 @@ const transactionDetailRouteNames: Partial<Record<TransactionBusinessType, strin
   fiat_deposit: 'FiatDepositDetail',
   exchange: 'ExchangeDetail',
   withdrawal: 'WithdrawalDetail',
+  manual_increase: 'TransactionDetail',
+  manual_decrease: 'TransactionDetail',
 };
 
 export function transactionDetailRoute(row: TransactionItem): RouteLocationRaw | null {
-  const routeName = transactionDetailRouteNames[row.detail_type];
-  if (!routeName || !row.detail_id) return null;
-  return { name: routeName, params: { id: String(row.detail_id) } };
+  const detailType = row.detail_type || row.business_type;
+  const detailId = row.detail_id || row.business_id;
+  const routeName = transactionDetailRouteNames[detailType];
+  if (!routeName || !detailId) return null;
+  if (routeName === 'TransactionDetail') {
+    return {
+      name: routeName,
+      params: { businessType: detailType, businessId: String(detailId) },
+    };
+  }
+  return { name: routeName, params: { id: String(detailId) } };
 }
 
 export function hasTransactionDetailRoute(row: TransactionItem) {

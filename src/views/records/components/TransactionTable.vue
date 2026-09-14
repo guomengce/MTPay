@@ -8,7 +8,7 @@
       >
         <template #default="{ row }">
           <a
-            v-if="hasTransactionDetailRoute(row)"
+            v-if="canViewDetail(row)"
             class="transaction-table__link"
             href="javascript:void(0)"
             @click.prevent="emit('view', row)"
@@ -85,7 +85,7 @@
       <el-table-column :label="t('records.actions')" min-width="100" fixed="right" align="center">
         <template #default="{ row }">
           <el-button
-            v-if="hasTransactionDetailRoute(row)"
+            v-if="canViewDetail(row)"
             type="primary"
             plain
             size="small"
@@ -119,6 +119,13 @@ const emit = defineEmits<{ (e: 'view', row: TransactionItem): void }>();
 const { t } = useI18n();
 function businessLabel(type: TransactionItem['business_type']) {
   return transactionBusinessLabel(type, t);
+}
+function canViewDetail(row: TransactionItem) {
+  return (
+    hasTransactionDetailRoute(row) ||
+    row.business_type === 'manual_increase' ||
+    row.business_type === 'manual_decrease'
+  );
 }
 function statusLabel(row: TransactionItem) {
   const key = row.status_group === 'needs_supplement' ? 'supplement' : row.status_group;
