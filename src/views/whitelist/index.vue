@@ -167,6 +167,7 @@ async function openEdit(item: WhitelistItem) {
 }
 
 async function toggleWhitelistStatus(item: WhitelistItem) {
+  if (actionSubmitting.value || (item.status !== 2 && item.status !== 4)) return;
   const nextStatus = item.status === 4 ? 2 : 4;
   try {
     await ElMessageBox.confirm(

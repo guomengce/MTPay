@@ -10,44 +10,53 @@
     :show-close="!busy"
     @closed="resetSupplement"
   >
-    <p v-if="requirement" class="supplement-requirement">{{ requirement }}</p>
-    <el-form label-position="top">
-      <el-form-item :label="t('withdrawal.supplementFiles')" required>
-        <el-upload
-          v-model:file-list="selectedFiles"
-          class="wd-upload"
-          drag
-          multiple
-          :auto-upload="false"
-          :limit="5"
-          accept=".pdf,.png,.jpg,.jpeg"
-          :disabled="busy"
-          :on-exceed="onExceed"
-          ><i class="ri-upload-cloud-2-line wd-upload-icon" />
-          <div>{{ t('whitelist.uploadText') }}</div>
-          <template #tip
-            ><div class="el-upload__tip">{{ t('withdrawal.fileLimit') }}</div></template
-          ></el-upload
-        >
-      </el-form-item>
-      <el-form-item :label="t('withdrawal.supplementNote')"
-        ><el-input
-          v-model="supplementNote"
-          type="textarea"
-          :rows="3"
-          maxlength="200"
-          show-word-limit
-          :disabled="busy"
-          :placeholder="t('withdrawal.supplementPlaceholder')"
-      /></el-form-item>
-    </el-form>
+    <div v-loading="loading" class="supplement-content" :aria-busy="Boolean(loading)">
+      <section v-if="requirement && !loading" class="supplement-requirement">
+        <strong>{{ t('withdrawal.adminSupplementLabel') }}</strong>
+        <p>{{ requirement }}</p>
+      </section>
+      <el-form label-position="top">
+        <el-form-item :label="t('withdrawal.supplementFiles')" required>
+          <el-upload
+            v-model:file-list="selectedFiles"
+            class="wd-upload"
+            drag
+            multiple
+            :auto-upload="false"
+            :limit="5"
+            accept=".pdf,.png,.jpg,.jpeg"
+            :disabled="busy"
+            :on-exceed="onExceed"
+            ><i class="ri-upload-cloud-2-line wd-upload-icon" />
+            <div>{{ t('whitelist.uploadText') }}</div>
+            <template #tip
+              ><div class="el-upload__tip">{{ t('withdrawal.fileLimit') }}</div></template
+            ></el-upload
+          >
+        </el-form-item>
+        <el-form-item :label="t('withdrawal.supplementNote')"
+          ><el-input
+            v-model="supplementNote"
+            type="textarea"
+            :rows="3"
+            maxlength="200"
+            show-word-limit
+            :disabled="busy"
+            :placeholder="t('withdrawal.supplementPlaceholder')"
+        /></el-form-item>
+      </el-form>
+    </div>
     <template #footer
       ><el-button :disabled="busy" @click="emit('update:modelValue', false)">{{
         t('common.actions.cancel')
       }}</el-button
-      ><el-button type="primary" :loading="busy" @click="sendSupplement">{{
-        t('withdrawal.submitSupplement')
-      }}</el-button></template
+      ><el-button
+        type="primary"
+        :disabled="loading"
+        :loading="submitting || uploading || uploadingLocal"
+        @click="sendSupplement"
+        >{{ t('withdrawal.submitSupplement') }}</el-button
+      ></template
     >
   </AgentDialog>
 </template>
@@ -62,6 +71,7 @@ const props = defineProps<{
   modelValue: boolean;
   row: WithdrawalOrder | null;
   requirement?: string;
+  loading?: boolean;
   submitting?: boolean;
   uploading?: boolean;
   uploadFile?: (file: File) => Promise<WithdrawalFile>;
@@ -75,7 +85,9 @@ const { t } = useI18n();
 const selectedFiles = ref<UploadUserFile[]>([]),
   supplementNote = ref(''),
   uploadingLocal = ref(false);
-const busy = computed(() => Boolean(props.submitting || props.uploading || uploadingLocal.value));
+const busy = computed(() =>
+  Boolean(props.loading || props.submitting || props.uploading || uploadingLocal.value),
+);
 function resetSupplement() {
   selectedFiles.value = [];
   supplementNote.value = '';
@@ -141,9 +153,18 @@ async function sendSupplement() {
   font-size: 32px;
 }
 .supplement-requirement {
-  padding: 12px;
+  margin-bottom: 20px;
+  padding: 12px 14px;
   background: #fff9ed;
   border-radius: 10px;
   white-space: pre-wrap;
+  strong {
+    color: #986617;
+    font-size: 14px;
+  }
+  p {
+    margin: 6px 0 0;
+    line-height: 1.6;
+  }
 }
 </style>

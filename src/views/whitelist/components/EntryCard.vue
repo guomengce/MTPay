@@ -108,7 +108,7 @@ const statusLabel = computed(
       t('whitelistStatus.disabled'),
     ][props.item.status] || props.item.status_name,
 );
-const canToggleStatus = computed(() => props.item.status === 2);
+const canToggleStatus = computed(() => props.item.status === 2 || props.item.status === 4);
 const toggleStatusLabel = computed(() =>
   t(props.item.status === 4 ? 'whitelist.enable' : 'whitelist.disable'),
 );

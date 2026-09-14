@@ -4,7 +4,7 @@
     :class="{ 'is-collapsed': isCollapsed, 'is-mobile': isMobile }"
   >
     <div class="app-aside__brand">
-      <img class="app-aside__logo" src="/assets/mtpay-logo-sidebar.png" alt="MTPay" />
+      <img class="app-aside__logo" src="/assets/mtpay-logo-official.png" alt="MTPay" />
     </div>
 
     <div v-if="!isCollapsed" class="app-aside__divider" aria-hidden="true" />

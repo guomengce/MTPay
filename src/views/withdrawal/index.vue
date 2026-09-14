@@ -55,6 +55,7 @@
       v-model="supplementDialogVisible"
       :row="supplementItem"
       :requirement="supplementRequirement"
+      :loading="supplementLoading"
       :submitting="supplementSubmitting"
       :uploading="supplementUploading"
       :upload-file="uploadSupplementFile"
@@ -136,6 +137,7 @@ const applyFormRef = ref<InstanceType<typeof ApplyForm>>();
 const supplementDialogVisible = ref(false);
 const supplementItem = ref<WithdrawalOrder | null>(null);
 const supplementRequirement = ref('');
+const supplementLoading = ref(false);
 const supplementMode = ref<'business' | 'risk'>('business');
 const twoFactorEnabled = ref<boolean | null>(null);
 const {
@@ -186,20 +188,25 @@ onBeforeRouteLeave(async () => {
 });
 
 async function openSupplement(row: WithdrawalOrder) {
+  if (supplementLoading.value) return;
   if (!row.available_actions?.can_supplement_withdrawal) return;
   supplementItem.value = row;
   supplementMode.value = 'business';
   supplementRequirement.value = '';
+  supplementLoading.value = true;
   supplementDialogVisible.value = true;
   try {
     await fetchDetail(row.id);
     supplementRequirement.value = extractSupplementRequirement(detail.value);
   } catch {
-    supplementRequirement.value = t('withdrawal.defaultSupplement');
+    supplementDialogVisible.value = false;
+  } finally {
+    supplementLoading.value = false;
   }
 }
 
 function openRiskSupplement(row: WithdrawalOrder) {
+  if (supplementLoading.value) return;
   if (row.risk?.can_supplement_risk !== true) return;
   supplementItem.value = row;
   supplementMode.value = 'risk';
@@ -222,11 +229,7 @@ async function handleSupplement(payload: { file_ids: number[]; message?: string 
       file_ids: payload.file_ids,
       message: payload.message,
     });
-    ElMessage.success(
-      t(
-        'withdrawal.supplemented',
-      ),
-    );
+    ElMessage.success(t('withdrawal.supplemented'));
     supplementDialogVisible.value = false;
     supplementItem.value = null;
     await fetchList();

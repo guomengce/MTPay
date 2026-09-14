@@ -248,11 +248,9 @@ export function useWhitelistSubmitForm() {
   }
 
   function collectDetailFiles(detail: WhitelistItemDetail) {
+    // 只编辑当前绑定附件，历史审核记录中的文件不代表仍然保留。
     const map = new Map<number, WhitelistFile>();
     for (const file of detail.files ?? []) map.set(file.file_id, file);
-    for (const record of detail.records ?? []) {
-      for (const file of record.files ?? []) map.set(file.file_id, file);
-    }
     return Array.from(map.values());
   }
 
@@ -314,10 +312,11 @@ export function useWhitelistSubmitForm() {
     const fileIds = fileList.value
       .map((item) => (item.response as WhitelistFile | undefined)?.file_id)
       .filter((id): id is number => typeof id === 'number');
-    if (fileIds.length) business.file_ids = fileIds;
+    if (fileIds.length) business.file_ids = [...new Set(fileIds)];
 
     const retainedIds = retainedFileIds.value;
     const originalIds = originalFileIds.value;
+    // 未移除原附件时省略字段；全部移除时必须保留 []，不可转成 undefined。
     const retainedChanged = retainedIds.length !== originalIds.length || retainedIds.some((id) => !originalIds.includes(id));
     if (originalIds.length && retainedChanged) business.retained_file_ids = retainedIds;
 

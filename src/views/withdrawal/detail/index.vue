@@ -12,6 +12,11 @@
       v-model="dialogVisible"
       :row="detail"
       :mode="mode"
+      :loading="loading"
+      :requirement="
+        (mode === 'risk' ? detail?.risk?.risk_supplement_request : detail?.supplement_request) ||
+        t('withdrawal.defaultSupplement')
+      "
       :submitting="submitting"
       :upload-file="uploadFile"
       @submit="sendSupplement"

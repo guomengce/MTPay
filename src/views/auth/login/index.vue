@@ -4,7 +4,7 @@
 
     <header class="login-page__header">
       <div class="login-page__brand">
-        <img class="login-page__logo" src="/assets/mtpay-logo.png" alt="MTPay" />
+        <img class="login-page__logo" src="/assets/mtpay-logo-official.png" alt="MTPay" />
       </div>
       <div class="login-page__header-actions">
         <LanguageSwitcher />
@@ -112,7 +112,7 @@ function handleContact() {
 
   &__logo {
     display: block;
-    width: 188px;
+    width: 168px;
     height: auto;
   }
 
