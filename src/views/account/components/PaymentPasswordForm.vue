@@ -2,17 +2,6 @@
   <el-form label-position="top" :disabled="busy" @submit.prevent="submit">
     <el-alert v-if="error" :title="error" type="error" :closable="false" />
     
-    <el-form-item required v-if="mode === 'setup'" :label="t('withdrawalSecurity.emailCode')">
-      <el-input v-model="emailCode" maxlength="6" inputmode="numeric" autocomplete="one-time-code"
-        ><template #append
-          ><el-button class="email-code-button" text type="primary" :loading="sendingCode" :disabled="busy || cooldown > 0" @click="sendCode">{{
-            cooldown > 0
-              ? t('withdrawalSecurity.resendAfter', { seconds: cooldown })
-              : t('withdrawalSecurity.sendCode')
-          }}</el-button></template
-        ></el-input
-      >
-    </el-form-item>
     <el-form-item required v-if="mode === 'change'" :label="t('paymentPassword.oldPassword')"
       ><el-input
         v-model="old"
@@ -51,7 +40,7 @@
       ></el-input>
     </el-form-item>
     <div class="payment-form__actions">
-      <el-button type="primary" native-type="submit" :loading="busy && !sendingCode">{{
+      <el-button type="primary" native-type="submit" :loading="busy">{{
         t('paymentPassword.' + mode)
       }}</el-button>
     </div>
@@ -76,38 +65,15 @@ const { t } = useI18n();
 const old = ref(''),
   password = ref(''),
   confirmation = ref(''),
-  emailCode = ref(''),
   code = ref(''),
   error = ref('');
-const sendingCode = ref(false);
-const busy = ref(false),
-  cooldown = ref(0);
-let deadline = 0;
-const timer = setInterval(() => {
-  cooldown.value = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
-}, 1000);
+const busy = ref(false);
 function clear() {
-  old.value = password.value = confirmation.value = emailCode.value = code.value = '';
+  old.value = password.value = confirmation.value = code.value = '';
 }
 function setBusy(value: boolean) {
   busy.value = value;
   emit('busy', value);
-}
-async function sendCode() {
-  if (busy.value || cooldown.value) return;
-  sendingCode.value = true;
-  setBusy(true);
-  error.value = '';
-  try {
-    const result = await api.sendPaymentPasswordEmailCode();
-    deadline = Date.now() + result.resend_after * 1000;
-    cooldown.value = result.resend_after;
-  } catch (e) {
-    error.value = paymentError(e);
-  } finally {
-    sendingCode.value = false;
-    setBusy(false);
-  }
 }
 async function submit() {
   if (busy.value) return;
@@ -115,8 +81,7 @@ async function submit() {
     !pattern.test(password.value) ||
     password.value !== confirmation.value ||
     (props.mode === 'change' && (!pattern.test(old.value) || old.value === password.value)) ||
-    (props.mode !== 'change' && !pattern.test(code.value)) ||
-    (props.mode === 'setup' && !pattern.test(emailCode.value))
+    (props.mode !== 'change' && !pattern.test(code.value))
   ) {
     error.value = t('paymentPassword.invalid');
     return;
@@ -132,8 +97,7 @@ async function submit() {
     payment_password_confirmation: confirmation.value,
   };
   try {
-    if (props.mode === 'setup')
-      await api.setPaymentPassword({ ...fields, email_code: emailCode.value, code: code.value });
+    if (props.mode === 'setup') await api.setPaymentPassword({ ...fields, code: code.value });
     else if (props.mode === 'change')
       await api.updatePaymentPassword({ ...fields, old_payment_password: old.value });
     else await api.resetPaymentPassword({ ...fields, code: code.value, token: props.token! });
@@ -150,7 +114,6 @@ async function submit() {
   }
 }
 onBeforeUnmount(() => {
-  clearInterval(timer);
   clear();
 });
 </script>

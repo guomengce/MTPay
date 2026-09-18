@@ -11,14 +11,8 @@ export interface PaymentPasswordFields {
 }
 export const getPaymentPasswordStatus = () =>
   request.get<unknown, PaymentPasswordStatus>('/web/getPaymentPasswordStatus');
-export const sendPaymentPasswordEmailCode = () =>
-  request.post<unknown, { expires_in: number; resend_after: number }>(
-    '/web/sendPaymentPasswordEmailCode',
-    {},
-  );
-export const setPaymentPassword = (
-  data: PaymentPasswordFields & { email_code: string; code: string },
-) => request.post('/web/setPaymentPassword', data);
+export const setPaymentPassword = (data: PaymentPasswordFields & { code: string }) =>
+  request.post('/web/setPaymentPassword', data);
 export const updatePaymentPassword = (
   data: PaymentPasswordFields & { old_payment_password: string },
 ) => request.post('/web/updatePaymentPassword', data);
