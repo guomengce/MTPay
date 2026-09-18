@@ -68,7 +68,37 @@ export interface TransactionPageResult {
   last_page: number;
 }
 
+export interface ManualBalanceAdjustmentDetail {
+  id?: number;
+  user_id?: number;
+  currency_code?: string;
+  direction?: 'increase' | 'decrease' | 1 | 2;
+  amount?: string;
+  balance_before?: string | null;
+  balance_after?: string | null;
+  reason?: string | null;
+  admin_name?: string | null;
+  admin?: { id: number; name: string } | null;
+  adjusted_at?: string | null;
+  created_at?: string | null;
+}
+
+export interface TransactionInfoResult {
+  transaction: TransactionItem;
+  detail: ManualBalanceAdjustmentDetail;
+}
+
 /** 当前代理的统一交易分页列表。 */
 export function fetchTransactionList(params: TransactionListParams = {}) {
   return request.get<unknown, TransactionPageResult>('/web/getTransactionList', { params });
+}
+
+/** 人工资产调整详情（只读）。 */
+export function fetchTransactionInfo(payload: {
+  business_type: Extract<TransactionBusinessType, 'manual_increase' | 'manual_decrease'>;
+  business_id: number;
+}) {
+  return request.get<unknown, TransactionInfoResult>('/web/getTransactionInfo', {
+    params: payload,
+  });
 }

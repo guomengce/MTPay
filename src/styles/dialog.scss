@@ -34,7 +34,7 @@
 .el-message-box__title { color: var(--portal-text); font-size: 18px; font-weight: 700; }
 .el-message-box__content { padding: 26px 26px 22px; color: var(--portal-text); line-height: 1.7; }
 .el-message-box__container { align-items: center; gap: 16px; }
-.el-message-box__status { position: static; color: #087fa5 !important; transform: none; font-size: 22px !important; }
+.el-message-box__status { position: static; transform: none; font-size: 22px !important; }
 .el-message-box__message { min-width: 0; padding: 0; }
 .el-message-box__btns { padding: 18px 26px 22px; border-top: 1px solid var(--portal-dialog-border); background: #fbfcfe; }
 
@@ -45,4 +45,28 @@
   .el-dialog__body { padding: 20px; }
   .el-dialog__footer, .el-message-box__btns { display: flex; padding: 16px 20px 20px; }
   .el-dialog__footer .el-button, .el-message-box__btns .el-button { min-width: 0; flex: 1; margin: 0; }
+}
+
+// 保留弹窗布局，图标颜色随消息类型变化。
+.el-message-box .el-message-box__status {
+  &.el-message-box-icon--success {
+    color: #15803d;
+    border-color: var(--mt-btn-success-border);
+    background: var(--mt-btn-success-soft);
+  }
+  &.el-message-box-icon--warning {
+    color: #a16207;
+    border-color: var(--mt-btn-warning-border);
+    background: var(--mt-btn-warning-soft);
+  }
+  &.el-message-box-icon--error {
+    color: #dc2626;
+    border-color: var(--mt-btn-danger-border);
+    background: var(--mt-btn-danger-soft);
+  }
+  &.el-message-box-icon--info {
+    color: #1d4ed8;
+    border-color: var(--mt-btn-info-border);
+    background: var(--mt-btn-info-soft);
+  }
 }

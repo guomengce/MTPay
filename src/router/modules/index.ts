@@ -128,6 +128,18 @@ export const featureRoutes: RouteRecordRaw[] = [
     },
   },
   {
+    path: '/records/manual/:businessType/:businessId',
+    name: 'ManualAdjustmentDetail',
+    component: () => import('@/views/records/detail/detail/index.vue'),
+    meta: {
+      title: 'menu.records',
+      icon: '',
+      requiresAuth: true,
+      hidden: true,
+      activeMenu: '/records',
+    },
+  },
+  {
     path: '/account',
     name: 'Account',
     component: () => import('@/views/account/index.vue'),

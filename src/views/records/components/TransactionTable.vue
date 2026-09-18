@@ -8,7 +8,7 @@
       >
         <template #default="{ row }">
           <a
-            v-if="hasTransactionDetailRoute(row)"
+            v-if="canViewDetail(row)"
             class="transaction-table__link"
             href="javascript:void(0)"
             @click.prevent="emit('view', row)"
@@ -82,10 +82,10 @@
           />
         </template>
       </el-table-column>
-      <el-table-column :label="t('records.actions')" min-width="100" fixed="right" align="center">
+      <el-table-column :label="t('records.actions')" min-width="120" fixed="right" align="center">
         <template #default="{ row }">
           <el-button
-            v-if="hasTransactionDetailRoute(row)"
+            v-if="canViewDetail(row)"
             type="primary"
             plain
             size="small"
@@ -119,6 +119,9 @@ const emit = defineEmits<{ (e: 'view', row: TransactionItem): void }>();
 const { t } = useI18n();
 function businessLabel(type: TransactionItem['business_type']) {
   return transactionBusinessLabel(type, t);
+}
+function canViewDetail(row: TransactionItem) {
+  return hasTransactionDetailRoute(row);
 }
 function statusLabel(row: TransactionItem) {
   const key = row.status_group === 'needs_supplement' ? 'supplement' : row.status_group;
@@ -213,20 +216,20 @@ function statusEffect(row: TransactionItem) {
     white-space: nowrap;
 
     &.is-deposit {
-      color: #07835d;
-      background: #e3f7ee;
+      color: #05966f;
+      background: #dff6ec;
     }
     &.is-fiat_deposit {
-      color: #1267a8;
-      background: #e8f3fb;
+      color: #069a94;
+      background: rgb(57 245 236 / 16%);
     }
     &.is-exchange {
       color: #b45309;
       background: #fef3c7;
     }
     &.is-withdrawal {
-      color: #0a7f7a;
-      background: #e4f6f2;
+      color: #1267e8;
+      background: #e7f0ff;
     }
     &.is-manual_increase {
       color: #047857;

@@ -129,7 +129,10 @@ export function useDashboard() {
     if (!counts) return '—';
     const labels = pendingBusinessKeys
       .filter((key) => Object.prototype.hasOwnProperty.call(counts, key))
-      .map((key) => t(`dashboard.${key}`));
+      .map((key, index) => {
+        const label = t(`dashboard.${key}`);
+        return locale.value.startsWith('en') && index > 0 ? label.toLowerCase() : label;
+      });
     if (!labels.length) return '—';
     if (labels.length === 1) return labels[0];
     const conjunction = t('textFormat.conjunction');

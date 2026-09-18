@@ -5,6 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
+    "dev:test": "vite --mode test --host 0.0.0.0 --port 9529 --strictPort",
+    "build:test": "vue-tsc --noEmit && vite build --mode test --outDir dist-test",
+    "preview:test": "vite preview --mode test --outDir dist-test --host 0.0.0.0 --port 9530 --strictPort",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview --host 0.0.0.0",
     "type-check": "vue-tsc --noEmit",

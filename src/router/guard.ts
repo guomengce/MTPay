@@ -1,3 +1,4 @@
+import { setPendingDestination } from '@/utils/loginDestination';
 import { getLoginChallenge, clearLoginChallenge } from '@/utils/loginChallenge';
 import router from '@/router';
 import { useAuthStore } from '@/stores/modules/auth';
@@ -9,6 +10,7 @@ let initialNavigation = true;
 router.beforeEach(async (to) => {
   if (initialNavigation) usePageLoadingStore().startRoute();
   const authStore = useAuthStore();
+  if (to.meta?.requiresAuth) setPendingDestination(to.fullPath);
   // 仅当前运行期间已成功取得用户资料，才可确认会话有效并跳过登录页。
   // 本地存储里单独存在 Token 不代表它仍有效。
   if ((to.name === 'Login' || to.name === 'TwoFactor') && authStore.isLoggedIn && authStore.profileReady) {
@@ -32,7 +34,8 @@ router.beforeEach(async (to) => {
   return true;
 });
 
-router.afterEach(() => {
+router.afterEach((_to, _from, failure) => {
+  if (!failure) setPendingDestination();
   if (!initialNavigation) return;
   initialNavigation = false;
   usePageLoadingStore().finishRoute();

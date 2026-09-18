@@ -258,7 +258,7 @@ export function uploadWithdrawalFile(formData: FormData) {
 }
 
 /** 提交出金申请；手续费和总扣款由后端按固定配置计算。 */
-export function submitWithdrawal(payload: SubmitWithdrawalPayload) {
+export function submitWithdrawal(payload: SubmitWithdrawalPayload & { payment_password: string }) {
   return request.post<unknown, WithdrawalOrderDetail>(
     '/web/submitWithdrawal',
     toWithdrawalFormData(payload),

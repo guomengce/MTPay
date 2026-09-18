@@ -1,3 +1,4 @@
+import { loginDestination } from '@/utils/loginDestination';
 /**
  * 全局 axios 实例
  * - 统一 baseURL / timeout
@@ -62,6 +63,7 @@ const PUBLIC_AUTH_PATHS = new Set([
   '/web/activateAgent',
   '/web/forgotAgentPassword',
   '/web/resetAgentPassword',
+  '/web/resetPaymentPassword',
 ]);
 let sessionExpiredHandled = false;
 let permissionRefreshPromise: Promise<void> | null = null;
@@ -145,6 +147,7 @@ request.interceptors.response.use(
 
 /** 保留接口原始错误，便于区分前端超时、HTTP 错误和传输中断。 */
 function logRequestError(error: AxiosError<ApiEnvelope<unknown>>) {
+  if (/PaymentPassword|Withdrawal/.test(error.config?.url || '')) return;
   console.error('[API request failed]', {
     method: error.config?.method?.toUpperCase(),
     url: error.config?.url,
@@ -167,7 +170,7 @@ async function handleSessionExpired() {
 
   const authStore = useAuthStore();
   const currentRoute = router.currentRoute.value;
-  const redirect = currentRoute.name === 'Login' ? undefined : currentRoute.fullPath;
+  const redirect = loginDestination(currentRoute);
 
   authStore.clearAuth();
   ElMessage.error(i18n.global.t('ui.sessionExpired'));

@@ -2,7 +2,7 @@
   <header class="admin-hero">
     <div class="admin-hero__main">
       <span class="admin-hero__icon">
-        <i :class="icon" aria-hidden="true" />
+        <i :class="navigationIcon || icon" aria-hidden="true" />
       </span>
       <div>
         <h1>{{ title }}</h1>
@@ -15,6 +15,12 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
+import { moduleIcon } from '@/utils/moduleIcon';
+const route = useRoute();
+const navigationIcon = computed(() => moduleIcon(String(route.meta.activeMenu || route.path)));
+
 defineProps<{
   title: string;
   icon: string;
@@ -47,6 +53,16 @@ defineProps<{
     align-items: center;
     justify-content: flex-end;
     min-width: 0;
+  }
+
+  &__icon > i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    font-weight: 400;
+    font-style: normal;
+    font-synthesis: none;
   }
 
   &__icon {
@@ -84,7 +100,17 @@ defineProps<{
       gap: 14px;
     }
 
-    &__icon {
+    &__icon > i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    font-weight: 400;
+    font-style: normal;
+    font-synthesis: none;
+  }
+
+  &__icon {
       width: 44px;
       height: 44px;
       flex-basis: 44px;
@@ -114,7 +140,17 @@ defineProps<{
       justify-content: stretch;
     }
 
-    &__icon {
+    &__icon > i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    font-weight: 400;
+    font-style: normal;
+    font-synthesis: none;
+  }
+
+  &__icon {
       width: 44px;
       height: 44px;
       flex-basis: 44px;

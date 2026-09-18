@@ -1,15 +1,11 @@
 <template>
   <main class="reset-page">
-    <LanguageSwitcher class="public-language" />
+    <AuthPageHeader overlay />
     <div class="reset-page__orb reset-page__orb--left" />
     <div class="reset-page__orb reset-page__orb--right" />
 
     <section class="reset-card">
-      <header class="reset-card__brand">
-        <img src="/assets/mtpay-logo-official.png" alt="MTPay" />
-      </header>
-
-      <div v-if="resetProfile" class="reset-card__result">
+<div v-if="resetProfile" class="reset-card__result">
         <span class="reset-card__result-icon reset-card__result-icon--success">
           <el-icon><CircleCheckFilled /></el-icon>
         </span>
@@ -99,7 +95,7 @@ import { useI18n } from 'vue-i18n';
 import type { FormInstance, FormRules } from 'element-plus';
 import { CircleCheck, CircleCheckFilled, Key, Lock, WarningFilled } from '@element-plus/icons-vue';
 import { resetAgentPassword, type AgentProfile } from '@/api/modules/auth';
-import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue';
+import AuthPageHeader from '@/components/common/AuthPageHeader.vue';
 import { useAuthStore } from '@/stores/modules/auth';
 
 interface PasswordForm {
@@ -173,7 +169,7 @@ function goLogin() {
   min-height: 100vh;
   overflow: hidden;
   place-items: center;
-  padding: 40px 20px;
+  padding: calc(clamp(32px, 7.8vh, 78px) + 88px) 20px 40px;
   background: linear-gradient(145deg, #eaf8fb 0%, #f8fbff 48%, #e8f2ff 100%);
   &::before {
     position: absolute;
@@ -203,7 +199,7 @@ function goLogin() {
     background: #499cf2;
   }
 }
-.public-language { position: absolute; z-index: 2; top: 22px; right: 28px; }
+
 .reset-card {
   position: relative;
   z-index: 1;
@@ -353,7 +349,7 @@ function goLogin() {
 }
 @include mobile {
   .reset-page {
-    padding: 16px;
+    padding: 120px 16px 24px;
   }
   .reset-card {
     padding: 26px 21px 22px;

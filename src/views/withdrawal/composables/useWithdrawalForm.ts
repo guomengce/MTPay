@@ -38,7 +38,7 @@ export function useWithdrawalForm() {
    * 提交法币出金订单。
    * 后端校验白名单归属、余额和文件规则，并计算手续费及实际冻结金额。
    */
-  async function submit(payload: SubmitWithdrawalPayload) {
+  async function submit(payload: SubmitWithdrawalPayload & { payment_password: string }) {
     submitting.value = true;
     try {
       const detail = await withdrawalApi.submitWithdrawal(payload);

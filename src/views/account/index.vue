@@ -7,7 +7,10 @@
       <LoginSecurityCard :submitting="submitting" @submit="changePassword" />
     </div>
 
-    <TwoFactorCard />
+    <div class="account-page__security-grid">
+      <TwoFactorCard />
+      <PaymentPasswordCard @changed="fetchProfile" />
+    </div>
 
   </section>
 </template>
@@ -19,6 +22,7 @@ import AdminHero from '@/components/admin/AdminHero.vue';
 import { usePageLoading } from '@/composables/usePageLoading';
 import CompanyProfileCard from './components/CompanyProfileCard.vue';
 import LoginSecurityCard from './components/LoginSecurityCard.vue';
+import PaymentPasswordCard from './components/PaymentPasswordCard.vue';
 import TwoFactorCard from './components/TwoFactorCard.vue';
 import { useAccount } from './composables/useAccount';
 
@@ -34,6 +38,14 @@ onMounted(fetchProfile);
   display: grid;
   min-width: 0;
   gap: 24px;
+
+  &__security-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 24px;
+    min-width: 0;
+  }
 
   &__grid {
     display: grid;
@@ -51,7 +63,8 @@ onMounted(fetchProfile);
   @include mobile {
     gap: 18px;
 
-    &__grid {
+    &__grid,
+    &__security-grid {
       grid-template-columns: 1fr;
       gap: 18px;
     }

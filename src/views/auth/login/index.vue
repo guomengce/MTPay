@@ -2,14 +2,7 @@
   <main class="login-page">
     <BrandPanel />
 
-    <header class="login-page__header">
-      <div class="login-page__brand">
-        <img class="login-page__logo" src="/assets/mtpay-logo-official.png" alt="MTPay" />
-      </div>
-      <div class="login-page__header-actions">
-        <LanguageSwitcher />
-      </div>
-    </header>
+    <AuthPageHeader />
 
     <section class="login-page__form">
       <div class="login-page__form-decor login-page__form-decor--ring" aria-hidden="true" />
@@ -45,7 +38,7 @@ import { completeLogin } from '@/utils/completeLogin';
 import { requiresTwoFactor, beginLoginChallenge, safeLoginRedirect } from '@/utils/loginChallenge';
 import BrandPanel from './components/BrandPanel.vue';
 import FormCard from './components/FormCard.vue';
-import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue';
+import AuthPageHeader from '@/components/common/AuthPageHeader.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -91,36 +84,6 @@ function handleContact() {
   min-height: 100vh;
   flex-direction: column;
   background: #ffffff;
-
-  &__header {
-    position: relative;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 24px 48px;
-  }
-
-  &__brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    color: #071833;
-    font-size: 22px;
-    font-weight: 800;
-  }
-
-  &__logo {
-    display: block;
-    width: 168px;
-    height: auto;
-  }
-
-  &__header-actions {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
 
   &__form {
     position: relative;
@@ -237,29 +200,12 @@ function handleContact() {
   }
 
   @include narrow {
-    &__header {
-      padding: 20px 32px;
-    }
-
     &__form {
       padding: 24px 48px 36px;
     }
   }
 
   @include mobile {
-    &__header {
-      padding: 16px 20px;
-    }
-
-    &__brand {
-      font-size: 18px;
-    }
-
-    &__logo {
-      width: 148px;
-      height: auto;
-    }
-
     &__form {
       justify-content: center;
       padding: 20px 16px 32px;

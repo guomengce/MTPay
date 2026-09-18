@@ -44,6 +44,7 @@
 </template>
 
 <script setup lang="ts">
+import { notifyPaymentSecurityChanged } from '@/utils/paymentPassword';
 import { onMounted, onBeforeUnmount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ElMessage } from 'element-plus';
@@ -106,7 +107,7 @@ async function submit() {
     if (disabling.value) {
       const confirmed = await confirmPortalAction({
         title: t('twoFactorSettings.disable'),
-        message: '確認關閉 2FA 嗎？',
+        message: t('twoFactorSettings.disableWarning'),
         confirmText: t('twoFactorSettings.confirmDisable'),
         cancelText: t('common.actions.cancel'),
       });
@@ -115,6 +116,7 @@ async function submit() {
       await disableOwnTwoFactor(code.value);
     } else { await confirmTwoFactorSetup(code.value); }
     if (!current()) return;
+    notifyPaymentSecurityChanged();
     cancel();
     enabled.value = null;
     const status = await getTwoFactorStatus();

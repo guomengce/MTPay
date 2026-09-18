@@ -91,7 +91,7 @@
           :label="t('withdrawal.actions')"
           min-width="180"
           fixed="right"
-          align="center"
+          align="left"
         >
           <template #default="{ row }">
             <div class="record-list__actions">
@@ -341,7 +341,7 @@ const { t } = useI18n();
 .record-list__actions {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 6px;
 
   :deep(.el-button + .el-button) {

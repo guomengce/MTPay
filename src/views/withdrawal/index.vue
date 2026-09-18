@@ -6,14 +6,21 @@
       <section v-if="twoFactorEnabled === false" class="withdrawal-security-gate" role="alert">
         <span class="withdrawal-security-gate__icon"><i class="ri-shield-keyhole-line" /></span>
         <div class="withdrawal-security-gate__copy">
-          <strong>{{ t('withdrawal.twoFactorRequiredTitle') }}</strong>
-          <p>{{ t('withdrawal.twoFactorRequiredDescription') }}</p>
+          <strong>{{ t(paymentStatus?.has_payment_password === false ? 'paymentPassword.bothRequiredTitle' : 'withdrawal.twoFactorRequiredTitle') }}</strong>
+          <p>{{ t(paymentStatus?.has_payment_password === false ? 'paymentPassword.bothRequiredDescription' : 'withdrawal.twoFactorRequiredDescription') }}</p>
         </div>
         <el-button type="danger" plain @click="openSecuritySettings">
-          {{ t('withdrawal.enableTwoFactor') }}
+          {{ t(paymentStatus?.has_payment_password === false ? 'paymentPassword.settings' : 'withdrawal.enableTwoFactor') }}
           <i class="ri-arrow-right-line" />
         </el-button>
       </section>
+      <section v-if="twoFactorEnabled === true && paymentStatus && (!paymentStatus.has_payment_password || paymentStatus.locked_until)" class="withdrawal-security-gate" role="alert">
+        <span class="withdrawal-security-gate__icon"><i class="ri-lock-password-line" /></span>
+        <div class="withdrawal-security-gate__copy"><strong>{{ t('paymentPassword.title') }}</strong><p>{{ paymentStatus.locked_until ? t('paymentPassword.locked', { time: paymentStatus.locked_until }) : t('paymentPassword.required') }}</p></div>
+        <el-button type="danger" plain @click="router.push({ name: 'Account', hash: '#payment-password-settings' })">{{ t(paymentStatus.locked_until ? 'paymentPassword.forgot' : 'paymentPassword.setup') }}</el-button>
+      </section>
+      <el-alert v-if="paymentStatusError" :title="paymentStatusError" type="error" :closable="false"><el-button text @click="loadPaymentStatus">{{ t('paymentPassword.refresh') }}</el-button></el-alert>
+      <el-button v-if="paymentStatus?.locked_until" text @click="loadPaymentStatus">{{ t('paymentPassword.refresh') }}</el-button>
       <el-alert
         v-if="securityError && !securityDialogVisible"
         :title="securityError"
@@ -26,9 +33,9 @@
         :payers="config?.payers"
         :payees="config?.payees"
         :file-rules="config?.file_rules"
-        :config-loading="configLoading"
+        :config-loading="configLoading || paymentLoading"
         :submitting="securityBusy"
-        :locked="securityLocked || twoFactorEnabled !== true"
+        :locked="securityLocked || !paymentAllowed"
         :uploading="withdrawalUploading"
         :upload-file="uploadWithdrawalFile"
         @submit="handleSubmit"
@@ -65,6 +72,7 @@
     <WithdrawalSecurityDialog
       :model-value="securityDialogVisible"
       :busy="securityBusy"
+      :sending-email="sendingEmail"
       :email="securityEmail"
       :email-verified="emailVerified"
       :two-factor-verified="twoFactorVerified"
@@ -87,7 +95,9 @@
  * - 提交与列表通过 useWithdrawalManagement 串联；
  * - 详情与补件统一进入独立详情页处理。
  */
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, onBeforeUnmount, ref } from 'vue';
+import { getPaymentPasswordStatus, type PaymentPasswordStatus } from '@/api/modules/paymentPassword';
+import { paymentError, onPaymentSecurityChanged } from '@/utils/paymentPassword';
 import { ElMessage } from 'element-plus';
 import { useI18n } from 'vue-i18n';
 import { useRouter, onBeforeRouteLeave } from 'vue-router';
@@ -99,7 +109,6 @@ import type {
 } from '@/api/modules/withdrawal';
 import AdminHero from '@/components/admin/AdminHero.vue';
 import { usePageLoading } from '@/composables/usePageLoading';
-import { getTwoFactorStatus } from '@/api/modules/twoFactor';
 import ApplyForm from './components/ApplyForm.vue';
 import RecordList from './components/RecordList.vue';
 import SupplementDialog from './components/SupplementDialog.vue';
@@ -140,9 +149,20 @@ const supplementRequirement = ref('');
 const supplementLoading = ref(false);
 const supplementMode = ref<'business' | 'risk'>('business');
 const twoFactorEnabled = ref<boolean | null>(null);
+const paymentStatus = ref<PaymentPasswordStatus | null>(null);
+const paymentStatusError = ref('');
+const paymentLoading = ref(false);
+const paymentAllowed = computed(() => !paymentLoading.value && twoFactorEnabled.value === true && paymentStatus.value?.has_payment_password === true && !paymentStatus.value.locked_until);
+async function loadPaymentStatus() {
+  paymentLoading.value = true; paymentStatusError.value = '';
+  try { paymentStatus.value = await getPaymentPasswordStatus(); twoFactorEnabled.value = paymentStatus.value.two_factor_enabled; }
+  catch (e) { paymentStatus.value = null; twoFactorEnabled.value = null; paymentStatusError.value = paymentError(e) || t('paymentPassword.loadFailed'); }
+  finally { paymentLoading.value = false; }
+}
 const {
   visible: securityDialogVisible,
   busy: securityBusy,
+  sendingEmail,
   locked: securityLocked,
   email: securityEmail,
   emailVerified,
@@ -159,17 +179,17 @@ const {
   submit: submitSecurity,
 } = useWithdrawalSecurity({
   refresh: async () => {
-    await Promise.all([loadConfig(true), fetchList()]);
+    await Promise.all([loadConfig(true), fetchList(), loadPaymentStatus()]);
   },
   completed: async () => {
     applyFormRef.value?.reset();
     ElMessage.success(t('withdrawalSecurity.submitted'));
-    await Promise.all([loadConfig(true), fetchList()]);
+    await Promise.all([loadConfig(true), fetchList(), loadPaymentStatus()]);
   },
 });
 
 function handleSubmit(payload: Parameters<typeof beginSecurity>[0]) {
-  if (twoFactorEnabled.value !== true) return;
+  if (!paymentAllowed.value) return;
   beginSecurity(payload);
 }
 
@@ -254,15 +274,10 @@ function handleQueryChange(patch: Partial<WithdrawalListParams>) {
 }
 
 onMounted(async () => {
-  const statusPromise = getTwoFactorStatus()
-    .then((enabled) => {
-      twoFactorEnabled.value = enabled;
-    })
-    .catch(() => {
-      twoFactorEnabled.value = false;
-    });
-  await Promise.all([loadConfig(true), fetchList(), statusPromise]);
+  await Promise.all([loadConfig(true), fetchList(), loadPaymentStatus()]);
 });
+const stopPaymentEvents = onPaymentSecurityChanged(() => { void loadPaymentStatus(); });
+onBeforeUnmount(stopPaymentEvents);
 const { t } = useI18n();
 </script>
 

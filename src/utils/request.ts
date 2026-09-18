@@ -1,3 +1,4 @@
+import { loginDestination } from '@/utils/loginDestination';
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import { ElMessage } from 'element-plus';
 
@@ -29,7 +30,8 @@ request.interceptors.response.use(
     if (status === 401) {
       const authStore = useAuthStore();
       authStore.clearAuth();
-      await router.replace({ name: 'Login' });
+      const redirect = loginDestination(router.currentRoute.value);
+      await router.replace({ name: 'Login', query: redirect ? { redirect } : undefined });
       ElMessage.error(i18n.global.t('ui.sessionExpired'));
       return Promise.reject(error);
     }

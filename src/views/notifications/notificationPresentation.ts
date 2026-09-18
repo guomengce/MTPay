@@ -1,7 +1,7 @@
 import type { AgentNotification, NotificationBusiness } from '@/api/modules/notification';
 export const notificationBusinesses: NotificationBusiness[] = ['whitelist', 'withdrawal', 'deposit', 'exchange'];
 const routes = { whitelist: 'WhitelistDetail', withdrawal: 'WithdrawalDetail', deposit: 'DepositDetail', exchange: 'ExchangeDetail' };
-const badges = { whitelist: 'WL', withdrawal: 'OUT', deposit: 'IN', exchange: 'FX' };
+const badges = { whitelist: 'WL', withdrawal: 'OUT', deposit: 'IN', exchange: 'EX' };
 export function notificationBadge(type?: NotificationBusiness) { return type && Object.prototype.hasOwnProperty.call(badges, type) ? badges[type] : 'MSG'; }
 export function notificationRoute(item: AgentNotification) {
   const hasDetail = item.detail_type !== undefined || item.detail_id !== undefined;

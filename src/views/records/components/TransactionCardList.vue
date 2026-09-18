@@ -51,7 +51,7 @@ const items = computed<ResponsiveCardItem[]>(() =>
         strong: true,
       },
     ],
-    actions: hasTransactionDetailRoute(row)
+    actions: canViewDetail(row)
       ? [
           {
             key: 'view',
@@ -64,6 +64,9 @@ const items = computed<ResponsiveCardItem[]>(() =>
       : [],
   })),
 );
+function canViewDetail(row: TransactionItem) {
+  return hasTransactionDetailRoute(row);
+}
 function statusLabel(row: TransactionItem) {
   const key = row.status_group === 'needs_supplement' ? 'supplement' : row.status_group;
   return t(`records.${key}`);

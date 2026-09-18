@@ -1,3 +1,4 @@
+import { i18n } from '@/locales';
 import { ElMessageBox } from 'element-plus';
 import type { VNode } from 'vue';
 
@@ -12,8 +13,8 @@ interface PortalConfirmOptions {
 export async function confirmPortalAction({
   title,
   message,
-  confirmText = '確認',
-  cancelText = '取消',
+  confirmText = i18n.global.t('common.actions.confirm'),
+  cancelText = i18n.global.t('common.actions.cancel'),
 }: PortalConfirmOptions): Promise<boolean> {
   try {
     await ElMessageBox.confirm(message, title, {

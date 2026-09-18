@@ -1,6 +1,6 @@
 <template>
   <main class="activate-page">
-    <LanguageSwitcher class="public-language" />
+    <AuthPageHeader overlay />
     <div class="activate-page__glow activate-page__glow--one" />
     <div class="activate-page__glow activate-page__glow--two" />
 
@@ -94,7 +94,7 @@ import { useI18n } from 'vue-i18n';
 import type { FormInstance, FormRules } from 'element-plus';
 import { CircleCheckFilled, Key, Lock, WarningFilled } from '@element-plus/icons-vue';
 import { activateAgent, type AgentProfile } from '@/api/modules/auth';
-import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue';
+import AuthPageHeader from '@/components/common/AuthPageHeader.vue';
 import { useAuthStore } from '@/stores/modules/auth';
 
 interface ActivateForm {
@@ -168,7 +168,7 @@ function goLogin() {
   min-height: 100vh;
   overflow: hidden;
   place-items: center;
-  padding: 40px 20px;
+  padding: calc(clamp(32px, 7.8vh, 78px) + 88px) 20px 40px;
   background: linear-gradient(145deg, #eaf8fb 0%, #f7fbff 46%, #e8f2ff 100%);
   &::before {
     position: absolute;
@@ -198,7 +198,7 @@ function goLogin() {
     background: #499cf2;
   }
 }
-.public-language { position: absolute; z-index: 2; top: 22px; right: 28px; }
+
 .activate-card {
   position: relative;
   z-index: 1;
@@ -324,7 +324,7 @@ function goLogin() {
 }
 @include mobile {
   .activate-page {
-    padding: 16px;
+    padding: 120px 16px 24px;
   }
   .activate-card {
     padding: 26px 21px 22px;

@@ -1,12 +1,12 @@
 :root {
-  --portal-message-accent: var(--mt-btn-info);
+  --portal-message-accent: #1d4ed8;
   --portal-message-border: var(--mt-btn-info-border);
   --portal-message-icon-background: var(--mt-btn-info-soft);
   --portal-message-background: linear-gradient(115deg, #f6fcfb 0%, #f2f9fc 100%);
   --portal-message-shadow: rgb(29 141 181 / 14%);
 }
 
-.el-message:not(.login-message--dark) {
+.el-message {
   width: fit-content;
   min-width: 0;
   max-width: min(560px, calc(100vw - 32px));
@@ -17,7 +17,7 @@
   box-shadow: 0 10px 28px var(--portal-message-shadow);
 
   &.el-message--success {
-    --portal-message-accent: var(--mt-btn-success);
+    --portal-message-accent: #15803d;
     --portal-message-border: var(--mt-btn-success-border);
     --portal-message-icon-background: var(--mt-btn-success-soft);
     --portal-message-background: linear-gradient(115deg, #f7fef9 0%, #eefdf4 100%);
@@ -25,7 +25,7 @@
   }
 
   &.el-message--warning {
-    --portal-message-accent: var(--mt-btn-warning);
+    --portal-message-accent: #a16207;
     --portal-message-border: var(--mt-btn-warning-border);
     --portal-message-icon-background: var(--mt-btn-warning-soft);
     --portal-message-background: linear-gradient(115deg, #fffdf4 0%, #fff8e6 100%);
@@ -33,7 +33,7 @@
   }
 
   &.el-message--error {
-    --portal-message-accent: var(--mt-btn-danger);
+    --portal-message-accent: #dc2626;
     --portal-message-border: var(--mt-btn-danger-border);
     --portal-message-icon-background: var(--mt-btn-danger-soft);
     --portal-message-background: linear-gradient(115deg, #fff8f8 0%, #fff1f1 100%);
@@ -41,7 +41,7 @@
   }
 
   &.el-message--info {
-    --portal-message-accent: var(--mt-btn-info);
+    --portal-message-accent: #1d4ed8;
     --portal-message-border: var(--mt-btn-info-border);
     --portal-message-icon-background: var(--mt-btn-info-soft);
     --portal-message-background: linear-gradient(115deg, #f5fbff 0%, #eaf6fc 100%);
@@ -63,7 +63,7 @@
 
   .el-message__content {
     min-width: 0;
-    color: var(--portal-text);
+    color: var(--portal-message-accent);
     font-size: 14px;
     font-weight: 600;
     line-height: 1.55;
@@ -71,8 +71,12 @@
 }
 
 @media (max-width: 767px) {
-  .el-message:not(.login-message--dark) {
+  .el-message {
     max-width: calc(100vw - 24px);
     padding: 10px 14px;
   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .el-message { transition: none; }
 }

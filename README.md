@@ -67,3 +67,19 @@ mtpay-agent-web/
 - 路由统一维护 `meta.title`、`meta.icon`、`meta.requiresAuth`、`meta.hidden`、`meta.keepAlive`，菜单由路由生成。
 - 请求层统一在 `src/utils/request.ts` 处理 token、401 和错误提示，页面层只关心业务结果。
 - 响应式适配优先使用 `src/styles/breakpoints.scss` 中的断点变量，避免各页面散落魔法数字。
+
+## 测试环境
+
+测试模式使用 `.env.test`，API 沿用现有 UAT 地址 `https://api-uat.mtpay.com`。
+如需覆盖测试 API，请在本地创建 `.env.test.local` 并设置 `VITE_API_BASE_URL`；该文件不会提交到 Git。
+
+- `npm run dev:test`：启动测试模式开发服务。
+- `npm run build:test`：类型检查并构建到 `dist-test`。
+- `npm run preview:test`：预览已生成的测试产物，需先执行测试构建。
+
+部署时上传 `dist-test` 的内容，服务器需将前端路由回退到 `index.html`，以支持直接打开详情链接。
+VITE 环境变量会打包到浏览器，不应包含密钥。测试模式只隔离前端配置，数据环境由 API 地址决定。
+测试构建输出到 `dist-test`，正式构建输出到 `dist`，两个目录独立，互不清理。
+测试开发端口：9529；测试预览端口：9530。
+
+正式环境使用 `.env.production`，API 为 `https://api.mtpay.com`，通过 `npm run build` 构建。

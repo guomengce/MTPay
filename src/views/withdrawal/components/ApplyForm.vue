@@ -39,7 +39,7 @@
               <el-form-item :label="t('withdrawal.payer')" prop="payer_whitelist_id">
                 <div class="apply-form__party-select">
                   <el-select v-model="formState.payer_whitelist_id" :placeholder="t('withdrawal.selectPayer')" :loading="configLoading" filterable>
-                    <el-option v-for="item in payers" :key="item.id" :value="item.id" :label="`${item.id} · ${item.subject_name}`" />
+                    <el-option v-for="item in payers" :key="item.id" :value="item.id" :label="item.subject_name" />
                   </el-select>
                   <el-button circle plain type="primary" :aria-label="t('withdrawal.whitelistDetails')" :title="t('withdrawal.whitelistDetails')" :disabled="formState.payer_whitelist_id == null" @click="showPartyDetails(selectedPayer)">
                     <i class="ri-eye-line" aria-hidden="true" />
@@ -50,7 +50,7 @@
               <el-form-item :label="t('withdrawal.payee')" prop="payee_whitelist_id">
                 <div class="apply-form__party-select">
                   <el-select v-model="formState.payee_whitelist_id" :placeholder="t('withdrawal.selectPayee')" :loading="configLoading" filterable>
-                    <el-option v-for="item in payees" :key="item.id" :value="item.id" :label="`${item.id} · ${item.subject_name}`" />
+                    <el-option v-for="item in payees" :key="item.id" :value="item.id" :label="item.subject_name" />
                   </el-select>
                   <el-button circle plain type="primary" :aria-label="t('withdrawal.whitelistDetails')" :title="t('withdrawal.whitelistDetails')" :disabled="formState.payee_whitelist_id == null" @click="showPartyDetails(selectedPayee)">
                     <i class="ri-eye-line" aria-hidden="true" />

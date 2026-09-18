@@ -1,6 +1,6 @@
 <template>
   <main class="forgot-page">
-    <LanguageSwitcher class="public-language" />
+    <AuthPageHeader overlay />
     <section class="forgot-card">
 
       <template v-if="sent">
@@ -60,7 +60,7 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import * as authApi from '@/api/modules/auth';
-import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue';
+import AuthPageHeader from '@/components/common/AuthPageHeader.vue';
 import { useAuthStore } from '@/stores/modules/auth';
 
 const router = useRouter();
@@ -105,13 +105,13 @@ function goToLogin() {
   display: grid;
   min-height: 100vh;
   place-items: center;
-  padding: 32px 20px;
+  padding: calc(clamp(32px, 7.8vh, 78px) + 88px) 20px 32px;
   background:
     radial-gradient(circle at 18% 16%, rgb(39 185 170 / 16%), transparent 28%),
     radial-gradient(circle at 85% 78%, rgb(29 141 181 / 14%), transparent 30%), #f5f9fc;
 }
 
-.public-language { position: absolute; z-index: 2; top: 22px; right: 28px; }
+
 
 .forgot-card {
   width: min(460px, 100%);
@@ -192,6 +192,7 @@ function goToLogin() {
 }
 
 @include mobile {
+  .forgot-page { padding: 120px 16px 24px; }
   .forgot-card {
     padding: 34px 22px 28px;
   }

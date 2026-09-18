@@ -4,6 +4,7 @@ import Layout from '@/layout/index.vue';
 import { featureRoutes } from './modules';
 
 export const routes: RouteRecordRaw[] = [
+  { path: '/reset-payment-password', name: 'ResetPaymentPassword', component: () => import('@/views/auth/reset-payment-password/index.vue'), meta: { title: 'paymentPassword.reset', requiresAuth: false, hidden: true } },
   {
     path: '/login',
     name: 'Login',
@@ -92,7 +93,7 @@ export const routes: RouteRecordRaw[] = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
-  scrollBehavior: () => ({ top: 0 }),
+  scrollBehavior: (to) => to.hash ? { el: to.hash, top: 20 } : { top: 0 },
 });
 
 export default router;

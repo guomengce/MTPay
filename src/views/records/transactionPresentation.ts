@@ -9,7 +9,9 @@ export function transactionBusinessLabel(type: TransactionBusinessType, t: Trans
 }
 
 export function transactionBusinessTone(type: TransactionBusinessType): StatusBadgeType {
-  if (type === 'deposit' || type === 'manual_increase') return 'success';
+  if (type === 'deposit') return 'success';
+  if (type === 'manual_increase') return 'success';
+  if (type === 'fiat_deposit') return 'mt';
   if (type === 'exchange') return 'warning';
   if (type === 'manual_decrease') return 'danger';
   return 'primary';

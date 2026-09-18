@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="form-card">
     <header class="form-card__header">
       <h2 class="form-card__title">{{ t('auth.welcome') }}</h2>
@@ -98,7 +98,7 @@ function handleSubmit() {
 }
 
 function showLoginMessage(message: string) {
-  ElMessage({ message, type: 'warning', customClass: 'login-message--dark' });
+  ElMessage({ message, type: 'warning' });
 }
 </script>
 

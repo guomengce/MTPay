@@ -20,7 +20,7 @@
         >
           <RouterLink :to="menu.path" class="app-aside__menu-link">
             <span class="app-aside__menu-icon">
-              <i :class="resolveIcon(menu.icon)" aria-hidden="true" />
+              <i :class="moduleIcon(menu.path) || 'ri-layout-grid-line'" aria-hidden="true" />
             </span>
             <span v-if="!isCollapsed" class="app-aside__menu-label">{{ t(menu.title) }}</span>
           </RouterLink>
@@ -45,6 +45,7 @@
 <script setup lang="ts">
 import { Check } from '@element-plus/icons-vue';
 import { computed } from 'vue';
+import { moduleIcon } from '@/utils/moduleIcon';
 import { useI18n } from 'vue-i18n';
 import { RouterLink, useRoute } from 'vue-router';
 
@@ -58,20 +59,6 @@ const { t } = useI18n();
 
 const isMobile = computed(() => appStore.device === 'mobile');
 const isCollapsed = computed(() => appStore.sidebarCollapsed && !isMobile.value);
-
-const icons = {
-  Grid: 'ri-dashboard-3-line',
-  Wallet: 'ri-wallet-3-line',
-  Switch: 'ri-exchange-dollar-line',
-  List: 'ri-user-follow-line',
-  Upload: 'ri-hand-coin-line',
-  Tickets: 'ri-file-list-3-line',
-  User: 'ri-shield-user-line',
-};
-
-function resolveIcon(name: string) {
-  return icons[name as keyof typeof icons] || icons.Grid;
-}
 
 function isActive(path: string) {
   return route.path === path || route.path.startsWith(`${path}/`);

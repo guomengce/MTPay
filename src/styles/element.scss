@@ -632,3 +632,16 @@
 .el-upload.is-limit-reached {
   opacity: 0.5;
 }
+
+/* Shared email verification action in payment setup and withdrawal dialogs. */
+.el-input-group__append .el-button.email-code-button {
+  color: var(--portal-primary);
+}
+.el-input-group__append .el-button.email-code-button:not(.is-disabled):hover,
+.el-input-group__append .el-button.email-code-button:not(.is-disabled):focus-visible {
+  color: var(--el-color-primary-dark-2);
+}
+.el-input-group__append .el-button.email-code-button.is-disabled {
+  color: var(--portal-primary);
+  opacity: .55;
+}
