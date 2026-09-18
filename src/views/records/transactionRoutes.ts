@@ -6,6 +6,8 @@ const transactionDetailRouteNames: Partial<Record<TransactionBusinessType, strin
   fiat_deposit: 'FiatDepositDetail',
   exchange: 'ExchangeDetail',
   withdrawal: 'WithdrawalDetail',
+  manual_increase: 'TransactionDetail',
+  manual_decrease: 'TransactionDetail',
 };
 
 export function transactionDetailRoute(row: TransactionItem): RouteLocationRaw | null {
