@@ -1,15 +1,7 @@
 <template>
   <el-form label-position="top" :disabled="busy" @submit.prevent="submit">
     <el-alert v-if="error" :title="error" type="error" :closable="false" />
-    <el-form-item
-      required
-      v-if="mode !== 'change'"
-      :label="t('withdrawalSecurity.authenticatorCode')"
-    >
-      <el-input v-model="code" maxlength="6" inputmode="numeric" autocomplete="one-time-code"
-        ><template #prefix><i class="ri-shield-keyhole-line" /></template
-      ></el-input>
-    </el-form-item>
+    
     <el-form-item required v-if="mode === 'setup'" :label="t('withdrawalSecurity.emailCode')">
       <el-input v-model="emailCode" maxlength="6" inputmode="numeric" autocomplete="one-time-code"
         ><template #append
@@ -39,6 +31,7 @@
         inputmode="numeric"
         autocomplete="new-password"
     /></el-form-item>
+    
     <el-form-item required :label="t('paymentPassword.confirmation')"
       ><el-input
         v-model="confirmation"
@@ -48,6 +41,15 @@
         inputmode="numeric"
         autocomplete="new-password"
     /></el-form-item>
+    <el-form-item
+      required
+      v-if="mode !== 'change'"
+      :label="t('withdrawalSecurity.authenticatorCode')"
+    >
+      <el-input v-model="code" maxlength="6" inputmode="numeric" autocomplete="one-time-code"
+        ><template #prefix><i class="ri-shield-keyhole-line" /></template
+      ></el-input>
+    </el-form-item>
     <div class="payment-form__actions">
       <el-button type="primary" native-type="submit" :loading="busy && !sendingCode">{{
         t('paymentPassword.' + mode)
